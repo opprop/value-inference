@@ -4,7 +4,7 @@ WORKING_DIR=$(pwd)
 ROOT=$(cd $(dirname "$0")/.. && pwd)
 JAVAC=$ROOT/checker-framework/checker/bin-devel/javac
 
-Cast_CHECKER=$ROOT/CastChecker
+CAST_CHECKER=$ROOT/cast_checker
 
 cd $WORKING_DIR
 
@@ -17,4 +17,4 @@ do
 done
 
 # -Acfgviz=org.checkerframework.dataflow.cfg.DOTCFGVisualizer,verbose,outdir=dotfile
-$JAVAC -processor cast.CastChecker -cp $READ_CHECKER/bin:$READ_CHECKER/lib $java_files
+$JAVAC -processor cast.CastChecker -cp $CAST_CHECKER/bin:$CAST_CHECKER/lib $java_files
