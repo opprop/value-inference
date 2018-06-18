@@ -8,7 +8,7 @@
 
 CUR_DIR=$(pwd)
 ROOT=$(cd $(dirname "$0")/.. && pwd)
-CAST_CHECKER=$ROOT/CastChecker
+CAST_CHECKER=$ROOT/cast_checker
 DLJC=$ROOT/do-like-javac
 
 export CLASSPATH=$CAST_CHECKER/bin:$CAST_CHECKER/lib

@@ -33,15 +33,6 @@ public class CastVisitor extends ValueVisitor {
 
     @Override
     protected void checkTypecastSafety(TypeCastTree node, Void p) {
-        AnnotatedTypeMirror castType = atypeFactory.getAnnotatedType(node);
-        AnnotatedTypeMirror exprType = atypeFactory.getAnnotatedType(node.getExpression());
-        //AnnotationMirror castAnno = castType.getAnnotationInHierarchy(INT_RANGE);
-        //AnnotationMirror exprAnno = atypeFactory.getAnnotatedType(node.getExpression()).getAnnotationInHierarchy(INT_RANGE);
-
-        if (true) {
-            checker.report(Result.failure("cast.unsafe", exprType, castType), node);
-        }
-
         super.checkTypecastSafety(node, p);
     }
 }
