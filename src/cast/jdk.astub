@@ -1,4 +1,10 @@
 import org.checkerframework.common.value.qual.IntRange;
+import org.checkerframework.common.value.qual.IntVal;
+
+package org.apache.commons.io;
+public class IOUtils extends Object {
+	public static final @IntVal(-1) int EOF;
+}
 
 // InputStream stubs
 package java.io;
@@ -122,4 +128,3 @@ public class PipedReader extends Reader {
 public class PushbackReader extends FilterReader {
     public @IntRange(from=-1, to=65535) int read() throws IOException;
 }
-

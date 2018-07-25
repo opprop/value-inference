@@ -8,13 +8,25 @@ CAST_CHECKER=$ROOT/cast_checker
 
 cd $WORKING_DIR
 
-java_files=$1
+files=$1
+java_files=""
 shift
 while [ $# -gt 0 ]
 do
-    java_files="$java_files $1"
+    files="$files $1"
     shift
 done
 
+for entry in $(find $files -name '*.java' -or -name '*.doc')
+do
+    java_files="$java_files $entry"
+done
+
+echo $java_files
+
+# no cast checker invocation:
+# $JAVAC $java_files
+
+# has cast checker invocation:
 # -Acfgviz=org.checkerframework.dataflow.cfg.DOTCFGVisualizer,verbose,outdir=dotfile
 $JAVAC -processor cast.CastChecker -cp $CAST_CHECKER/bin:$CAST_CHECKER/lib $java_files
