@@ -10,7 +10,8 @@ public class CastTest extends CheckerFrameworkPerDirectoryTest {
         super(testFiles,
                 cast.CastChecker.class,
                 "",
-                "-Anomsgtext");
+                "-Anomsgtext",
+                "-Anocheckjdk");
     }
 
     @Parameters
