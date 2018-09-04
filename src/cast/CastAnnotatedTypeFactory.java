@@ -286,7 +286,7 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 		
 		/** Returns true iff the given type is in the domain of the Constant Value Checker. */
         private boolean handledByValueChecker(AnnotatedTypeMirror type) {
-            return coveredClassStrings.contains(type.getUnderlyingType().toString());
+            return COVERED_CLASS_STRINGS.contains(type.getUnderlyingType().toString());
         }
 
         /** Return true if this range contains unsigned part of {@code short} value. */

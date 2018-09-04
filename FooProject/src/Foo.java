@@ -78,12 +78,19 @@ public class Foo {
     public void acceptUnsignedByte(@IntRange(from=0, to=255) byte value) throws IOException {}
 
     public void testPassingArgument(@IntRange(from=0, to=255) int value) throws IOException {
-        byte data = (@IntRange(from=0, to=255) byte) value;
+        byte data = (byte) value;
 
         //:: error: (argument.type.incompatible)
         acceptSignedByte(data);
 
         acceptUnsignedByte(data);   // OK
+    }
+
+    public void testParameter(byte value) throws IOException {
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=0, to=255) byte data1 = value;
+
+        @IntRange(from=-128, to=127) byte data2 = value; // OK
     }
 
     public void assignRefinementCheck() throws IOException {
