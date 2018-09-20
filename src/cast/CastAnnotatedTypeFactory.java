@@ -1,5 +1,7 @@
 package cast;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +22,10 @@ import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
+import org.checkerframework.framework.qual.DefaultFor;
+import org.checkerframework.framework.qual.DefaultQualifierInHierarchy;
+import org.checkerframework.framework.qual.TypeKind;
+import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
@@ -29,13 +35,15 @@ import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotato
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
+import org.checkerframework.framework.util.defaults.QualifierDefaults;
+import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.TypeCastTree;
 
 public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
-		
+	
 	public CastAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
         if (this.getClass().equals(CastAnnotatedTypeFactory.class)) {
@@ -52,6 +60,67 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 	@Override
     protected TypeAnnotator createTypeAnnotator() {
         return new ListTypeAnnotator(new CastTypeAnnotator(this), super.createTypeAnnotator());
+    }
+	/*
+    @Override
+    protected void addCheckedCodeDefaults(QualifierDefaults defs) {
+        // Add defaults from @DefaultFor and @DefaultQualifierInHierarchy
+        for (Class<? extends Annotation> qual : getSupportedTypeQualifiers()) {
+            DefaultFor defaultFor = qual.getAnnotation(DefaultFor.class);
+            if (defaultFor != null) {
+                final TypeUseLocation[] locations = defaultFor.value();
+                final org.checkerframework.framework.qual.TypeKind[] typeKinds = defaultFor.types();
+
+            	AnnotationMirror int_range = AnnotationBuilder.fromClass(elements, IntRange.class);
+            	AnnotationMirror mirror = AnnotationBuilder.fromClass(elements, qual);
+            	
+            	if (mirror == int_range) {
+            		 for (org.checkerframework.framework.qual.TypeKind type : typeKinds) {   
+	                	AnnotationMirror anno;
+	                	switch (type) {
+		                	case BYTE:
+			                	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+			                	break;
+		                	case CHAR:
+			                	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+			                	break;
+		                	case SHORT:
+			                	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+			                	break;
+		                	case INT:
+			                	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+			                	break;
+			                default:
+			                	anno = mirror;
+	                	}
+	                	org.checkerframework.framework.qual.TypeKind[] typeKind = {type};
+	                	defs.addCheckedCodeDefaults(anno, locations, typeKind);
+	                }
+                }
+            	else {
+            		defs.addCheckedCodeDefaults(mirror, locations, typeKinds);
+            	}
+            }
+            
+            if (qual.getAnnotation(DefaultQualifierInHierarchy.class) != null) {
+                defs.addCheckedCodeDefault(
+                        AnnotationBuilder.fromClass(elements, qual), TypeUseLocation.OTHERWISE);
+            }
+        }
+    }
+    */
+    /**
+     * Map between {@link org.checkerframework.framework.qual.TypeKind} and {@link
+     * javax.lang.model.type.TypeKind}.
+     *
+     * @param typeKind the Checker Framework TypeKind
+     * @return the javax TypeKind
+     */
+    private TypeKind mapTypeKinds(org.checkerframework.framework.qual.TypeKind typeKind) {
+        if (typeKind == null) {
+            return null;
+        }
+        return TypeKind.valueOf(typeKind.name());
     }
 	
     /**
