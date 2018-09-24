@@ -86,11 +86,13 @@ public class Foo {
         acceptUnsignedByte(data);   // OK
     }
 
-    public void testParameter(byte value) throws IOException {
+    public void testParameter(byte value, char value2) throws IOException {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=0, to=255) byte data1 = value;
 
-        @IntRange(from=-128, to=127) byte data2 = value; // OK
+        @IntRange(from=-128, to=127) byte data2 = value;    // OK
+
+        @IntRange(from=0, to=65535) char data3 = value2;   //OK
     }
 
     public void assignRefinementCheck() throws IOException {
