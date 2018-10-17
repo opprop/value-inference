@@ -61,7 +61,7 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
     protected TypeAnnotator createTypeAnnotator() {
         return new ListTypeAnnotator(new CastTypeAnnotator(this), super.createTypeAnnotator());
     }
-	/*
+	
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         // Add defaults from @DefaultFor and @DefaultQualifierInHierarchy
@@ -69,33 +69,28 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
             DefaultFor defaultFor = qual.getAnnotation(DefaultFor.class);
             if (defaultFor != null) {
                 final TypeUseLocation[] locations = defaultFor.value();
-                final org.checkerframework.framework.qual.TypeKind[] typeKinds = defaultFor.types();
+                final TypeKind[] typeKinds = defaultFor.types();
 
-            	AnnotationMirror int_range = AnnotationBuilder.fromClass(elements, IntRange.class);
             	AnnotationMirror mirror = AnnotationBuilder.fromClass(elements, qual);
             	
-            	if (mirror == int_range) {
-            		 for (org.checkerframework.framework.qual.TypeKind type : typeKinds) {   
-	                	AnnotationMirror anno;
-	                	switch (type) {
-		                	case BYTE:
-			                	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
-			                	break;
-		                	case CHAR:
-			                	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
-			                	break;
-		                	case SHORT:
-			                	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
-			                	break;
-		                	case INT:
-			                	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
-			                	break;
-			                default:
-			                	anno = mirror;
-	                	}
-	                	org.checkerframework.framework.qual.TypeKind[] typeKind = {type};
-	                	defs.addCheckedCodeDefaults(anno, locations, typeKind);
-	                }
+            	if (AnnotationUtils.areSameByClass(mirror, IntRange.class)) {  
+                	AnnotationMirror anno;
+                	
+                	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+                	TypeKind[] byte_type = {TypeKind.BYTE};
+                	defs.addCheckedCodeDefaults(anno, locations, byte_type);
+                	
+                	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+                	TypeKind[] char_type = {TypeKind.CHAR};
+                	defs.addCheckedCodeDefaults(anno, locations, char_type);
+                	
+                	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+                	TypeKind[] short_type = {TypeKind.SHORT};
+                	defs.addCheckedCodeDefaults(anno, locations, short_type);
+                	
+                	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+                	TypeKind[] int_type = {TypeKind.INT};
+                	defs.addCheckedCodeDefaults(anno, locations, int_type);
                 }
             	else {
             		defs.addCheckedCodeDefaults(mirror, locations, typeKinds);
@@ -107,20 +102,6 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
                         AnnotationBuilder.fromClass(elements, qual), TypeUseLocation.OTHERWISE);
             }
         }
-    }
-    */
-    /**
-     * Map between {@link org.checkerframework.framework.qual.TypeKind} and {@link
-     * javax.lang.model.type.TypeKind}.
-     *
-     * @param typeKind the Checker Framework TypeKind
-     * @return the javax TypeKind
-     */
-    private TypeKind mapTypeKinds(org.checkerframework.framework.qual.TypeKind typeKind) {
-        if (typeKind == null) {
-            return null;
-        }
-        return TypeKind.valueOf(typeKind.name());
     }
 	
     /**
