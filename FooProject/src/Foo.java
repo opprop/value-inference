@@ -7,50 +7,6 @@ import java.io.Reader;
 import org.checkerframework.common.value.qual.IntRange;
 
 public class Foo {
-    public void unsafeWayOfCastingByte1() throws IOException {
-        InputStream in = new FileInputStream("afile");
-        @SuppressWarnings("unused")
-        byte data;
-        //:: warning: (cast.unsafe)
-        while ((data = (byte) in.read()) != -1) {
-            //...
-        }
-        in.close();
-    }
-    
-    public void compliantSolutionByte() throws IOException {
-        InputStream in = new FileInputStream("afile");
-        int inbuff = 0;
-        @SuppressWarnings("unused")
-        byte data;
-        while ((inbuff = in.read()) != -1) {
-            data = (byte) inbuff; // OK
-        }
-        in.close();
-    }
-
-    public void unsafeWayOfCastingChar() throws IOException {
-        Reader in = new FileReader("afile");
-        @SuppressWarnings("unused")
-        char data;
-        //:: warning: (cast.unsafe)
-        while ((data = (char) in.read()) != -1) {
-            //...
-        }
-        in.close();
-    }
-
-    public void compliantSolutionChar() throws IOException {
-        Reader in = new FileReader("afile");
-        int inbuff;
-        @SuppressWarnings("unused")
-        char data;
-        while ((inbuff = in.read()) != -1) {
-            data = (char) inbuff; // OK
-        }
-        in.close();
-    }
-
     public byte returnUnsighByteError() throws IOException {
         InputStream in = new FileInputStream("afile");
         @SuppressWarnings("unused")
@@ -136,4 +92,26 @@ public class Foo {
             char octal_char_cast = (char) ((octal_char * 8) + Character.digit(ch, 8));
         }
     }
+	
+	byte byte_field;
+	public void testField() {
+		//:: error: (assignment.type.incompatible)
+		@IntRange(from=0, to=255) byte value1 = byte_field;
+		
+		@IntRange(from=-128, to=127) byte value2 = byte_field;	// OK
+		
+	}
+    
+	byte[] field_array;
+	@IntRange(from=-128, to=127) byte[] field_annoArray;
+	
+	public void testArray(byte[] array, @IntRange(from=-128, to=127) byte[] annoArray) {
+		
+		@IntRange(from=-128, to=127) byte value1 = array[0];
+		@IntRange(from=-128, to=127) byte value2 = annoArray[0];
+		
+		@IntRange(from=-128, to=127) byte value3 = field_array[0];
+		@IntRange(from=-128, to=127) byte value4 = field_annoArray[0];
+		
+	}
 }

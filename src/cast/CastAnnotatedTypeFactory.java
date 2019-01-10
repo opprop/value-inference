@@ -64,44 +64,26 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 	
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
-        // Add defaults from @DefaultFor and @DefaultQualifierInHierarchy
-        for (Class<? extends Annotation> qual : getSupportedTypeQualifiers()) {
-            DefaultFor defaultFor = qual.getAnnotation(DefaultFor.class);
-            if (defaultFor != null) {
-                final TypeUseLocation[] locations = defaultFor.value();
-                final TypeKind[] typeKinds = defaultFor.types();
-
-            	AnnotationMirror mirror = AnnotationBuilder.fromClass(elements, qual);
-            	
-            	if (AnnotationUtils.areSameByClass(mirror, IntRange.class)) {  
-                	AnnotationMirror anno;
-                	
-                	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
-                	TypeKind[] byte_type = {TypeKind.BYTE};
-                	defs.addCheckedCodeDefaults(anno, locations, byte_type);
-                	
-                	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
-                	TypeKind[] char_type = {TypeKind.CHAR};
-                	defs.addCheckedCodeDefaults(anno, locations, char_type);
-                	
-                	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
-                	TypeKind[] short_type = {TypeKind.SHORT};
-                	defs.addCheckedCodeDefaults(anno, locations, short_type);
-                	
-                	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
-                	TypeKind[] int_type = {TypeKind.INT};
-                	defs.addCheckedCodeDefaults(anno, locations, int_type);
-                }
-            	else {
-            		defs.addCheckedCodeDefaults(mirror, locations, typeKinds);
-            	}
-            }
-            
-            if (qual.getAnnotation(DefaultQualifierInHierarchy.class) != null) {
-                defs.addCheckedCodeDefault(
-                        AnnotationBuilder.fromClass(elements, qual), TypeUseLocation.OTHERWISE);
-            }
-        }
+		TypeUseLocation[] useLocation = {TypeUseLocation.PARAMETER, TypeUseLocation.FIELD};
+    	AnnotationMirror anno;
+    	
+    	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+    	TypeKind[] byte_type = {TypeKind.BYTE};
+    	defs.addCheckedCodeDefaults(anno, useLocation, byte_type);
+    	
+    	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+    	TypeKind[] char_type = {TypeKind.CHAR};
+    	defs.addCheckedCodeDefaults(anno, useLocation, char_type);
+    	
+    	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+    	TypeKind[] short_type = {TypeKind.SHORT};
+    	defs.addCheckedCodeDefaults(anno, useLocation, short_type);
+    	
+    	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+    	TypeKind[] int_type = {TypeKind.INT};
+    	defs.addCheckedCodeDefaults(anno, useLocation, int_type);
+    	
+        super.addCheckedCodeDefaults(defs);
     }
 	
     /**
