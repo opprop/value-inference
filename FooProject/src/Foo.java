@@ -32,14 +32,29 @@ public class Foo {
 
     public void acceptSignedByte(byte value) throws IOException {}
     public void acceptUnsignedByte(@IntRange(from=0, to=255) byte value) throws IOException {}
+    public void acceptSignedByteArray(byte[] value) throws IOException {}
+    public void acceptUnsignedByteArray(@IntRange(from=0, to=255) byte[] value) throws IOException {}
+    public void acceptChar(char value) throws IOException {}
+    public void acceptCharArray(char[] value) throws IOException {}
+    public void acceptSignedByteDoubleArray(byte[][] value) throws IOException {}
+    public void acceptUnsignedByteDoubleArray(@IntRange(from=0, to=255) byte[][] value) throws IOException {}
+    public void acceptCharDoubleArray(char[][] value) throws IOException {}
 
-    public void testPassingArgument(@IntRange(from=0, to=255) int value) throws IOException {
-        byte data = (byte) value;
-
+    public void testPassingArgument(byte byte_val, char char_val, byte[] byte_arr, char[] char_arr, byte[][] byte_double_arr, char[][] char_double_arr) throws IOException {
         //:: error: (argument.type.incompatible)
-        acceptSignedByte(data);
-
-        acceptUnsignedByte(data);   // OK
+        acceptUnsignedByte(byte_val);
+        acceptSignedByte(byte_val);   // OK
+    	acceptChar(char_val);   // OK
+        
+        //:: error: (argument.type.incompatible)
+    	acceptUnsignedByteArray(byte_arr);
+        acceptSignedByteArray(byte_arr);	// OK
+        acceptCharArray(char_arr);	// OK
+        
+        //:: error: (argument.type.incompatible)
+        acceptUnsignedByteDoubleArray(byte_double_arr);
+    	acceptSignedByteDoubleArray(byte_double_arr);	// OK
+    	acceptCharDoubleArray(char_double_arr);	// OK
     }
 
     public void testParameter(byte value, char value2) throws IOException {
@@ -47,7 +62,6 @@ public class Foo {
         @IntRange(from=0, to=255) byte data1 = value;
 
         @IntRange(from=-128, to=127) byte data2 = value;    // OK
-
         @IntRange(from=0, to=65535) char data3 = value2;   //OK
     }
 
@@ -94,24 +108,36 @@ public class Foo {
     }
 	
 	byte byte_field;
+	char char_field;
 	public void testField() {
 		//:: error: (assignment.type.incompatible)
 		@IntRange(from=0, to=255) byte value1 = byte_field;
 		
-		@IntRange(from=-128, to=127) byte value2 = byte_field;	// OK
-		
+		@IntRange(from=-128, to=127) byte value3 = byte_field;	// OK
+		@IntRange(from=0, to=65535) char value2 = char_field;	// OK
 	}
     
-	byte[] field_array;
-	@IntRange(from=-128, to=127) byte[] field_annoArray;
-	
-	public void testArray(byte[] array, @IntRange(from=-128, to=127) byte[] annoArray) {
+	byte[] byte_field_array;
+	char[] char_field_array;
+	byte[][] byte_double_array;
+	char[][] char_double_array;
+	public void testArray(byte[] byte_array, char[] char_array) {
+		//:: error: (assignment.type.incompatible)
+		@IntRange(from=0, to=255) byte value = byte_array[0];
 		
-		@IntRange(from=-128, to=127) byte value1 = array[0];
-		@IntRange(from=-128, to=127) byte value2 = annoArray[0];
+		//:: error: (assignment.type.incompatible)
+		@IntRange(from=0, to=255) byte value1 = byte_field_array[0];
 		
-		@IntRange(from=-128, to=127) byte value3 = field_array[0];
-		@IntRange(from=-128, to=127) byte value4 = field_annoArray[0];
+		@IntRange(from=-128, to=127) byte value2 = byte_array[0];			// OK
+		@IntRange(from=-128, to=127) byte value3 = byte_field_array[0];		// OK
+		@IntRange(from=0, to=65535) char value4 = char_array[0];			// OK
+		@IntRange(from=0, to=65535) char value5 = char_field_array[0];		// OK
+		
+		//:: error: (assignment.type.incompatible)
+		@IntRange(from=0, to=255) byte value6 = byte_double_array[0][0];
+		
+		@IntRange(from=-128, to=127) byte value7 = byte_double_array[0][0];	// OK
+		@IntRange(from=0, to=65535) char value8 = char_double_array[0][0];	// OK
 		
 	}
 }
