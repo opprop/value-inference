@@ -64,19 +64,19 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
     	AnnotationMirror anno;
     	
     	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
-    	TypeKind[] byte_type = {TypeKind.BYTE, TypeKind.BYTE_ARRAY};
+    	TypeKind[] byte_type = {TypeKind.BYTE};
     	defs.addCheckedCodeDefaults(anno, useLocation, byte_type);
     	
     	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
-    	TypeKind[] char_type = {TypeKind.CHAR, TypeKind.CHAR_ARRAY};
+    	TypeKind[] char_type = {TypeKind.CHAR};
     	defs.addCheckedCodeDefaults(anno, useLocation, char_type);
     	
     	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
-    	TypeKind[] short_type = {TypeKind.SHORT, TypeKind.SHORT_ARRAY};
+    	TypeKind[] short_type = {TypeKind.SHORT};
     	defs.addCheckedCodeDefaults(anno, useLocation, short_type);
     	
     	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
-    	TypeKind[] int_type = {TypeKind.INT, TypeKind.INT_ARRAY};
+    	TypeKind[] int_type = {TypeKind.INT};
     	defs.addCheckedCodeDefaults(anno, useLocation, int_type);
     	
         super.addCheckedCodeDefaults(defs);
