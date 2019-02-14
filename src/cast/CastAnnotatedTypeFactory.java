@@ -1,7 +1,5 @@
 package cast;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,12 +20,11 @@ import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
-import org.checkerframework.framework.qual.DefaultFor;
-import org.checkerframework.framework.qual.DefaultQualifierInHierarchy;
 import org.checkerframework.framework.qual.TypeKind;
 import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
@@ -36,7 +33,6 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
-import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 
 import com.sun.source.tree.NewArrayTree;
@@ -61,66 +57,29 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
     protected TypeAnnotator createTypeAnnotator() {
         return new ListTypeAnnotator(new CastTypeAnnotator(this), super.createTypeAnnotator());
     }
-	/*
+	
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
-        // Add defaults from @DefaultFor and @DefaultQualifierInHierarchy
-        for (Class<? extends Annotation> qual : getSupportedTypeQualifiers()) {
-            DefaultFor defaultFor = qual.getAnnotation(DefaultFor.class);
-            if (defaultFor != null) {
-                final TypeUseLocation[] locations = defaultFor.value();
-                final org.checkerframework.framework.qual.TypeKind[] typeKinds = defaultFor.types();
-
-            	AnnotationMirror int_range = AnnotationBuilder.fromClass(elements, IntRange.class);
-            	AnnotationMirror mirror = AnnotationBuilder.fromClass(elements, qual);
-            	
-            	if (mirror == int_range) {
-            		 for (org.checkerframework.framework.qual.TypeKind type : typeKinds) {   
-	                	AnnotationMirror anno;
-	                	switch (type) {
-		                	case BYTE:
-			                	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
-			                	break;
-		                	case CHAR:
-			                	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
-			                	break;
-		                	case SHORT:
-			                	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
-			                	break;
-		                	case INT:
-			                	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
-			                	break;
-			                default:
-			                	anno = mirror;
-	                	}
-	                	org.checkerframework.framework.qual.TypeKind[] typeKind = {type};
-	                	defs.addCheckedCodeDefaults(anno, locations, typeKind);
-	                }
-                }
-            	else {
-            		defs.addCheckedCodeDefaults(mirror, locations, typeKinds);
-            	}
-            }
-            
-            if (qual.getAnnotation(DefaultQualifierInHierarchy.class) != null) {
-                defs.addCheckedCodeDefault(
-                        AnnotationBuilder.fromClass(elements, qual), TypeUseLocation.OTHERWISE);
-            }
-        }
-    }
-    */
-    /**
-     * Map between {@link org.checkerframework.framework.qual.TypeKind} and {@link
-     * javax.lang.model.type.TypeKind}.
-     *
-     * @param typeKind the Checker Framework TypeKind
-     * @return the javax TypeKind
-     */
-    private TypeKind mapTypeKinds(org.checkerframework.framework.qual.TypeKind typeKind) {
-        if (typeKind == null) {
-            return null;
-        }
-        return TypeKind.valueOf(typeKind.name());
+		TypeUseLocation[] useLocation = {TypeUseLocation.PARAMETER, TypeUseLocation.FIELD};
+    	AnnotationMirror anno;
+    	
+    	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+    	TypeKind[] byte_type = {TypeKind.BYTE};
+    	defs.addCheckedCodeDefaults(anno, useLocation, byte_type);
+    	
+    	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+    	TypeKind[] char_type = {TypeKind.CHAR};
+    	defs.addCheckedCodeDefaults(anno, useLocation, char_type);
+    	
+    	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+    	TypeKind[] short_type = {TypeKind.SHORT};
+    	defs.addCheckedCodeDefaults(anno, useLocation, short_type);
+    	
+    	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+    	TypeKind[] int_type = {TypeKind.INT};
+    	defs.addCheckedCodeDefaults(anno, useLocation, int_type);
+    	
+        super.addCheckedCodeDefaults(defs);
     }
 	
     /**
@@ -138,11 +97,21 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
             replaceWithNewAnnoInSpecialCases(type);
             return super.scan(type, aVoid);
         }
-
+        
         @Override
         public Void visitExecutable(AnnotatedExecutableType t, Void p) {
 			List<AnnotatedTypeMirror> paramTypes = t.getParameterTypes();
 			for (AnnotatedTypeMirror paramType : paramTypes) {
+				if (paramType.getKind() == TypeKind.mapTypeKind(TypeKind.ARRAY)) {
+					AnnotatedTypeMirror compType = ((AnnotatedArrayType)paramType).getComponentType();
+					AnnotationMirror anno = createIntRangeAnnotations(compType);
+		        	if (anno != null) {
+		        		compType.addMissingAnnotations(Collections.singleton(anno));
+					}
+		        	scan(((AnnotatedArrayType)paramType).getComponentType(), p);
+		        	continue;
+				}
+				
 				AnnotationMirror anno = createIntRangeAnnotations(paramType);
 				if (anno != null) {
 					paramType.addMissingAnnotations(Collections.singleton(anno));
@@ -150,6 +119,16 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 			}
 			
 			AnnotatedTypeMirror retType = t.getReturnType();
+			if (retType.getKind() == TypeKind.mapTypeKind(TypeKind.ARRAY)) {
+				AnnotatedTypeMirror compType = ((AnnotatedArrayType)retType).getComponentType();
+				AnnotationMirror anno = createIntRangeAnnotations(compType);
+	        	if (anno != null) {
+	        		compType.addMissingAnnotations(Collections.singleton(anno));
+				}
+	        	scan(((AnnotatedArrayType)retType).getComponentType(), p);
+	        	return super.visitExecutable(t, p);
+			}
+			
 			AnnotationMirror anno = createIntRangeAnnotations(retType);
 			if (anno != null) {
 				retType.addMissingAnnotations(Collections.singleton(anno));
@@ -169,6 +148,9 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 	            	break;
 	            case CHAR:
 	            	newAnno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+	            	break;
+	            case ARRAY:
+	            	newAnno = createIntRangeAnnotation(Range.EVERYTHING);
 	            	break;
 	            case INT:
 	            case DOUBLE:

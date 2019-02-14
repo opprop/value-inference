@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.io.Reader;
 
 public class JavaWrite {
-    public void unsafeWayOfCastingByte() throws IOException {
+    public void unsafeWayOfWritingByte() throws IOException {
         InputStream in = new FileInputStream("in-file");
         OutputStream out = new FileOutputStream("out-file");
         @SuppressWarnings("unused")
