@@ -1,12 +1,42 @@
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.Reader;
 
 import org.checkerframework.common.value.qual.IntRange;
+import org.checkerframework.common.value.qual.IntVal;
 
 public class Foo {
+    public void unsafeWayOfWiddeningByte() throws IOException {
+        InputStream in = new FileInputStream("in-file");
+        OutputStream out = new FileOutputStream("out-file");
+        @SuppressWarnings("unused")
+        int inbuff = 0;
+        byte data;
+        while ((inbuff = in.read()) != -1) {
+            data = (byte) inbuff;
+            // ::warning: (argument.type.incompatible)
+            out.write(data);
+        }
+        in.close();
+    }
+    
+    public void compliantSolutionWiddeningByte() throws IOException {
+        InputStream in = new FileInputStream("in-file");
+        OutputStream out = new FileOutputStream("out-file");
+        @SuppressWarnings("unused")
+        int inbuff = 0;
+        byte data;
+        while ((inbuff = in.read()) != -1) {
+            data = (byte) inbuff;
+            out.write(data & 0xff); // OK
+        }
+        in.close();
+    }
+    
     public void unsafeWayOfCastingByte1() throws IOException {
         InputStream in = new FileInputStream("afile");
         @SuppressWarnings("unused")
@@ -76,6 +106,7 @@ public class Foo {
 
     public void acceptSignedByte(byte value) throws IOException {}
     public void acceptUnsignedByte(@IntRange(from=0, to=255) byte value) throws IOException {}
+    public void acceptByteArray(byte[] value) throws IOException {}
 
     public void testPassingArgument(@IntRange(from=0, to=255) int value) throws IOException {
         byte data = (byte) value;
@@ -84,15 +115,28 @@ public class Foo {
         acceptSignedByte(data);
 
         acceptUnsignedByte(data);   // OK
+
+        byte signed = returnSignedByte();
+        byte[] data_array = {signed};
+        acceptByteArray(data_array);    // OK
+
+        //:: error: (argument.type.incompatible)
+        byte unsigned = returnUnsighByte();
+        byte[] unsigned_array = {unsigned};
+        acceptByteArray(unsigned_array);  
+
+        acceptByteArray(returnByteArray());    // OK
     }
 
-    public void testParameter(byte value, char value2) throws IOException {
+    public void testParameter(byte value, char value2, byte[] value3) throws IOException {
         //:: error: (assignment.type.incompatible)
         @IntRange(from=0, to=255) byte data1 = value;
 
         @IntRange(from=-128, to=127) byte data2 = value;    // OK
 
-        @IntRange(from=0, to=65535) char data3 = value2;   //OK
+        @IntRange(from=0, to=65535) char data3 = value2;   // OK
+
+        @IntRange(from=-128, to=127) byte data4 = value3[0];   // OK
     }
 
     public void assignRefinementCheck() throws IOException {
@@ -109,12 +153,20 @@ public class Foo {
         in.close();
     }
 
+    public byte[] returnByteArray() throws IOException { return null; }
+    public byte returnSignedByte() throws IOException { return 0; }
+
     public void returnRefinementCheck() throws IOException {
-        byte data = (@IntRange(from=0, to=255) byte) returnUnsighByte();    //OK
+        @IntRange(from=0, to=255) byte data1 = (byte) returnUnsighByte();    //OK
+        //:: error: (assignment.type.incompatible)
+        @IntRange(from=0, to=255) byte data2 = (byte) returnUnsighByteError();
+        
+        @IntRange(from=-128, to=127) byte data3 = returnByteArray()[0];  //OK
+
     }
 
-    public void wideningCheck(@IntRange(from=0, to=255) byte data) throws IOException {
-        //:: warning: (argument.type.incompatible)
+    public void wideningCheck(@IntRange(from=0, to=255) byte data, byte signed) throws IOException {
+        //:: warning: (assignment.type.incompatible)
         int value1 = data;
         value1 = data;
         
@@ -122,6 +174,34 @@ public class Foo {
         value2 = data & 0xFF; // OK
         int value3 = data & 0xff;
         value3 = data & 0xff; // OK
+        
+        //:: warning: (assignment.type.incompatible)
+        int add = data + 1;
+        add = (data & 0xff) + 1; // OK
+    }
+    
+    public void intValBoundTest() throws IOException {
+    	byte value1 = (byte) 255;	// OK
+    	short value2 = (short) 65535;	// OK
+    	char value3 = (char) 65535;	// OK
+    	
+    	//:: warning: (cast.unsafe)
+    	byte value4 = (byte) 256;
+    	//:: warning: (cast.unsafe)
+    	short value5 = (short) 65536;
+    	//:: warning: (cast.unsafe)
+    	char value6 = (char) 65536;
+    	
+    	byte value7 = (byte) -128;	// OK
+    	short value8 = (short) -32768;	// OK
+    	char value9 = (char) 0;	// OK
+    	
+    	//:: warning: (cast.unsafe)
+    	byte value10 = (byte) -129;
+    	//:: warning: (cast.unsafe)
+    	short value11 = (short) -32769;
+    	//:: warning: (cast.unsafe)
+    	char value12 = (char) -1;
     }
 
     public void testDigitExcute(String orig) throws IOException {
@@ -135,5 +215,12 @@ public class Foo {
             }
             char octal_char_cast = (char) ((octal_char * 8) + Character.digit(ch, 8));
         }
+    }
+    
+    byte field;
+    byte[] field_array;
+    public void testfieldAnno() throws IOException {
+    	@IntRange(from=-128, to=127) byte value = field;	// OK
+        @IntRange(from=-128, to=127) byte value2 = field_array[0];    // OK
     }
 }
