@@ -33,7 +33,7 @@ public class CastVisitor extends ValueVisitor {
     protected CastAnnotatedTypeFactory createTypeFactory() {
         return new CastAnnotatedTypeFactory(checker);
     }
-
+    
     @Override
     protected void commonAssignmentCheck(
             AnnotatedTypeMirror varType,
@@ -41,7 +41,7 @@ public class CastVisitor extends ValueVisitor {
             Tree valueTree,
             String errorKey) {
     	
-    	if (varType.getUnderlyingType().getKind() != valueType.getUnderlyingType().getKind()
+    	if (varType.getKind() != valueType.getKind()
     			&& valueType.getUnderlyingType().getKind() == TypeKind.BYTE) {
             AnnotationMirror valueAnno = valueType.getAnnotationInHierarchy(UNKNOWNVAL);
         	Range range = ValueAnnotatedTypeFactory.getRange(valueAnno);

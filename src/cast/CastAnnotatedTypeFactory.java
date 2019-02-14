@@ -10,11 +10,7 @@ import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueCheckerUtils;
-import org.checkerframework.common.value.qual.ArrayLen;
-import org.checkerframework.common.value.qual.ArrayLenRange;
-import org.checkerframework.common.value.qual.IntRange;
 import org.checkerframework.common.value.qual.IntVal;
-import org.checkerframework.common.value.qual.StringVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
@@ -87,7 +83,7 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
      * Performs pre-processing on annotations written by users, replacing illegal annotations by
      * legal ones.
      */
-    private class CastTypeAnnotator extends TypeAnnotator {
+    private class CastTypeAnnotator extends ValueTypeAnnotator {
 
         private CastTypeAnnotator(AnnotatedTypeFactory atypeFactory) {
             super(atypeFactory);
@@ -95,7 +91,6 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 
         @Override
         protected Void scan(AnnotatedTypeMirror type, Void aVoid) {
-            replaceWithNewAnnoInSpecialCases(type);
             return super.scan(type, aVoid);
         }
         
@@ -166,114 +161,6 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 	            	newAnno = null;
 			}
 			return newAnno;
-        }
-        
-        /**
-         * This method performs pre-processing on annotations written by users.
-         *
-         * <p>If any *Val annotation has &gt; MAX_VALUES number of values provided, replaces the
-         * annotation by @IntRange for integral types, @ArrayLenRange for arrays, @ArrayLen
-         * or @ArrayLenRange for strings, and @UnknownVal for all other types. Works together with
-         * {@link
-         * org.checkerframework.common.value.ValueVisitor#visitAnnotation(com.sun.source.tree.AnnotationTree,
-         * Void)} which issues warnings to users in these cases.
-         *
-         * <p>If any @IntRange or @ArrayLenRange annotation has incorrect parameters, e.g. the value
-         * "from" is greater than the value "to", replaces the annotation by {@code @BottomVal}. The
-         * {@link
-         * org.checkerframework.common.value.ValueVisitor#visitAnnotation(com.sun.source.tree.AnnotationTree,
-         * Void)} raises an error to users if the annotation was user-written.
-         *
-         * <p>If any @ArrayLen annotation has a negative number, replaces the annotation by {@code
-         * BottomVal}. The {@link
-         * org.checkerframework.common.value.ValueVisitor#visitAnnotation(com.sun.source.tree.AnnotationTree,
-         * Void)} raises an error to users if the annotation was user-written.
-         *
-         * <p>If a user only writes one side of an {@code IntRange} annotation, this method also
-         * computes an appropriate default based on the underlying type for the other side of the
-         * range. For instance, if the user write {@code @IntRange(from = 1) short x;} then this
-         * method will translate the annotation to {@code @IntRange(from = 1, to = Short.MAX_VALUE}.
-         */
-        private void replaceWithNewAnnoInSpecialCases(AnnotatedTypeMirror atm) {
-            AnnotationMirror anno = atm.getAnnotationInHierarchy(UNKNOWNVAL);
-            if (anno == null) {
-                return;
-            }
-
-            if (anno != null && anno.getElementValues().size() > 0) {
-                if (AnnotationUtils.areSameByClass(anno, IntVal.class)) {
-                    List<Long> values = getIntValues(anno);
-                    if (values.size() > MAX_VALUES) {
-                        long annoMinVal = Collections.min(values);
-                        long annoMaxVal = Collections.max(values);
-                        atm.replaceAnnotation(
-                                createIntRangeAnnotation(new Range(annoMinVal, annoMaxVal)));
-                    }
-                } else if (AnnotationUtils.areSameByClass(anno, ArrayLen.class)) {
-                    List<Integer> values = getArrayLength(anno);
-                    if (values.isEmpty()) {
-                        atm.replaceAnnotation(BOTTOMVAL);
-                    } else if (Collections.min(values) < 0) {
-                        atm.replaceAnnotation(BOTTOMVAL);
-                    } else if (values.size() > MAX_VALUES) {
-                        long annoMinVal = Collections.min(values);
-                        long annoMaxVal = Collections.max(values);
-                        atm.replaceAnnotation(
-                                createArrayLenRangeAnnotation(new Range(annoMinVal, annoMaxVal)));
-                    }
-                } else if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
-                    // Compute appropriate defaults for integral ranges.
-                    long from = getFromValueFromIntRange(atm);
-                    long to = getToValueFromIntRange(atm);
-
-                    if (from > to) {
-                        // from > to either indicates a user error when writing an
-                        // annotation or an error in the checker's implementation -
-                        // from should always be <= to. ValueVisitor#validateType will
-                        // issue an error.
-                        atm.replaceAnnotation(BOTTOMVAL);
-                    } else {
-                        // Always do a replacement of the annotation here so that
-                        // the defaults calculated above are correctly added to the
-                        // annotation (assuming the annotation is well-formed).
-                        atm.replaceAnnotation(createIntRangeAnnotation(new Range(from, to)));
-                    }
-                } else if (AnnotationUtils.areSameByClass(anno, ArrayLenRange.class)) {
-                    int from = AnnotationUtils.getElementValue(anno, "from", Integer.class, true);
-                    int to = AnnotationUtils.getElementValue(anno, "to", Integer.class, true);
-                    if (from > to) {
-                        // from > to either indicates a user error when writing an
-                        // annotation or an error in the checker's implementation -
-                        // from should always be <= to. ValueVisitor#validateType will
-                        // issue an error.
-                        atm.replaceAnnotation(BOTTOMVAL);
-                    } else if (from < 0) {
-                        // No array can have a length less than 0. Any time the type includes a from
-                        // less than zero, it must indicate imprecision in the checker.
-                        atm.replaceAnnotation(createArrayLenRangeAnnotation(0, to));
-                    }
-                } else if (AnnotationUtils.areSameByClass(anno, StringVal.class)) {
-                    // The annotation is StringVal. If there are too many elements,
-                    // ArrayLen or ArrayLenRange is used.
-                    List<String> values = getStringValues(anno);
-
-                    if (values.size() > MAX_VALUES) {
-                        List<Integer> lengths = ValueCheckerUtils.getLengthsForStringValues(values);
-                        atm.replaceAnnotation(createArrayLenAnnotation(lengths));
-                    }
-
-                } else {
-                    // In here the annotation is @*Val where (*) is not Int, String but other types
-                    // (Double, etc).
-                    // Therefore we extract its values in a generic way to check its size.
-                    List<Object> values =
-                            AnnotationUtils.getElementValueArray(
-                                    anno, "value", Object.class, false);
-                    if (values.size() > MAX_VALUES) {
-                        atm.replaceAnnotation(UNKNOWNVAL);
-                    }
-                }
-            }
         }
     }
 	
