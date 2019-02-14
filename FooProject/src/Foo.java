@@ -123,8 +123,9 @@ public class Foo {
         //:: error: (argument.type.incompatible)
         byte unsigned = returnUnsighByte();
         byte[] unsigned_array = {unsigned};
-        acceptByteArray(unsigned_array);  
-        acceptByteArray(returnByteArray());    // OK
+        //:: error: (argument.type.incompatible)
+        acceptByteArray(unsigned_array);
+        acceptByteArray(returnByteArray());    	// OK
     }
     
     public void acceptSignedByteArray(byte[] value) throws IOException {}

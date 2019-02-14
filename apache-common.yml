@@ -1,6 +1,0 @@
-projects:
-   commons-io:
-    giturl: https://github.com/opprop-benchmarks/commons-io.git
-    build: mvn install
-    clean: mvn clean
-

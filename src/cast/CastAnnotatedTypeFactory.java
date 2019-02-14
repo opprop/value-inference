@@ -1,5 +1,6 @@
 package cast;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -98,6 +99,7 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
             return super.scan(type, aVoid);
         }
         
+
         @Override
         public Void visitExecutable(AnnotatedExecutableType t, Void p) {
 			List<AnnotatedTypeMirror> paramTypes = t.getParameterTypes();
@@ -153,6 +155,8 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 	            	newAnno = createIntRangeAnnotation(Range.EVERYTHING);
 	            	break;
 	            case INT:
+	            	//newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+	            	//break;
 	            case DOUBLE:
 	            case FLOAT:
 	            case LONG:
@@ -328,12 +332,113 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
                         }
                         atm.addMissingAnnotations(Collections.singleton(newAnno));
                         return null;
-                    }
+                    } else if (AnnotationUtils.areSameByClass(oldAnno, IntVal.class)) {
+                        List<Long> longs = ValueAnnotatedTypeFactory.getIntValues(oldAnno);
+                        List<?> values = castNumbers(newType, longs);
+                        newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
+                        atm.addMissingAnnotations(Collections.singleton(newAnno));
+                        return null;
+                    } 
                 }
             }
             
             return super.visitTypeCast(tree, atm);
 	    }
+		
+	    /** Converts a {@code List<A>} to a {@code List<B>}, where A and B are numeric types. */
+	    private List<? extends Number> castNumbers(
+	            TypeMirror type, List<? extends Number> numbers) {
+	        if (numbers == null) {
+	            return null;
+	        }
+	        
+	        List<Long> values = new ArrayList<>();
+	        
+	        javax.lang.model.type.TypeKind typeKind = type.getKind();
+	        switch (typeKind) {
+	            case BYTE:
+	                for (Number l : numbers) {
+	                	if (l.longValue() > 255 || l.longValue() < -128) {
+	                		values.add((long) l.byteValue());
+	                	} else {
+	                		values.add(l.longValue());
+	                	}
+	                }
+	                return values;
+	            case SHORT:
+	            	for (Number l : numbers) {
+	                	if (l.longValue() > 65535 || l.longValue() < -32768) {
+	                		values.add((long) l.shortValue());
+	                	} else {
+	                		values.add(l.longValue());
+	                	}
+	                }
+	            	return values;
+	            case CHAR:
+	            case INT:
+	            case LONG:
+	                for (Number l : numbers) {
+	                    values.add(l.longValue());
+	                }
+	                return values;
+	            default:
+	                throw new UnsupportedOperationException(typeKind.toString());
+	        }
+	    }
+
+		
+	    /**
+	     * Returns a constant value annotation with the {@code values}. The class of the annotation
+	     * reflects the {@code resultType} given.
+	     *
+	     * @param resultType used to selected which kind of value annotation is returned
+	     * @param values must be a homogeneous list: every element of it has the same class
+	     * @return a constant value annotation with the {@code values}
+	     */
+	    AnnotationMirror createResultingAnnotation(TypeMirror resultType, List<?> values) {
+	        if (values == null) {
+	            return UNKNOWNVAL;
+	        }
+	        // For some reason null is included in the list of values,
+	        // so remove it so that it does not cause a NPE elsewhere.
+	        values.remove(null);
+	        if (values.isEmpty()) {
+	            return BOTTOMVAL;
+	        }
+
+	        switch (resultType.getKind()) {
+	            case INT:
+	            case LONG:
+	            case SHORT:
+	            case BYTE:
+	                List<Number> numberVals = new ArrayList<>(values.size());
+	                List<Character> characterVals = new ArrayList<>(values.size());
+	                for (Object o : values) {
+	                    if (o instanceof Character) {
+	                        characterVals.add((Character) o);
+	                    } else {
+	                        numberVals.add((Number) o);
+	                    }
+	                }
+	                if (numberVals.isEmpty()) {
+	                    return createCharAnnotation(characterVals);
+	                }
+	                return createNumberAnnotationMirror(new ArrayList<>(numberVals));
+	            case CHAR:
+	                List<Character> charVals = new ArrayList<>(values.size());
+	                for (Object o : values) {
+	                    if (o instanceof Number) {
+	                        charVals.add((char) ((Number) o).intValue());
+	                    } else {
+	                        charVals.add((char) o);
+	                    }
+	                }
+	                return createCharAnnotation(charVals);
+	            default:
+	                throw new UnsupportedOperationException("Unexpected kind:" + resultType);
+	        }
+	    }
+
 		
 		/** Returns true iff the given type is in the domain of the Constant Value Checker. */
         private boolean handledByValueChecker(AnnotatedTypeMirror type) {
