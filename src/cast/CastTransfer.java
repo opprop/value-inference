@@ -32,35 +32,33 @@ public class CastTransfer extends ValueTransfer {
 		atypefactory = (CastAnnotatedTypeFactory) analysis.getTypeFactory();
 		UNKNOWNVAL = AnnotationBuilder.fromClass(analysis.getTypeFactory().getElementUtils(), UnknownVal.class);
 	}
-
-	@Override
-	public TransferResult<CFValue, CFStore> visitWideningConversion(WideningConversionNode n,
-			TransferInput<CFValue, CFStore> p) {
-		TransferResult<CFValue, CFStore> result = super.visitWideningConversion(n, p);
-
-        // Combine annotations from the operand with the wide type
-		CFValue operandValue = p.getValueOfSubNode(n.getOperand());
-		if (n.getOperand().getType().getKind() == TypeKind.BYTE) {
-			Set<AnnotationMirror> annos = operandValue.getAnnotations();
-			for (AnnotationMirror anno : annos) {
-				if (AnnotationUtils.areSameByClass(anno, IntRange.class)
-						|| AnnotationUtils.areSameByClass(anno, IntVal.class)) {
-					Range annoRange = ValueAnnotatedTypeFactory.getRange(anno);
-					if (isUnsignedByte(annoRange)) {
-						System.out.println("visits");
-						result.setResultValue(operandValue);
-						System.out.println(result);
-						return result;
-					}
-				}
-			}
-		}
-
-		CFValue widenedValue = getValueWithSameAnnotations(n.getType(), operandValue);
-		result.setResultValue(widenedValue);
-
-		return result;
-	}
+//
+//	@Override
+//	public TransferResult<CFValue, CFStore> visitWideningConversion(WideningConversionNode n,
+//			TransferInput<CFValue, CFStore> p) {
+//		TransferResult<CFValue, CFStore> result = super.visitWideningConversion(n, p);
+//
+//        // Combine annotations from the operand with the wide type
+//		CFValue operandValue = p.getValueOfSubNode(n.getOperand());
+//		if (n.getOperand().getType().getKind() == TypeKind.BYTE) {
+//			Set<AnnotationMirror> annos = operandValue.getAnnotations();
+//			for (AnnotationMirror anno : annos) {
+//				if (AnnotationUtils.areSameByClass(anno, IntRange.class)
+//						|| AnnotationUtils.areSameByClass(anno, IntVal.class)) {
+//					Range annoRange = ValueAnnotatedTypeFactory.getRange(anno);
+//					if (isUnsignedByte(annoRange)) {
+//						result.setResultValue(operandValue);
+//						return result;
+//					}
+//				}
+//			}
+//		}
+//
+//		CFValue widenedValue = getValueWithSameAnnotations(n.getType(), operandValue);
+//		result.setResultValue(widenedValue);
+//
+//		return result;
+//	}
 //
 //	@Override
 //	public TransferResult<CFValue, CFStore> visitNumericalAddition(NumericalAdditionNode n,
@@ -189,19 +187,19 @@ public class CastTransfer extends ValueTransfer {
 //		return result;
 //	}
 	
-	public TransferResult<CFValue, CFStore> visitNumericalAddition(
-            NumericalAdditionNode n, TransferInput<CFValue, CFStore> p) {
-        TransferResult<CFValue, CFStore> transferResult = super.visitNumericalAddition(n, p);
-        if (n.getLeftOperand() instanceof WideningConversionNode) {
-        	WideningConversionNode left = (WideningConversionNode) n.getLeftOperand();
-            System.out.println(left.getOperand().getType().getKind());
-        }
-        if (n.getRightOperand() instanceof WideningConversionNode) {
-            System.out.println(n.getRightOperand().getType().getKind());
-        }
-        return transferResult;
-    }
-	
+//	public TransferResult<CFValue, CFStore> visitNumericalAddition(
+//            NumericalAdditionNode n, TransferInput<CFValue, CFStore> p) {
+//        TransferResult<CFValue, CFStore> transferResult = super.visitNumericalAddition(n, p);
+//        if (n.getLeftOperand() instanceof WideningConversionNode) {
+//        	WideningConversionNode left = (WideningConversionNode) n.getLeftOperand();
+//            System.out.println(left.getOperand().getType().getKind());
+//        }
+//        if (n.getRightOperand() instanceof WideningConversionNode) {
+//            System.out.println(n.getRightOperand().getType().getKind());
+//        }
+//        return transferResult;
+//    }
+//	
 	/** Return true if this range contains unsigned part of {@code byte} value. */
 	private boolean isUnsignedByte(Range range) {
 		return !range.intersect(new Range(Byte.MAX_VALUE + 1, Byte.MAX_VALUE * 2 + 1)).isNothing()
