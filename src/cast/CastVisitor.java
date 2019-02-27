@@ -56,10 +56,12 @@ public class CastVisitor extends ValueVisitor {
     	if (varType.getKind() != valueType.getKind()
     			&& valueType.getUnderlyingType().getKind() == TypeKind.BYTE) {
             AnnotationMirror valueAnno = valueType.getAnnotationInHierarchy(UNKNOWNVAL);
-        	Range range = ValueAnnotatedTypeFactory.getRange(valueAnno);
-        	if (isUnsignedByte(range)) {
-        		checker.report(Result.warning(errorKey, valueType, varType), valueTree);
-        	}
+            if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
+	            Range range = ValueAnnotatedTypeFactory.getRange(valueAnno);
+	        	if (isUnsignedByte(range)) {
+	        		checker.report(Result.warning(errorKey, valueType, varType), valueTree);
+	        	}
+            }
         }
         super.commonAssignmentCheck(varType, valueType, valueTree, errorKey);
     }
