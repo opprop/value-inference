@@ -21,10 +21,9 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
-import com.sun.source.tree.VariableTree;
 
 public class CastVisitor extends ValueVisitor {
 
@@ -46,6 +45,24 @@ public class CastVisitor extends ValueVisitor {
 		return !range.intersect(new Range(Byte.MAX_VALUE + 1, Byte.MAX_VALUE * 2 + 1)).isNothing()
 				&& !range.contains(Range.BYTE_EVERYTHING);
 	}
+	
+	@Override
+    protected void commonAssignmentCheck(
+            AnnotatedTypeMirror varType,
+            AnnotatedTypeMirror valueType,
+            Tree valueTree,
+            String errorKey) {
+    	
+    	if (varType.getKind() != valueType.getKind()
+    			&& valueType.getUnderlyingType().getKind() == TypeKind.BYTE) {
+            AnnotationMirror valueAnno = valueType.getAnnotationInHierarchy(UNKNOWNVAL);
+        	Range range = ValueAnnotatedTypeFactory.getRange(valueAnno);
+        	if (isUnsignedByte(range)) {
+        		checker.report(Result.warning(errorKey, valueType, varType), valueTree);
+        	}
+        }
+        super.commonAssignmentCheck(varType, valueType, valueTree, errorKey);
+    }
 
 	@Override
 	public Void visitTypeCast(TypeCastTree node, Void p) {
@@ -59,71 +76,26 @@ public class CastVisitor extends ValueVisitor {
 	}
 
 	@Override
-	public Void visitAssignment(AssignmentTree node, Void p) {
-		Set<Node> expr_nodes = atypeFactory.getNodesForTree(node.getExpression());
-		if (expr_nodes != null) {
-			for (Node n : expr_nodes) {
-				if (n instanceof WideningConversionNode) {
-					checkUnsafeWidening((WideningConversionNode) n, node);
-				} else {
-					visitNode(n);
-				}
-			}
-		}
-		return super.visitAssignment(node, p);
-	}
-
-	@Override
-	public Void visitVariable(VariableTree node, Void p) {
-		Set<Node> expr_nodes = atypeFactory.getNodesForTree(node.getInitializer());
-		if (expr_nodes != null) {
-			for (Node n : expr_nodes) {
-				if (n instanceof WideningConversionNode) {
-					checkUnsafeWidening((WideningConversionNode) n, node);
-				} else {
-					visitNode(n);
-				}
-			}
-		}
-		return super.visitVariable(node, p);
-	}
-
-	private void visitNode(Node n) {
-		if (n instanceof BitwiseAndNode) {
-			visitBitwiseAnd((BitwiseAndNode) n);
-		} else if (n instanceof BinaryOperationNode) {
+	public Void visitBinary(BinaryTree node, Void p) {
+        Set<Node> nodes = atypeFactory.getNodesForTree(node);
+        for (Node n : nodes) {
 			visitBinaryOperation((BinaryOperationNode) n);
-		}
-	}
+        }
+        return super.visitBinary(node, p);
+    }
 
 	private void visitBinaryOperation(BinaryOperationNode node) {
 		Node leftNode = node.getLeftOperand();
 		Node rightNode = node.getRightOperand();
 
-		if (leftNode instanceof WideningConversionNode) {
+		if (leftNode instanceof WideningConversionNode
+				&& (!(node instanceof BitwiseAndNode) || !rightNode.toString().equals("255"))) {
 			checkUnsafeWidening((WideningConversionNode) leftNode, node.getTree());
 		}
-		if (rightNode instanceof WideningConversionNode) {
+		if (rightNode instanceof WideningConversionNode
+				&& (!(node instanceof BitwiseAndNode) || !leftNode.toString().equals("255"))) {
 			checkUnsafeWidening((WideningConversionNode) rightNode, node.getTree());
 		}
-
-		visitNode(leftNode);
-		visitNode(rightNode);
-	}
-
-	private void visitBitwiseAnd(BitwiseAndNode node) {
-		Node leftNode = node.getLeftOperand();
-		Node rightNode = node.getRightOperand();
-
-		if (leftNode instanceof WideningConversionNode && !rightNode.toString().equals("255")) {
-			checkUnsafeWidening((WideningConversionNode) leftNode, node.getTree());
-		}
-		if (rightNode instanceof WideningConversionNode && !leftNode.toString().equals("255")) {
-			checkUnsafeWidening((WideningConversionNode) rightNode, node.getTree());
-		}
-
-		visitNode(leftNode);
-		visitNode(rightNode);
 	}
 
 	private void checkUnsafeWidening(WideningConversionNode node, Tree target) {
