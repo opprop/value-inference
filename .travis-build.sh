@@ -1,11 +1,20 @@
 #!/bin/bash
-ROOT=$TRAVIS_BUILD_DIR/..
 
-# Fail the whole script if any command fails
-set -e
+# builds & test units-inference, runs it on the corpus, and grabs the results
 
-export SHELLOPTS
+# Split $TRAVIS_REPO_SLUG into the owner and repository parts
+OIFS=$IFS
+IFS='/'
+read -r -a slugarray <<< "$TRAVIS_REPO_SLUG"
+SLUGOWNER=${slugarray[0]}
+SLUGREPO=${slugarray[1]}
+IFS=$OIFS
 
-. ./.travis-build-without-test.sh
+export REPO_SITE=$SLUGOWNER
 
-ant -f $TRAVIS_BUILD_DIR/build.xml test
+# Build dependencies
+. ./setup.sh
+
+echo "Starting security-demo tests"
+
+. ./test-cast.sh travis

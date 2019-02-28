@@ -1,0 +1,159 @@
+/// Why doesn't this work on Travis under Java 7?
+/// The same text does in Randoop's build.gradle file.
+plugins {
+    // Plugin that applies Google-Java-format to the Java files in the project.
+    // https://github.com/sherter/google-java-format-gradle-plugin
+    // id 'com.github.sherter.google-java-format' version '0.6'
+}
+
+apply plugin: 'java'
+
+ext {
+    assert JavaVersion.current() == JavaVersion.VERSION_1_8: "Set JAVA_HOME to JDK 8. Current version is ${JavaVersion.current()}"
+    jsr308 = System.getenv('JSR308') ?: file(new File("..")).absolutePath
+    cfPath = "${jsr308}/checker-framework"
+    cfiPath = "${jsr308}/checker-framework-inference"
+    jsr308langtoolsPath = "${jsr308}/jsr308-langtools"
+    afu = "${jsr308}/annotation-tools/annotation-file-utilities"
+    castPath = "${jsr308}/cast_checker"
+}
+
+println '==================================='
+println '           Cast Checker            '
+println '==================================='
+println ''
+println '-------------------------------'
+println 'Important Environment Variables'
+println '-------------------------------'
+println 'JSR308: ' + jsr308
+println 'CF:     ' + cfPath
+println 'CFI:    ' + cfiPath
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(dir: "${cfPath}/checker/dist", include: "checker.jar")
+    compile fileTree(dir: "${cfiPath}/dist", include: "checker-framework-inference.jar")
+    // sat4j solver dependency
+    compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
+    compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
+
+    // CF test lib dependency
+    testCompile fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
+    testCompile 'junit:junit:4.12'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src"]
+        }
+
+        resources {
+            srcDirs = ["src"]
+            include "**/*.astub"
+        }
+    }
+
+    test {
+        java {
+            // TODO: we shouldn't need source level dependency on CFITest
+            srcDirs = ["tests", "${cfiPath}/tests/checkers/inference/test"]
+        }
+    }
+}
+
+compileJava {
+    options.compilerArgs = [
+            '-implicit:class',
+            '-Awarns',
+            '-Xmaxwarns', '10000',
+    ]
+}
+
+afterEvaluate {
+    // Create a task for each JUnit test class whose name is the same as the JUnit class name.
+    sourceSets.test.allJava.filter { it.path.contains("${castPath}/tests") }.forEach { file ->
+        String junitClassName = file.name.replaceAll(".java", "")
+        String testName = junitClassName.replaceAll("Test", "")
+        tasks.create(name: "${junitClassName}", type: Test) {
+            description "Run ${testName} tests."
+            include "**/${name}.class"
+        }
+    }
+
+    // Configure JUnit tests
+    tasks.withType(Test) {
+        group 'Verification'
+
+        systemProperties 'path.afu.scripts': "${afu}/scripts",
+                'path.inference.script': "${cfiPath}/scripts/inference",
+                JDK_JAR: "${cfPath}/checker/dist/jdk8.jar"
+
+        environment "external_checker_classpath", "${castPath}/build/classes/java/main:${castPath}/build/libs/cast_checker.jar"
+
+        jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
+
+        testLogging {
+            // Always run the tests
+            outputs.upToDateWhen { false }
+            // The following prints out each time a test is passed.
+            events "passed", "skipped", "failed", "standardOut", "standardError"
+
+            // Show the found unexpected diagnostics and expected diagnostics not found.
+            exceptionFormat "full"
+            showExceptions true
+            showCauses true
+            showStackTraces true
+            showStandardStreams true
+        }
+
+        // After each test, print a summary.
+        afterSuite { desc, result ->
+            if (desc.getClassName() != null) {
+                long mils = result.getEndTime() - result.getStartTime()
+                double seconds = mils / 1000.0
+
+                println "Testsuite: ${desc.getClassName()}\n" +
+                        "Tests run: ${result.testCount}, " +
+                        "Failures: ${result.failedTestCount}, " +
+                        "Skipped: ${result.skippedTestCount}, " +
+                        "Time elapsed: ${seconds} sec\n"
+            }
+        }
+    }
+}
+
+tasks.clean {
+    delete += "build"
+    delete += "dist"
+    delete += "testdata"
+}
+
+// Commented out because plugins section is commented out
+/* Configuration for formatting */
+/*
+googleJavaFormat {
+    // toolVersion '1.3'
+    options style: 'AOSP'
+}
+tasks.googleJavaFormat {
+    group 'Formatting'
+    description = "Reformat Java source code with Google-Java-format"
+    exclude 'testing'
+    exclude 'testdata'
+    exclude 'annotated'
+    exclude 'worked-benchmarks'
+}
+tasks.verifyGoogleJavaFormat {
+    group 'Formatting'
+    description = "Check Java source code is in Google-Java-format"
+    exclude 'testing'
+    exclude 'testdata'
+    exclude 'annotated'
+    exclude 'worked-benchmarks'
+}
+*/
