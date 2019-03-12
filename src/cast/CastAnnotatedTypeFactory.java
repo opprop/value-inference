@@ -78,6 +78,30 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
     	
         super.addCheckedCodeDefaults(defs);
     }
+    
+    @Override
+    protected void addUncheckedCodeDefaults(QualifierDefaults defs) {
+    	TypeUseLocation[] useLocation = {TypeUseLocation.PARAMETER, TypeUseLocation.FIELD};
+    	AnnotationMirror anno;
+    	
+    	anno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+    	TypeKind[] byte_type = {TypeKind.BYTE};
+    	defs.addUncheckedCodeDefaults(anno, useLocation, byte_type);
+    	
+    	anno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+    	TypeKind[] char_type = {TypeKind.CHAR};
+    	defs.addUncheckedCodeDefaults(anno, useLocation, char_type);
+    	
+    	anno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+    	TypeKind[] short_type = {TypeKind.SHORT};
+    	defs.addUncheckedCodeDefaults(anno, useLocation, short_type);
+    	
+    	anno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+    	TypeKind[] int_type = {TypeKind.INT};
+    	defs.addUncheckedCodeDefaults(anno, useLocation, int_type);
+    	
+        super.addUncheckedCodeDefaults(defs);
+    }
 	
     /**
      * Performs pre-processing on annotations written by users, replacing illegal annotations by
@@ -197,10 +221,10 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
                 if (oldAnno != null) {
                     TypeMirror newType = atm.getUnderlyingType();
                     AnnotationMirror newAnno;
-                    Range range;
+                    Range range = Range.EVERYTHING;
+                    Class<?> newClass = ValueCheckerUtils.getClassFromType(newType);
 
                     if (isIntRange(oldAnno) && (range = getRange(oldAnno)).isWiderThan(MAX_VALUES)) {
-                        Class<?> newClass = ValueCheckerUtils.getClassFromType(newType);
                         Range castRange = getRange(oldAnno);
                         if (newClass == byte.class && isUnsignedByte(castRange)) {
                         	newAnno = createIntRangeAnnotation(unsignedByteRange());
@@ -225,7 +249,13 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
                         newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
                         atm.addMissingAnnotations(Collections.singleton(newAnno));
                         return null;
-                    } 
+                    } else if (oldAnno == UNKNOWNVAL) {
+	                    if (newClass == byte.class || newClass == short.class || newClass == char.class) {
+	                		newAnno =
+	                                createIntRangeAnnotation(NumberUtils.castRange(newType, range));
+	                        atm.addMissingAnnotations(Collections.singleton(newAnno));
+                    	}
+                    }
                 }
             }
             

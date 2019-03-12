@@ -208,4 +208,21 @@ public class Foo {
 		@IntRange(from=0, to=65535) char value8 = char_double_array[0][0];	// OK
 		
 	}
+	
+	public static long readSwappedUnsignedInteger(final @IntRange(from=0, to=255) byte[] data, int offset) {
+        final long low = ( ( ( data[ offset + 0 ] & 0xff ) << 0 ) +
+                     ( ( data[ offset + 1 ] & 0xff ) << 8 ) +
+                     ( ( data[ offset + 2 ] & 0xff ) << 16 ) );
+
+        final long high = data[ offset + 3 ] & 0xff;
+        
+        return (high << 24) + (0xffffffffL & low); 
+    }
+	
+	private static void toBytes(final long bits, final @IntRange(from=0, to=255) byte[] result) {
+		result[0] = (byte) (0xff & bits);			// OK
+		result[1] = (byte) (bits & 0xff);			// OK
+        result[2] = (byte) ((bits >> 0) & 0xff);	// OK
+        result[3] = (byte) (0xff & (bits >> 8));	// OK
+    }
 }

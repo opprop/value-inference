@@ -81,7 +81,12 @@ public class CastVisitor extends ValueVisitor {
 	public Void visitBinary(BinaryTree node, Void p) {
         Set<Node> nodes = atypeFactory.getNodesForTree(node);
         for (Node n : nodes) {
-			visitBinaryOperation((BinaryOperationNode) n);
+        	if (n instanceof BinaryOperationNode)
+        		visitBinaryOperation((BinaryOperationNode) n);
+        	else if (n instanceof WideningConversionNode) {
+        		System.out.println(n);
+        		checkUnsafeWidening((WideningConversionNode)n, node);
+        	}
         }
         return super.visitBinary(node, p);
     }
