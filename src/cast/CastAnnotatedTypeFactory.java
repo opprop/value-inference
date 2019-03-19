@@ -238,23 +238,21 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
                             throw new UnsupportedOperationException(
                                     "ValueAnnotatedTypeFactory: can't convert int to boolean");
                         } else {
-                            newAnno =
-                                    createIntRangeAnnotation(NumberUtils.castRange(newType, range));
+                            newAnno = createIntRangeAnnotation(NumberUtils.castRange(newType, range));
                         }
                         atm.addMissingAnnotations(Collections.singleton(newAnno));
                         return null;
-                    } else if (AnnotationUtils.areSameByClass(oldAnno, IntVal.class)) {
+                    } else if (AnnotationUtils.areSameByClass(oldAnno, IntVal.class) 
+                    		&& newClass != double.class && newClass != float.class) {
                         List<Long> longs = ValueAnnotatedTypeFactory.getIntValues(oldAnno);
                         List<?> values = castNumbers(newType, longs);
                         newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
                         atm.addMissingAnnotations(Collections.singleton(newAnno));
                         return null;
-                    } else if (oldAnno == UNKNOWNVAL) {
-	                    if (newClass == byte.class || newClass == short.class || newClass == char.class) {
-	                		newAnno =
-	                                createIntRangeAnnotation(NumberUtils.castRange(newType, range));
-	                        atm.addMissingAnnotations(Collections.singleton(newAnno));
-                    	}
+                    } else if ((newClass == byte.class || newClass == short.class || newClass == char.class)
+                    		&& oldAnno == UNKNOWNVAL) {
+                		newAnno = createIntRangeAnnotation(NumberUtils.castRange(newType, range));
+                        atm.addMissingAnnotations(Collections.singleton(newAnno));
                     }
                 }
             }

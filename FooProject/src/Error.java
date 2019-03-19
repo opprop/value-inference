@@ -41,23 +41,6 @@ public class Error {
     }
     
     /**
-      * commons-io/src/main/java/org/apache/commons/io/HexDump.java:104
-      */
-    public static void dump(final byte[] data, final long offset, final OutputStream stream, final int index)
-    		throws IOException, ArrayIndexOutOfBoundsException, IllegalArgumentException {
-
-			final StringBuilder buffer = new StringBuilder(74);
-			int chars_read = data.length;
-			for (int k = 0; k < chars_read; k++) {
-				if (data[k] >= ' ' && data[k] < 127) {
-				    buffer.append((char) data[k]);
-				} else {
-				    buffer.append('.');
-				}
-			}
-	}
-    
-    /**
      * Needed in readInstruction and subclasses in this package
      * @since 6.0
      * commons-bcel/src/main/java/org/apache/bcel/generic/Instruction.java:531

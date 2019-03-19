@@ -8,24 +8,14 @@ import java.io.Reader;
 
 import org.checkerframework.common.value.qual.IntRange;
 import org.checkerframework.common.value.qual.IntVal;
+import org.checkerframework.framework.qual.EnsuresQualifierif;
 
 public class FalsePositive {
-	/**
-	 * commons-bcel/src/main/java/org/apache/bcel/classfile/Signature.java:165
-	 */
-	private static void matchIdent( final MyByteArrayInputStream in, final StringBuilder buf ) {
-        int ch;
-        if ((ch = in.read()) == -1) {
-            throw new RuntimeException("Illegal signature: " + in.getData()
-                    + " no ident, reaching EOF");
-        }
-        char value = (char) ch;
-    }
 	
 	/**
 	 * commons-csv/src/main/java/org/apache/commons/csv/Lexer.java:264
 	 */
-	private Token parseEncapsulatedToken() throws IOException {
+	private void parseEncapsulatedToken() throws IOException {
 		int c;
 		Reader reader = new FileReader("afile");
         c = reader.read();
@@ -37,8 +27,26 @@ public class FalsePositive {
 	/**
      * @return true if the given character indicates end of file
      */
-    boolean isEndOfFile(final int ch) {
+    @EnsuresQualifierif(result=true, expression="#1", qualifier=Intval.class) boolean isEndOfFile(final int ch) {
         return ch == -1;
+    }
+    
+    /**
+      * commons-io/src/main/java/org/apache/commons/io/HexDump.java:104
+      */
+    public static void dump(final byte[] data, final long offset, final OutputStream stream, final int index)
+           throws IOException, ArrayIndexOutOfBoundsException, IllegalArgumentException {
+    	final StringBuilder buffer = new StringBuilder(74);
+    	int chars_read = data.length;
+    	for (int j = 0; j < chars_read; j++) {
+	    	for (int k = 0; k < chars_read; k++) {
+	    		if (data[k+j] >= ' ' && data[k+j] < 127) {
+	    			buffer.append((char) data[k+j]);
+	    		} else {
+	    			buffer.append('.');
+	    		}
+		   }
+    	}
     }
 
 }
