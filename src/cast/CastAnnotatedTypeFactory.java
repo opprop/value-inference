@@ -174,8 +174,8 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
 	            	newAnno = createIntRangeAnnotation(Range.EVERYTHING);
 	            	break;
 	            case INT:
-	            	//newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
-	            	//break;
+	            	newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+	            	break;
 	            case DOUBLE:
 	            case FLOAT:
 	            case LONG:

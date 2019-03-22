@@ -2,6 +2,7 @@
 
 # Eclipse output
 bin/
+.gradle/
 
 # Eclipse personal settings
 .settings/
@@ -12,6 +13,7 @@ tests/lib
 lib/
 logs/
 apache-common/
+build/
 
 # Analysis
 Analysis/

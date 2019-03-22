@@ -8,7 +8,7 @@ import java.io.Reader;
 
 import org.checkerframework.common.value.qual.IntRange;
 import org.checkerframework.common.value.qual.IntVal;
-import org.checkerframework.framework.qual.EnsuresQualifierif;
+//import org.checkerframework.framework.qual.EnsuresQualifierif;
 
 public class FalsePositive {
 	
@@ -27,7 +27,8 @@ public class FalsePositive {
 	/**
      * @return true if the given character indicates end of file
      */
-    @EnsuresQualifierif(result=true, expression="#1", qualifier=Intval.class) boolean isEndOfFile(final int ch) {
+    //@EnsuresQualifierif(result=true, expression="#1", qualifier=Intval.class) 
+	boolean isEndOfFile(final int ch) {
         return ch == -1;
     }
     
@@ -48,5 +49,4 @@ public class FalsePositive {
 		   }
     	}
     }
-
 }

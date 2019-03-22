@@ -84,7 +84,6 @@ public class CastVisitor extends ValueVisitor {
         	if (n instanceof BinaryOperationNode)
         		visitBinaryOperation((BinaryOperationNode) n);
         	else if (n instanceof WideningConversionNode) {
-        		System.out.println(n);
         		checkUnsafeWidening((WideningConversionNode)n, node);
         	}
         }
