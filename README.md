@@ -8,7 +8,7 @@ A type system that enforces [CERT-FIO08-J rule](https://www.securecoding.cert.or
 
 This project is developed based on [Checker Framework](http://types.cs.washington.edu/checker-framework/). To use this checker, below dependencies are required:
 
-- checker framework
+- opprop/checker framework
 - jsr308-langtools
 - annotation-tools
 
