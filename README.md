@@ -1,4 +1,4 @@
-# cast_checker 
+# Cast Checker Inference 
 
 [![build-status](https://travis-ci.org/txiang61/cast_checker.svg?branch=master)](https://travis-ci.org/txiang61/cast_checker)
 
