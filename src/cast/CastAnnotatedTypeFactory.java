@@ -45,12 +45,6 @@ public class CastAnnotatedTypeFactory extends ValueAnnotatedTypeFactory {
     }
 	
 	@Override
-    public CFTransfer createFlowTransferFunction(
-            CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
-        return new CastTransfer(analysis);
-    }
-	
-	@Override
     protected TypeAnnotator createTypeAnnotator() {
         return new ListTypeAnnotator(new CastTypeAnnotator(this), super.createTypeAnnotator());
     }

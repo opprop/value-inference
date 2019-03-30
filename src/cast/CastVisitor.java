@@ -5,9 +5,7 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
 
-import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
-import org.checkerframework.common.value.ValueVisitor;
 import org.checkerframework.common.value.qual.IntRange;
 import org.checkerframework.common.value.qual.UnknownVal;
 import org.checkerframework.common.value.util.Range;
@@ -25,15 +23,23 @@ import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
 
-public class CastVisitor extends ValueVisitor {
+import checkers.inference.InferenceChecker;
+import checkers.inference.InferenceVisitor;
+import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+
+public class CastVisitor extends InferenceVisitor<CastChecker, BaseAnnotatedTypeFactory> {
 
 	/** The top type for this hierarchy. */
 	protected final AnnotationMirror UNKNOWNVAL;
 
-	public CastVisitor(BaseTypeChecker checker) {
-		super(checker);
-		UNKNOWNVAL = AnnotationBuilder.fromClass(elements, UnknownVal.class);
-	}
+	public CastVisitor(
+            CastChecker checker,
+            InferenceChecker ichecker,
+            BaseAnnotatedTypeFactory factory,
+            boolean infer) {
+        super(checker, ichecker, factory, infer);
+        UNKNOWNVAL = AnnotationBuilder.fromClass(elements, UnknownVal.class);
+    }
 
 	@Override
 	protected CastAnnotatedTypeFactory createTypeFactory() {

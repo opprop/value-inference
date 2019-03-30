@@ -36,4 +36,4 @@ fi
 
 echo "Building cast checker without testing"
 
-(cd $JSR308/security-demo && ./gradlew build -x test --console=plain)
+(cd $JSR308/cast-inference && ./gradlew build -x test --console=plain)
