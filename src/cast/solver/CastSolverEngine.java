@@ -1,12 +1,12 @@
 package cast.solver;
 
+import cast.solver.z3smt.CastZ3SmtSolverFactory;
 import checkers.inference.solver.SolverEngine;
 import checkers.inference.solver.backend.SolverFactory;
-import checkers.inference.solver.backend.maxsat.MaxSatSolverFactory;
 
 public class CastSolverEngine extends SolverEngine {
     @Override
     protected SolverFactory createSolverFactory() {
-        return new MaxSatSolverFactory();
+        return new CastZ3SmtSolverFactory();
     }
 }

@@ -9,7 +9,7 @@ export PATH=$AFU/scripts:$PATH
 
 CHECKER=cast.CastChecker
 
-SOLVER=security.solver.CastSolverEngine
+SOLVER=cast.solver.CastSolverEngine
 IS_HACK=true
 
 # DEBUG_SOLVER=checkers.inference.solver.DebugSolver
