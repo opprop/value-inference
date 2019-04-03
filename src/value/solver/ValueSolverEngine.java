@@ -1,12 +1,12 @@
-package cast.solver;
+package value.solver;
 
-import cast.solver.z3smt.CastZ3SmtSolverFactory;
 import checkers.inference.solver.SolverEngine;
 import checkers.inference.solver.backend.SolverFactory;
+import value.solver.z3smt.ValueZ3SmtSolverFactory;
 
-public class CastSolverEngine extends SolverEngine {
+public class ValueSolverEngine extends SolverEngine {
     @Override
     protected SolverFactory createSolverFactory() {
-        return new CastZ3SmtSolverFactory();
+        return new ValueZ3SmtSolverFactory();
     }
 }

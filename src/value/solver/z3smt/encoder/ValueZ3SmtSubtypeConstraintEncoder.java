@@ -1,23 +1,23 @@
-package cast.solver.z3smt.encoder;
+package value.solver.z3smt.encoder;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
-import cast.representation.TypeCheckCast;
-import cast.solver.z3smt.representation.Z3InferenceCast;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
+import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
+import value.representation.TypeCheckValue;
+import value.solver.z3smt.representation.Z3InferenceValue;
 
-public class CastZ3SmtComparableConstraintEncoder 
-	extends Z3SmtAbstractConstraintEncoder<Z3InferenceCast, TypeCheckCast> 
-	implements ComparableConstraintEncoder<BoolExpr>{
+public class ValueZ3SmtSubtypeConstraintEncoder 
+	extends Z3SmtAbstractConstraintEncoder<Z3InferenceValue, TypeCheckValue> 
+	implements SubtypeConstraintEncoder<BoolExpr> {
 
-	public CastZ3SmtComparableConstraintEncoder(Lattice lattice, Context ctx,
-			Z3SmtFormatTranslator<Z3InferenceCast, TypeCheckCast> z3SmtFormatTranslator) {
+	public ValueZ3SmtSubtypeConstraintEncoder(Lattice lattice, Context ctx,
+			Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> z3SmtFormatTranslator) {
 		super(lattice, ctx, z3SmtFormatTranslator);
 		// TODO Auto-generated constructor stub
 	}

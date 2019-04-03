@@ -1,4 +1,4 @@
-package cast;
+package value;
 
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
@@ -8,23 +8,24 @@ import checkers.inference.dataflow.InferenceAnalysis;
 import checkers.inference.dataflow.InferenceTransfer;
 import checkers.inference.model.ConstraintManager;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
 import org.checkerframework.framework.flow.CFTransfer;
 
-public class CastChecker extends BaseInferrableChecker {
+public class ValueChecker extends BaseInferrableChecker {
     @Override
     public void initChecker() {
         super.initChecker();
     }
 
     @Override
-    public CastVisitor createVisitor(
+    public ValueVisitor createVisitor(
             InferenceChecker ichecker, BaseAnnotatedTypeFactory factory, boolean infer) {
-        return new CastVisitor(this, ichecker, factory, infer);
+        return new ValueVisitor(this, ichecker, factory, infer);
     }
 
     @Override
-    public CastAnnotatedTypeFactory createRealTypeFactory() {
-        return new CastAnnotatedTypeFactory(this);
+    public ValueAnnotatedTypeFactory createRealTypeFactory() {
+        return new ValueAnnotatedTypeFactory(this);
     }
 
     @Override
@@ -33,14 +34,14 @@ public class CastChecker extends BaseInferrableChecker {
     }
 
     @Override
-    public CastInferenceAnnotatedTypeFactory createInferenceATF(
+    public ValueInferenceAnnotatedTypeFactory createInferenceATF(
             InferenceChecker inferenceChecker,
             InferrableChecker realChecker,
             BaseAnnotatedTypeFactory realTypeFactory,
             SlotManager slotManager,
             ConstraintManager constraintManager) {
-        CastInferenceAnnotatedTypeFactory securityInferenceATF =
-                new CastInferenceAnnotatedTypeFactory(
+        ValueInferenceAnnotatedTypeFactory securityInferenceATF =
+                new ValueInferenceAnnotatedTypeFactory(
                         inferenceChecker,
                         realChecker.withCombineConstraints(),
                         realTypeFactory,

@@ -7,9 +7,9 @@ CFI=$ROOT/checker-framework-inference
 AFU=$ROOT/annotation-tools/annotation-file-utilities
 export PATH=$AFU/scripts:$PATH
 
-CHECKER=cast.CastChecker
+CHECKER=value.ValueChecker
 
-SOLVER=cast.solver.CastSolverEngine
+SOLVER=value.solver.ValueSolverEngine
 IS_HACK=true
 
 # DEBUG_SOLVER=checkers.inference.solver.DebugSolver
@@ -17,7 +17,7 @@ IS_HACK=true
 # IS_HACK=false
 # DEBUG_CLASSPATH=""
 
-CASTPATH=$ROOT/cast-inference/build/classes/java/main
+CASTPATH=$ROOT/value-inference/build/classes/java/main
 export CLASSPATH=$CASTPATH:$DEBUG_CLASSPATH:.
 export external_checker_classpath=$CASTPATH
 

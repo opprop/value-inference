@@ -1,4 +1,4 @@
-package cast;
+package value;
 
 import java.util.Set;
 
@@ -27,13 +27,13 @@ import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 
-public class CastVisitor extends InferenceVisitor<CastChecker, BaseAnnotatedTypeFactory> {
+public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTypeFactory> {
 
 	/** The top type for this hierarchy. */
 	protected final AnnotationMirror UNKNOWNVAL;
 
-	public CastVisitor(
-            CastChecker checker,
+	public ValueVisitor(
+            ValueChecker checker,
             InferenceChecker ichecker,
             BaseAnnotatedTypeFactory factory,
             boolean infer) {
@@ -42,8 +42,8 @@ public class CastVisitor extends InferenceVisitor<CastChecker, BaseAnnotatedType
     }
 
 	@Override
-	protected CastAnnotatedTypeFactory createTypeFactory() {
-		return new CastAnnotatedTypeFactory(checker);
+	protected ValueAnnotatedTypeFactory createTypeFactory() {
+		return new ValueAnnotatedTypeFactory(checker);
 	}
 
 	/** Return true if this range contains unsigned part of {@code byte} value. */

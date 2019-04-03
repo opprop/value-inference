@@ -4,11 +4,11 @@ import java.util.List;
 import org.checkerframework.framework.test.CheckerFrameworkPerDirectoryTest;
 import org.junit.runners.Parameterized.Parameters;
 
-public class CastTest extends CheckerFrameworkPerDirectoryTest {
+public class ValueTest extends CheckerFrameworkPerDirectoryTest {
 
-    public CastTest(List<File> testFiles) {
+    public ValueTest(List<File> testFiles) {
         super(testFiles,
-                cast.CastChecker.class,
+                value.ValueChecker.class,
                 "",
                 "-Anomsgtext",
                 "-Anocheckjdk");
