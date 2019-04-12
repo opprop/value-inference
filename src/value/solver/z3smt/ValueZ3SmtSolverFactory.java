@@ -1,8 +1,12 @@
 package value.solver.z3smt;
 
+import checkers.inference.InferenceMain;
 import checkers.inference.solver.frontend.Lattice;
 import value.representation.TypeCheckValue;
 import value.solver.z3smt.representation.Z3InferenceValue;
+
+import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
+
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.Z3SmtSolverFactory;
 

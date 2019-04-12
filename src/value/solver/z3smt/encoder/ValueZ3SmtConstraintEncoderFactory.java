@@ -29,14 +29,12 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public SubtypeConstraintEncoder<BoolExpr> createSubtypeConstraintEncoder() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ValueZ3SmtSubtypeConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 	@Override
 	public EqualityConstraintEncoder<BoolExpr> createEqualityConstraintEncoder() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ValueZ3SmtEqualityConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 	@Override
@@ -47,8 +45,7 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ValueZ3SmtComparableConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 	@Override
@@ -77,8 +74,7 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public ArithmeticConstraintEncoder<BoolExpr> createArithmeticConstraintEncoder() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ValueZ3SmtArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 }

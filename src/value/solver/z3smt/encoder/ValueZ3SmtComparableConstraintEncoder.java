@@ -3,41 +3,44 @@ package value.solver.z3smt.encoder;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 
-import backend.z3smt.Z3SmtFormatTranslator;
-import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
 import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import value.representation.TypeCheckValue;
+import value.solver.z3smt.ValueZ3SmtFormatTranslator;
 import value.solver.z3smt.representation.Z3InferenceValue;
 
-public class ValueZ3SmtComparableConstraintEncoder 
-	extends Z3SmtAbstractConstraintEncoder<Z3InferenceValue, TypeCheckValue> 
-	implements ComparableConstraintEncoder<BoolExpr>{
+public class ValueZ3SmtComparableConstraintEncoder extends ValueZ3SmtAbstractConstraintEncoder
+		implements ComparableConstraintEncoder<BoolExpr>{
 
 	public ValueZ3SmtComparableConstraintEncoder(Lattice lattice, Context ctx,
-			Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> z3SmtFormatTranslator) {
+			ValueZ3SmtFormatTranslator z3SmtFormatTranslator) {
 		super(lattice, ctx, z3SmtFormatTranslator);
-		// TODO Auto-generated constructor stub
+	}
+	
+	protected BoolExpr encode(Slot fst, Slot snd) {
+        Z3InferenceValue first = fst.serialize(z3SmtFormatTranslator);
+        Z3InferenceValue second = snd.serialize(z3SmtFormatTranslator);
+
+        return ctx.mkOr(
+        		valueZ3SmtEncoderUtils.subtype(ctx, first, second),
+        		valueZ3SmtEncoderUtils.subtype(ctx, second, first));
 	}
 
 	@Override
 	public BoolExpr encodeVariable_Variable(VariableSlot fst, VariableSlot snd) {
-		// TODO Auto-generated method stub
-		return null;
+		return encode(fst, snd);
 	}
 
 	@Override
 	public BoolExpr encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
-		// TODO Auto-generated method stub
-		return null;
+		return encode(fst, snd);
 	}
 
 	@Override
 	public BoolExpr encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
-		// TODO Auto-generated method stub
-		return null;
+		return encode(fst, snd);
 	}
 
 }

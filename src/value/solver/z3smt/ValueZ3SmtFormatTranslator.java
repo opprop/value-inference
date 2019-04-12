@@ -14,6 +14,7 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
 import value.representation.TypeCheckValue;
+import value.solver.z3smt.encoder.ValueZ3SmtConstraintEncoderFactory;
 import value.solver.z3smt.representation.Z3InferenceValue;
 
 public class ValueZ3SmtFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> {
@@ -67,8 +68,7 @@ public class ValueZ3SmtFormatTranslator extends Z3SmtFormatTranslator<Z3Inferenc
 
 	@Override
 	protected ConstraintEncoderFactory<BoolExpr> createConstraintEncoderFactory() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ValueZ3SmtConstraintEncoderFactory(lattice, ctx, this);
 	}
 
 }
