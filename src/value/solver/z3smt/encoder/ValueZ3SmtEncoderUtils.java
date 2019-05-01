@@ -31,13 +31,13 @@ public class ValueZ3SmtEncoderUtils {
                                 ctx.mkNot(superT.getBottomVal())),
                         		ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
                         		ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
-                        		ctx.mkEq(subT.getNumVal(), superT.getNumVal()),
+                        		ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
                         		ctx.mkOr(
                         				ctx.mkAnd(
-                        						subT.getNumVal(),
+                        						subT.getIntRange(),
                         						ctx.mkGe(subT.getIntRangeLower(), superT.getIntRangeLower()),
                         						ctx.mkLe(subT.getIntRangeUpper(), superT.getIntRangeUpper())),
-                        				ctx.mkNot(subT.getNumVal())
+                        				ctx.mkNot(subT.getIntRange())
                         				)
                         		);
 
@@ -52,13 +52,13 @@ public class ValueZ3SmtEncoderUtils {
                 		ctx.mkEq(left.getUnknownVal(), right.getUnknownVal()),
                 		ctx.mkEq(left.getBoolVal(), right.getBoolVal()),
                 		ctx.mkEq(left.getStringVal(), right.getStringVal()),
-                		ctx.mkEq(left.getNumVal(), right.getNumVal()),
+                		ctx.mkEq(left.getIntRange(), right.getIntRange()),
                 		ctx.mkOr(
                 				ctx.mkAnd(
-                						left.getNumVal(),
+                						left.getIntRange(),
                 						ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
                 						ctx.mkEq(left.getIntRangeUpper(), right.getIntRangeUpper())),
-                				ctx.mkNot(left.getNumVal())
+                				ctx.mkNot(left.getIntRange())
                 				)
                         );
 

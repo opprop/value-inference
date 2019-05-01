@@ -8,19 +8,19 @@ public class Z3InferenceValue {
 	
 	private final Context ctx;
 	
-	private String slotID;
+	private int slotID;
 	
 	private BoolExpr unknownval;
     private BoolExpr bottomval;
     private BoolExpr boolval;
-    private BoolExpr numval;
+    private BoolExpr intrange;
     private BoolExpr stringval;
     
     private IntExpr intrangelo;
     private IntExpr intrangehi;
     
-    public static Z3InferenceValue makeConstantSlot(Context ctx) {
-    	Z3InferenceValue slot = new Z3InferenceValue(ctx);
+    public static Z3InferenceValue makeConstantSlot(Context ctx, int slotID) {
+    	Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
 
         // default UnknownVal value is false
         slot.unknownval = ctx.mkBool(false);
@@ -29,7 +29,7 @@ public class Z3InferenceValue {
         // default BottomVal value is false
         slot.boolval = ctx.mkBool(false);
         // default BottomVal value is false
-        slot.numval = ctx.mkBool(true);
+        slot.intrange = ctx.mkBool(true);
         // default BottomVal value is false
         slot.stringval = ctx.mkBool(false);
         
@@ -40,22 +40,23 @@ public class Z3InferenceValue {
         return slot;
     }
 
-    public static Z3InferenceValue makeVariableSlot(Context ctx) {
-    	Z3InferenceValue slot = new Z3InferenceValue(ctx);
+    public static Z3InferenceValue makeVariableSlot(Context ctx, int slotID) {
+    	Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
 
-        slot.unknownval = ctx.mkBoolConst(String.valueOf("slotID") + "TOP");
-        slot.bottomval = ctx.mkBoolConst(String.valueOf("slotID") + "BOTTOM");
-        slot.boolval = ctx.mkBoolConst(String.valueOf("slotID") + "BOOLVAL");
-        slot.numval = ctx.mkBoolConst(String.valueOf("slotID") + "INTRANGE");
-        slot.stringval = ctx.mkBoolConst(String.valueOf("slotID") + "STRINGVAL");
-        slot.intrangelo = ctx.mkIntConst(String.valueOf("slotID") + "from");
-        slot.intrangehi = ctx.mkIntConst(String.valueOf("slotID") + "to");
+        slot.unknownval = ctx.mkBoolConst(String.valueOf(slotID) + "-TOP");
+        slot.bottomval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOTTOM");
+        slot.boolval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOOLVAL");
+        slot.intrange = ctx.mkBoolConst(String.valueOf(slotID) + "-INTRANGE");
+        slot.stringval = ctx.mkBoolConst(String.valueOf(slotID) + "-STRINGVAL");
+        slot.intrangelo = ctx.mkIntConst(String.valueOf(slotID) + "-from");
+        slot.intrangehi = ctx.mkIntConst(String.valueOf(slotID) + "-to");
 
         return slot;
     }
     
-    private Z3InferenceValue(Context ctx) {
+    private Z3InferenceValue(Context ctx, int slotID) {
         this.ctx = ctx;
+        this.slotID = slotID;
     }
     
     public void setUnknownVal(boolean val) {
@@ -82,12 +83,12 @@ public class Z3InferenceValue {
         return boolval;
     }
     
-    public void setNumVal(boolean val) {
-        numval = ctx.mkBool(val);
+    public void setIntRange(boolean val) {
+    	intrange = ctx.mkBool(val);
     }
 
-    public BoolExpr getNumVal() {
-        return numval;
+    public BoolExpr getIntRange() {
+        return intrange;
     }
     
     public void setStringVal(boolean val) {

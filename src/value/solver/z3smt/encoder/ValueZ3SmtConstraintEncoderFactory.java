@@ -39,7 +39,6 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public InequalityConstraintEncoder<BoolExpr> createInequalityConstraintEncoder() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -56,19 +55,16 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public CombineConstraintEncoder<BoolExpr> createCombineConstraintEncoder() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ExistentialConstraintEncoder<BoolExpr> createExistentialConstraintEncoder() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ImplicationConstraintEncoder<BoolExpr> createImplicationConstraintEncoder() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

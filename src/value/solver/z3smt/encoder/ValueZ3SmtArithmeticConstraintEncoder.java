@@ -29,9 +29,9 @@ implements ArithmeticConstraintEncoder<BoolExpr> {
 
         return ctx.mkOr(
         		ctx.mkAnd(left.getUnknownVal(), right.getUnknownVal(), res.getUnknownVal()),
-        		ctx.mkAnd(left.getUnknownVal(), right.getNumVal(), res.getUnknownVal()),
-        		ctx.mkAnd(left.getNumVal(), right.getUnknownVal(), res.getUnknownVal()),
-        		ctx.mkAnd(left.getNumVal(), right.getNumVal(), res.getNumVal())
+        		ctx.mkAnd(left.getUnknownVal(), right.getIntRange(), res.getUnknownVal()),
+        		ctx.mkAnd(left.getIntRange(), right.getUnknownVal(), res.getUnknownVal()),
+        		ctx.mkAnd(left.getIntRange(), right.getIntRange(), res.getIntRange())
         		);
 	}
 
