@@ -1,9 +1,8 @@
-package value.solver.z3smt.encoder;
+package value.solver.encoder;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 
-import backend.z3smt.encoder.Z3SmtConstraintEncoderFactory;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
@@ -13,28 +12,29 @@ import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncode
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
+import checkers.inference.solver.backend.z3smt.encoder.Z3SmtConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
 import value.representation.TypeCheckValue;
-import value.solver.z3smt.ValueZ3SmtFormatTranslator;
-import value.solver.z3smt.representation.Z3InferenceValue;
+import value.solver.ValueFormatTranslator;
+import value.solver.representation.Z3InferenceValue;
 
-public class ValueZ3SmtConstraintEncoderFactory 
-	extends Z3SmtConstraintEncoderFactory<Z3InferenceValue, TypeCheckValue, ValueZ3SmtFormatTranslator> {
+public class ValueConstraintEncoderFactory 
+	extends Z3SmtConstraintEncoderFactory<Z3InferenceValue, TypeCheckValue, ValueFormatTranslator> {
 
-	public ValueZ3SmtConstraintEncoderFactory(Lattice lattice, Context ctx,
-			ValueZ3SmtFormatTranslator z3SmtFormatTranslator) {
+	public ValueConstraintEncoderFactory(Lattice lattice, Context ctx,
+			ValueFormatTranslator z3SmtFormatTranslator) {
 		super(lattice, ctx, z3SmtFormatTranslator);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public SubtypeConstraintEncoder<BoolExpr> createSubtypeConstraintEncoder() {
-		return new ValueZ3SmtSubtypeConstraintEncoder(lattice, ctx, formatTranslator);
+		return new ValueSubtypeConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 	@Override
 	public EqualityConstraintEncoder<BoolExpr> createEqualityConstraintEncoder() {
-		return new ValueZ3SmtEqualityConstraintEncoder(lattice, ctx, formatTranslator);
+		return new ValueEqualityConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 	@Override
@@ -44,12 +44,11 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-		return new ValueZ3SmtComparableConstraintEncoder(lattice, ctx, formatTranslator);
+		return new ValueComparableConstraintEncoder(lattice, ctx, formatTranslator);
 	}
 
 	@Override
 	public PreferenceConstraintEncoder<BoolExpr> createPreferenceConstraintEncoder() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -70,7 +69,6 @@ public class ValueZ3SmtConstraintEncoderFactory
 
 	@Override
 	public ArithmeticConstraintEncoder<BoolExpr> createArithmeticConstraintEncoder() {
-		return new ValueZ3SmtArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
+		return new ValueArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
 	}
-
 }

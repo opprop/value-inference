@@ -1,4 +1,4 @@
-package value.solver.z3smt.encoder;
+package value.solver.encoder;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -8,14 +8,14 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import value.solver.z3smt.ValueZ3SmtFormatTranslator;
-import value.solver.z3smt.representation.Z3InferenceValue;
+import value.solver.ValueFormatTranslator;
+import value.solver.representation.Z3InferenceValue;
 
-public class ValueZ3SmtSubtypeConstraintEncoder extends ValueZ3SmtAbstractConstraintEncoder 
+public class ValueSubtypeConstraintEncoder extends ValueAbstractConstraintEncoder 
 		implements SubtypeConstraintEncoder<BoolExpr> {
 
-	public ValueZ3SmtSubtypeConstraintEncoder(Lattice lattice, Context ctx,
-			ValueZ3SmtFormatTranslator z3SmtFormatTranslator) {
+	public ValueSubtypeConstraintEncoder(Lattice lattice, Context ctx,
+			ValueFormatTranslator z3SmtFormatTranslator) {
 		super(lattice, ctx, z3SmtFormatTranslator);
 	}
 	

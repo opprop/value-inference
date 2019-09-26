@@ -3,9 +3,9 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="tests/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="/scene-lib/junit.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/checker-framework-inference"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/checker"/>
 	<classpathentry kind="lib" path="/checker-framework-inference/lib/com.microsoft.z3.jar"/>
+	<classpathentry kind="lib" path="/checker-framework-inference/dist/checker-framework-inference.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

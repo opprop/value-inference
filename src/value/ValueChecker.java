@@ -8,13 +8,13 @@ import checkers.inference.dataflow.InferenceAnalysis;
 import checkers.inference.dataflow.InferenceTransfer;
 import checkers.inference.model.ConstraintManager;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.common.value.ValueAnnotatedTypeFactory;
 import org.checkerframework.framework.flow.CFTransfer;
 
 public class ValueChecker extends BaseInferrableChecker {
     @Override
     public void initChecker() {
         super.initChecker();
+        ValueAnnotationMirrorHolder.init(this);
     }
 
     @Override

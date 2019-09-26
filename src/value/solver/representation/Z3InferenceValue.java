@@ -1,10 +1,20 @@
-package value.solver.z3smt.representation;
+package value.solver.representation;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import com.microsoft.z3.ArrayExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 
 public class Z3InferenceValue {
+	
+	/** The maximum number of values allowed in an annotation's array. */
+    protected static final int MAX_VALUES = 10;
 	
 	private final Context ctx;
 	
@@ -13,11 +23,14 @@ public class Z3InferenceValue {
 	private BoolExpr unknownval;
     private BoolExpr bottomval;
     private BoolExpr boolval;
-    private BoolExpr intrange;
     private BoolExpr stringval;
     
+    private BoolExpr intrange;
     private IntExpr intrangelo;
     private IntExpr intrangehi;
+    
+    private BoolExpr intval;
+    private IntExpr intvalue;
     
     public static Z3InferenceValue makeConstantSlot(Context ctx, int slotID) {
     	Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
@@ -29,13 +42,17 @@ public class Z3InferenceValue {
         // default BottomVal value is false
         slot.boolval = ctx.mkBool(false);
         // default BottomVal value is false
-        slot.intrange = ctx.mkBool(true);
+        slot.intrange = ctx.mkBool(false);
         // default BottomVal value is false
         slot.stringval = ctx.mkBool(false);
+        // default BottomVal value is false
+        slot.intval = ctx.mkBool(false);
         
         // default value is range everything
         slot.intrangelo = ctx.mkInt(Long.MIN_VALUE);
         slot.intrangehi = ctx.mkInt(Long.MAX_VALUE);
+        
+        slot.intvalue = ctx.mkIntConst(String.valueOf(slotID) + "-intvalue");
 
         return slot;
     }
@@ -47,9 +64,11 @@ public class Z3InferenceValue {
         slot.bottomval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOTTOM");
         slot.boolval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOOLVAL");
         slot.intrange = ctx.mkBoolConst(String.valueOf(slotID) + "-INTRANGE");
+        slot.intval = ctx.mkBoolConst(String.valueOf(slotID) + "-INTVAL");
         slot.stringval = ctx.mkBoolConst(String.valueOf(slotID) + "-STRINGVAL");
         slot.intrangelo = ctx.mkIntConst(String.valueOf(slotID) + "-from");
         slot.intrangehi = ctx.mkIntConst(String.valueOf(slotID) + "-to");
+        slot.intvalue = ctx.mkIntConst(String.valueOf(slotID) + "-intvalue");
 
         return slot;
     }
@@ -113,5 +132,40 @@ public class Z3InferenceValue {
     
     public IntExpr getIntRangeUpper() {
     	return intrangehi;
+    }
+    
+    public void setIntVal(boolean val) {
+        intval = ctx.mkBool(val);
+    }
+
+    public BoolExpr getIntVal() {
+        return intval;
+    }
+    
+    public void setIntVals(long val) {
+    	intvalue = ctx.mkInt(val);
+//    	val = removeDuplicates(val);
+//    	if (val.size() > MAX_VALUES) {
+//    		setIntVal(false);
+//    		setIntRange(true);
+//    		long valMin = Collections.min(val);
+//            long valMax = Collections.max(val);
+//    		setIntRangeLower(valMin);
+//    		setIntRangeUpper(valMax);
+//    	} else {
+//	    	for(Long l : val) {
+//	    		IntExpr i = ctx.mkInt(l);
+//	    		
+//	    	}
+//    	}
+    }
+    
+    public IntExpr getIntVals() {
+    	return intvalue;
+    }
+    
+    private static <T extends Comparable<T>> List<T> removeDuplicates(List<T> values) {
+        Set<T> set = new TreeSet<>(values);
+        return new ArrayList<>(set);
     }
 }

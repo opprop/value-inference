@@ -1,0 +1,91 @@
+package value.solver.encoder;
+
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+
+import value.representation.ValueRepresentationUtils;
+import value.solver.representation.Z3InferenceValue;
+
+public class ValueEncoderUtils {
+	
+	public ValueEncoderUtils () {}
+
+	// sub <: super cases:
+    // bot <: any
+    // any <: top
+    // str <: str
+	// bool <: bool
+	// int(from1, to1) <: int(from2, to2) | from1 >= from2 && to1 <= to2 
+	public BoolExpr subtype(Context ctx, Z3InferenceValue subT, Z3InferenceValue superT) {
+        BoolExpr subtypeEncoding =
+                ctx.mkOr(
+	        		// sub = bot
+	                subT.getBottomVal(),
+	                // super = top
+	                superT.getUnknownVal(),
+	                // if neither is top or bottom then they must be equal: sub = super
+	                ctx.mkAnd(
+	            		ctx.mkNot(subT.getUnknownVal()),
+	                	ctx.mkNot(subT.getBottomVal()),
+	                	ctx.mkNot(superT.getUnknownVal()),
+	                	ctx.mkNot(superT.getBottomVal()),
+	                	ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
+	            		ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
+	            		ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
+	            		ctx.mkXor(ctx.mkXor(subT.getBoolVal(), subT.getIntRange()), subT.getStringVal()),
+	            		ctx.mkNot(ctx.mkAnd(subT.getBoolVal(), subT.getIntRange(), subT.getStringVal())),
+	            		intRangeSubtype(ctx, subT, superT)
+                    )
+	            );
+
+        return subtypeEncoding;
+	}
+	
+	public BoolExpr intRangeSubtype(Context ctx, Z3InferenceValue subT, Z3InferenceValue superT) {
+		BoolExpr encoding = ctx.mkTrue();
+		if (ValueRepresentationUtils.getInstance().serializeRange()) {
+			encoding = ctx.mkAnd(
+						subT.getIntRange(),
+						ctx.mkGe(subT.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+						ctx.mkGe(subT.getIntRangeUpper(), ctx.mkInt(Long.MIN_VALUE)),
+						ctx.mkLe(subT.getIntRangeLower(), ctx.mkInt(Long.MAX_VALUE)),
+						ctx.mkLe(subT.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)),
+						ctx.mkGe(superT.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+						ctx.mkGe(superT.getIntRangeUpper(), ctx.mkInt(Long.MIN_VALUE)),
+						ctx.mkLe(superT.getIntRangeLower(), ctx.mkInt(Long.MAX_VALUE)),
+						ctx.mkLe(superT.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)),
+						ctx.mkGe(subT.getIntRangeLower(), superT.getIntRangeLower()),
+						ctx.mkLe(subT.getIntRangeUpper(), superT.getIntRangeUpper()));
+		}
+		return encoding;
+	}
+	
+	// x =: x
+	public BoolExpr equality(Context ctx, Z3InferenceValue left, Z3InferenceValue right) {
+        BoolExpr equalityEncoding =
+                ctx.mkAnd(
+                		ctx.mkEq(left.getBottomVal(), right.getBottomVal()),
+                		ctx.mkEq(left.getUnknownVal(), right.getUnknownVal()),
+                		ctx.mkEq(left.getBoolVal(), right.getBoolVal()),
+                		ctx.mkEq(left.getStringVal(), right.getStringVal()),
+                		ctx.mkEq(left.getIntRange(), right.getIntRange()),
+                		ctx.mkXor(
+                			ctx.mkXor(left.getBottomVal(), left.getUnknownVal()),
+                			ctx.mkAnd(
+                				ctx.mkXor(ctx.mkXor(left.getBoolVal(), left.getIntRange()), left.getStringVal()),
+                				ctx.mkNot(ctx.mkAnd(left.getBoolVal(), left.getIntRange(), left.getStringVal()))
+	                		)
+                		),
+                		// int = int
+                		ctx.mkOr(
+	        				ctx.mkAnd(
+	        						left.getIntRange()),
+//	        						ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
+//	        						ctx.mkEq(left.getIntRangeUpper(), right.getIntRangeUpper())),
+	        				ctx.mkNot(left.getIntRange())
+	        				)
+                        );
+        
+        return equalityEncoding;
+	}
+}

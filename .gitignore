@@ -17,6 +17,7 @@ build/
 
 # Analysis
 Analysis/
+
 # do-like-javac output
 dljc-out/
 
@@ -26,3 +27,8 @@ FooProject/bin
 # case study output
 case-study/apache-tomee/tomee
 *.class
+annotated/
+*.smt
+example/
+statistics.txt
+default.jaif

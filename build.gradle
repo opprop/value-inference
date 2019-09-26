@@ -15,11 +15,11 @@ ext {
     cfiPath = "${jsr308}/checker-framework-inference"
     jsr308langtoolsPath = "${jsr308}/jsr308-langtools"
     afu = "${jsr308}/annotation-tools/annotation-file-utilities"
-    castPath = "${jsr308}/cast_checker"
+    valuePath = "${jsr308}/value-inference"
 }
 
 println '==================================='
-println '           Cast Checker            '
+println '         Value Inference           '
 println '==================================='
 println ''
 println '-------------------------------'
@@ -76,7 +76,7 @@ compileJava {
 
 afterEvaluate {
     // Create a task for each JUnit test class whose name is the same as the JUnit class name.
-    sourceSets.test.allJava.filter { it.path.contains("${castPath}/tests") }.forEach { file ->
+    sourceSets.test.allJava.filter { it.path.contains("${valuePath}/tests") }.forEach { file ->
         String junitClassName = file.name.replaceAll(".java", "")
         String testName = junitClassName.replaceAll("Test", "")
         tasks.create(name: "${junitClassName}", type: Test) {
@@ -93,7 +93,7 @@ afterEvaluate {
                 'path.inference.script': "${cfiPath}/scripts/inference",
                 JDK_JAR: "${cfPath}/checker/dist/jdk8.jar"
 
-        environment "external_checker_classpath", "${castPath}/build/classes/java/main:${castPath}/build/libs/cast_checker.jar"
+        environment "external_checker_classpath", "${valuePath}/build/classes/java/main:${valuePath}/build/libs/value-inference.jar"
 
         jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
 

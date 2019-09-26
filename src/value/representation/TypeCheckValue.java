@@ -1,6 +1,11 @@
 package value.representation;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.checkerframework.javacutil.BugInCF;
+
+import com.microsoft.z3.IntExpr;
 
 /**
  * A data structure class to encapsulate a set of java variables representing values for type
@@ -8,29 +13,33 @@ import org.checkerframework.javacutil.BugInCF;
  */
 public class TypeCheckValue{
 	
+	/** The maximum number of values allowed in an annotation's array. */
+    protected static final int MAX_VALUES = 10;
+    
 	private boolean unknownval;
     private boolean bottomval;
     private boolean boolval;
-    private boolean intrange;
     private boolean stringval;
     
+    private boolean intrange;
     private long intrangelo;
     private long intrangehi;
     
-	public TypeCheckValue() {
+    private boolean intval;
+    private long intvals;
+
+    public TypeCheckValue() {
 		this.unknownval = false;
 		this.bottomval = false;
 		this.boolval = false;
 		this.intrange = false;
 		this.stringval = false;
+		this.intval = false;
 		this.intrangelo = Long.MIN_VALUE;
 		this.intrangehi = Long.MAX_VALUE;
 	}
     
     public void setUnknownVal(boolean val) {
-    	if (unknownval && bottomval) {
-    		throw new BugInCF("Cannot set top and bottom both to true at the same time");
-    	}
         unknownval = val;
     }
 
@@ -39,9 +48,6 @@ public class TypeCheckValue{
     }
     
     public void setBottomVal(boolean val) {
-    	if (unknownval && bottomval) {
-    		throw new BugInCF("Cannot set top and bottom both to true at the same time");
-    	}
     	bottomval = val;
     }
 
@@ -50,9 +56,6 @@ public class TypeCheckValue{
     }
     
     public void setBoolVal(boolean val) {
-    	if ((boolval && intrange) || (boolval && stringval) || (intrange && stringval)) {
-    		throw new BugInCF("Can only be one of int, bool, or string");
-    	}
         boolval = val;
     }
 
@@ -61,9 +64,6 @@ public class TypeCheckValue{
     }
     
     public void setIntRange(boolean val) {
-    	if ((boolval && intrange) || (boolval && stringval) || (intrange && stringval)) {
-    		throw new BugInCF("Can only be one of int, bool, or string");
-    	}
     	intrange = val;
     }
 
@@ -72,13 +72,10 @@ public class TypeCheckValue{
     }
     
     public void setStringVal(boolean val) {
-    	if ((boolval && intrange) || (boolval && stringval) || (intrange && stringval)) {
-    		throw new BugInCF("Can only be one of int, bool, or string");
-    	}
         stringval = val;
     }
 
-    public boolean getStringVal() {
+    public boolean isStringVal() {
         return stringval;
     }
     
@@ -104,6 +101,32 @@ public class TypeCheckValue{
     	return intrangehi;
     }
     
+    public void setIntVal(boolean val) {
+    	intval = val;
+    }
+
+    public boolean isIntVal() {
+        return intval;
+    }
+    
+    public void setIntVals(long val) {
+    	intvals = val;
+//    	if (val.size() > MAX_VALUES) {
+//    		setIntVal(false);
+//    		setIntRange(true);
+//    		long valMin = Collections.min(val);
+//            long valMax = Collections.max(val);
+//    		setIntRangeLower(valMin);
+//    		setIntRangeUpper(valMax);
+//    	} else {
+//	    	intvals = val;
+//    	}
+    }
+    
+    public long getIntVals() {
+    	return intvals;
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -112,6 +135,15 @@ public class TypeCheckValue{
         }
         if (this.bottomval) {
         	sb.append("@BottomVal");
+        }
+        if (this.stringval) {
+        	sb.append("@StringVal");
+        }
+        if (this.boolval) {
+        	sb.append("@BoolVal");
+        }
+        if (this.intval) {
+        	sb.append("@IntVal(" + this.intvals + ")");
         }
         if (this.intrange) {
         	sb.append("@IntRange(from = " + this.intrangelo + ", to = " + this.intrangehi);

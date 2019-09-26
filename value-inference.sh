@@ -10,6 +10,7 @@ export PATH=$AFU/scripts:$PATH
 CHECKER=value.ValueChecker
 
 SOLVER=value.solver.ValueSolverEngine
+#SOLVER=checkers.inference.solver.DebugSolver
 IS_HACK=true
 
 # DEBUG_SOLVER=checkers.inference.solver.DebugSolver
@@ -17,9 +18,9 @@ IS_HACK=true
 # IS_HACK=false
 # DEBUG_CLASSPATH=""
 
-CASTPATH=$ROOT/value-inference/build/classes/java/main
-export CLASSPATH=$CASTPATH:$DEBUG_CLASSPATH:.
-export external_checker_classpath=$CASTPATH
+SECURITYPATH=$ROOT/value-inference/build/classes/java/main
+export CLASSPATH=$SECURITYPATH:$DEBUG_CLASSPATH:.
+export external_checker_classpath=$SECURITYPATH
 
 CFI_LIB=$CFI/lib
 export DYLD_LIBRARY_PATH=$CFI_LIB
