@@ -11,10 +11,19 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.common.value.ValueCheckerUtils;
+import org.checkerframework.common.value.qual.ArrayLenRange;
+import org.checkerframework.common.value.qual.IntRangeFromGTENegativeOne;
+import org.checkerframework.common.value.qual.IntRangeFromNonNegative;
+import org.checkerframework.common.value.qual.IntRangeFromPositive;
+import org.checkerframework.common.value.qual.IntVal;
+import org.checkerframework.common.value.util.NumberUtils;
+import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
@@ -25,9 +34,16 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.ElementUtils;
+import org.checkerframework.javacutil.TreeUtils;
+import org.checkerframework.javacutil.TypesUtils;
 
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.Tree.Kind;
 
 import value.qual.BoolVal;
 import value.qual.BottomVal;
@@ -190,6 +206,88 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return false;
             }
         }
+        
+        @Override
+        public AnnotationMirror widenedUpperBound(
+                AnnotationMirror newQualifier, AnnotationMirror previousQualifier) {
+            AnnotationMirror lub = leastUpperBound(newQualifier, previousQualifier);
+            if (AnnotationUtils.areSameByClass(lub, IntRange.class)) {
+                Range lubRange = getRange(lub);
+                Range newRange = getRange(newQualifier);
+                Range oldRange = getRange(previousQualifier);
+                Range wubRange = widenedRange(newRange, oldRange, lubRange);
+                return createIntRangeAnnotation(wubRange);
+            } else {
+                return lub;
+            }
+        }
+        
+        private Range widenedRange(Range newRange, Range oldRange, Range lubRange) {
+            if (newRange == null || oldRange == null || lubRange.equals(oldRange)) {
+                return lubRange;
+            }
+            // If both bounds of the new range are bigger than the old range, then returned range
+            // should use the lower bound of the new range and a MAX_VALUE.
+            if ((newRange.from >= oldRange.from && newRange.to >= oldRange.to)) {
+                if (lubRange.to < Byte.MAX_VALUE) {
+                    return new Range(newRange.from, Byte.MAX_VALUE);
+                } else if (lubRange.to < Short.MAX_VALUE) {
+                    return new Range(newRange.from, Short.MAX_VALUE);
+                } else if (lubRange.to < Integer.MAX_VALUE) {
+                    return new Range(newRange.from, Integer.MAX_VALUE);
+                } else {
+                    return new Range(newRange.from, Long.MAX_VALUE);
+                }
+            }
+
+            // If both bounds of the old range are bigger than the new range, then returned range
+            // should use a MIN_VALUE and the upper bound of the new range.
+            if ((newRange.from <= oldRange.from && newRange.to <= oldRange.to)) {
+                if (lubRange.from > Byte.MIN_VALUE) {
+                    return new Range(Byte.MIN_VALUE, newRange.to);
+                } else if (lubRange.from > Short.MIN_VALUE) {
+                    return new Range(Short.MIN_VALUE, newRange.to);
+                } else if (lubRange.from > Integer.MIN_VALUE) {
+                    return new Range(Integer.MIN_VALUE, newRange.to);
+                } else {
+                    return new Range(Long.MIN_VALUE, newRange.to);
+                }
+            }
+
+            if (lubRange.isWithin(Byte.MIN_VALUE + 1, Byte.MAX_VALUE)
+                    || lubRange.isWithin(Byte.MIN_VALUE, Byte.MAX_VALUE - 1)) {
+                return Range.BYTE_EVERYTHING;
+            } else if (lubRange.isWithin(Short.MIN_VALUE + 1, Short.MAX_VALUE)
+                    || lubRange.isWithin(Short.MIN_VALUE, Short.MAX_VALUE - 1)) {
+                return Range.SHORT_EVERYTHING;
+            } else if (lubRange.isWithin(Long.MIN_VALUE + 1, Long.MAX_VALUE)
+                    || lubRange.isWithin(Long.MIN_VALUE, Long.MAX_VALUE - 1)) {
+                return Range.INT_EVERYTHING;
+            } else {
+                return Range.EVERYTHING;
+            }
+        }
+    }
+    
+    /**
+     * Returns a {@code Range} bounded by the values specified in the given {@code @Range}
+     * annotation. Also returns an appropriate range if an {@code @IntVal} annotation is passed.
+     * Returns {@code null} if the annotation is null or if the annotation is not an {@code
+     * IntRange}, {@code IntRangeFromPositive}, {@code IntVal}, or {@code ArrayLenRange}.
+     */
+    public static Range getRange(AnnotationMirror rangeAnno) {
+        if (rangeAnno == null) {
+            return null;
+        }
+
+        // Assume rangeAnno is well-formed, i.e., 'from' is less than or equal to 'to'.
+        if (AnnotationUtils.areSameByClass(rangeAnno, IntRange.class)) {
+            return new Range(
+                    AnnotationUtils.getElementValue(rangeAnno, "from", Long.class, true),
+                    AnnotationUtils.getElementValue(rangeAnno, "to", Long.class, true));
+        }
+
+        return null;
     }
     
     /**
@@ -327,12 +425,137 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     return null;
             }
         }
-  
+        
+        @Override
+        public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
+            if (handledByValueChecker(atm)) {
+                AnnotationMirror oldAnno =
+                        getAnnotatedType(tree.getExpression()).getAnnotationInHierarchy(UNKNOWNVAL);
+                if (oldAnno == null) {
+                    return null;
+                }
+                TypeMirror newType = atm.getUnderlyingType();
+                AnnotationMirror newAnno;
+                Range range;
+
+                if (TypesUtils.isString(newType) || newType.getKind() == TypeKind.ARRAY) {
+                    // Strings and arrays do not allow conversions
+                    newAnno = oldAnno;
+                } else if (AnnotationUtils.areSameByClass(oldAnno, IntRange.class)
+                        && (range = getRange(oldAnno)).isWiderThan(MAX_VALUES)) {
+                    Class<?> newClass = ValueCheckerUtils.getClassFromType(newType);
+                    if (newClass == String.class) {
+                        newAnno = UNKNOWNVAL;
+                    } else if (newClass == Boolean.class || newClass == boolean.class) {
+                        throw new UnsupportedOperationException(
+                                "ValueAnnotatedTypeFactory: can't convert int to boolean");
+                    } else {
+                        newAnno = createIntRangeAnnotation(NumberUtils.castRange(newType, range));
+                    }
+                } else {
+                    List<?> values = ValueCheckerUtils.getValuesCastedToType(oldAnno, newType);
+                    newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
+                }
+                atm.addMissingAnnotations(Collections.singleton(newAnno));
+            } else if (atm.getKind() == TypeKind.ARRAY) {
+                if (tree.getExpression().getKind() == Kind.NULL_LITERAL) {
+                    atm.addMissingAnnotations(Collections.singleton(BOTTOMVAL));
+                }
+            }
+            return null;
+        }
 
         /** Returns true iff the given type is in the domain of the Constant Value Checker. */
         private boolean handledByValueChecker(AnnotatedTypeMirror type) {
             TypeMirror tm = type.getUnderlyingType();
             return COVERED_CLASS_STRINGS.contains(tm.toString());
+        }
+    }
+    
+    /**
+     * Returns a constant value annotation with the {@code values}. The class of the annotation
+     * reflects the {@code resultType} given.
+     *
+     * @param resultType used to selected which kind of value annotation is returned
+     * @param values must be a homogeneous list: every element of it has the same class
+     * @return a constant value annotation with the {@code values}
+     */
+    AnnotationMirror createResultingAnnotation(TypeMirror resultType, List<?> values) {
+        if (values == null) {
+            return UNKNOWNVAL;
+        }
+        // For some reason null is included in the list of values,
+        // so remove it so that it does not cause a NPE elsewhere.
+        values.remove(null);
+        if (values.isEmpty()) {
+            return BOTTOMVAL;
+        }
+
+        if (TypesUtils.isString(resultType)) {
+            List<String> stringVals = new ArrayList<>(values.size());
+            for (Object o : values) {
+                stringVals.add((String) o);
+            }
+            return createStringAnnotation(stringVals);
+        } else if (ValueCheckerUtils.getClassFromType(resultType) == char[].class) {
+            List<String> stringVals = new ArrayList<>(values.size());
+            for (Object o : values) {
+                if (o instanceof char[]) {
+                    stringVals.add(new String((char[]) o));
+                } else {
+                    stringVals.add(o.toString());
+                }
+            }
+            return createStringAnnotation(stringVals);
+        }
+
+        TypeKind primitiveKind;
+        if (TypesUtils.isPrimitive(resultType)) {
+            primitiveKind = resultType.getKind();
+        } else if (TypesUtils.isBoxedPrimitive(resultType)) {
+            primitiveKind = types.unboxedType(resultType).getKind();
+        } else {
+            return UNKNOWNVAL;
+        }
+
+        switch (primitiveKind) {
+            case BOOLEAN:
+                List<Boolean> boolVals = new ArrayList<>(values.size());
+                for (Object o : values) {
+                    boolVals.add((Boolean) o);
+                }
+                return createBooleanAnnotation(boolVals);
+            case DOUBLE:
+            case FLOAT:
+            case INT:
+            case LONG:
+            case SHORT:
+            case BYTE:
+                List<Number> numberVals = new ArrayList<>(values.size());
+                List<Character> characterVals = new ArrayList<>(values.size());
+                for (Object o : values) {
+                    if (o instanceof Character) {
+                        characterVals.add((Character) o);
+                    } else {
+                        numberVals.add((Number) o);
+                    }
+                }
+                if (numberVals.isEmpty()) {
+                    return createCharAnnotation(characterVals);
+                }
+                return createNumberAnnotationMirror(new ArrayList<>(numberVals));
+            case CHAR:
+                List<Character> charVals = new ArrayList<>(values.size());
+                for (Object o : values) {
+                    if (o instanceof Number) {
+                        charVals.add((char) ((Number) o).intValue());
+                    } else {
+                        charVals.add((char) o);
+                    }
+                }
+                return createCharAnnotation(charVals);
+            default:
+                throw new UnsupportedOperationException("Unexpected kind:" + resultType);
         }
     }
     
@@ -439,6 +662,23 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         long valMin = Collections.min(values);
         long valMax = Collections.max(values);
         return createIntRangeAnnotation(valMin, valMax);
+    }
+    
+    /**
+     * Create an {@code @IntRange} or {@code @IntVal} annotation from the range. May return
+     * BOTTOMVAL or UNKNOWNVAL.
+     */
+    public AnnotationMirror createIntRangeAnnotation(Range range) {
+        if (range.isNothing()) {
+            return BOTTOMVAL;
+        } else if (range.isLongEverything()) {
+            return UNKNOWNVAL;
+        } else if (range.isWiderThan(MAX_VALUES)) {
+            return createIntRangeAnnotation(range.from, range.to);
+        } else {
+            List<Long> newValues = ValueCheckerUtils.getValuesFromRange(range, Long.class);
+            return createIntValAnnotation(newValues);
+        }
     }
     
     /**
