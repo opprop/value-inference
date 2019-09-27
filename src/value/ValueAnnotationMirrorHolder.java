@@ -8,7 +8,6 @@ import org.checkerframework.javacutil.AnnotationBuilder;
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
-import value.qual.IntVal;
 import value.qual.StringVal;
 import value.qual.UnknownVal;
 
@@ -24,7 +23,6 @@ public class ValueAnnotationMirrorHolder {
     public static AnnotationMirror BOOLVAL;
     public static AnnotationMirror INTRANGE;
     public static AnnotationMirror BOTTOMVAL;
-    public static AnnotationMirror INTVAL;
 
     public static void init(SourceChecker checker) {
         Elements elements = checker.getElementUtils();
@@ -34,6 +32,5 @@ public class ValueAnnotationMirrorHolder {
         BOOLVAL = AnnotationBuilder.fromClass(elements, BoolVal.class);
         INTRANGE = AnnotationBuilder.fromClass(elements, IntRange.class);
         BOTTOMVAL = AnnotationBuilder.fromClass(elements, BottomVal.class);
-        INTVAL = AnnotationBuilder.fromClass(elements, IntVal.class);
     }
 }

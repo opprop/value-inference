@@ -24,9 +24,6 @@ public class TypeCheckValue{
     private boolean intrange;
     private long intrangelo;
     private long intrangehi;
-    
-    private boolean intval;
-    private long intvals;
 
     public TypeCheckValue() {
 		this.unknownval = false;
@@ -34,7 +31,6 @@ public class TypeCheckValue{
 		this.boolval = false;
 		this.intrange = false;
 		this.stringval = false;
-		this.intval = false;
 		this.intrangelo = Long.MIN_VALUE;
 		this.intrangehi = Long.MAX_VALUE;
 	}
@@ -80,8 +76,8 @@ public class TypeCheckValue{
     }
     
     public void setIntRangeLower(long val) {
-    	if (!intrange) {
-    		throw new BugInCF("Only set when the value is an number");
+    	if (val > intrangehi) {
+    		throw new BugInCF("Upperbound lower than lowerbound");
     	}
     	intrangelo = val;
     }
@@ -91,40 +87,14 @@ public class TypeCheckValue{
     }
 
     public void setIntRangeUpper(long val) {
-    	if (!intrange) {
-    		throw new BugInCF("Only set when the value is an number");
+    	if (val < intrangelo) {
+    		throw new BugInCF("Upperbound lower than lowerbound");
     	}
     	intrangehi = val;
     }
     
     public long getIntRangeUpper() {
     	return intrangehi;
-    }
-    
-    public void setIntVal(boolean val) {
-    	intval = val;
-    }
-
-    public boolean isIntVal() {
-        return intval;
-    }
-    
-    public void setIntVals(long val) {
-    	intvals = val;
-//    	if (val.size() > MAX_VALUES) {
-//    		setIntVal(false);
-//    		setIntRange(true);
-//    		long valMin = Collections.min(val);
-//            long valMax = Collections.max(val);
-//    		setIntRangeLower(valMin);
-//    		setIntRangeUpper(valMax);
-//    	} else {
-//	    	intvals = val;
-//    	}
-    }
-    
-    public long getIntVals() {
-    	return intvals;
     }
     
     @Override
@@ -141,9 +111,6 @@ public class TypeCheckValue{
         }
         if (this.boolval) {
         	sb.append("@BoolVal");
-        }
-        if (this.intval) {
-        	sb.append("@IntVal(" + this.intvals + ")");
         }
         if (this.intrange) {
         	sb.append("@IntRange(from = " + this.intrangelo + ", to = " + this.intrangehi);

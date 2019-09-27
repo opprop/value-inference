@@ -34,7 +34,6 @@ import value.qual.BottomVal;
 import value.qual.IntRange;
 import value.qual.StringVal;
 import value.qual.UnknownVal;
-import value.representation.ValueRepresentationUtils;
 
 public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 	
@@ -51,7 +50,6 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 	
     public ValueAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
-        ValueRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
     }
     

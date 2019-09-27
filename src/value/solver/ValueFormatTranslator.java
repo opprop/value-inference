@@ -28,11 +28,9 @@ import value.ValueAnnotationMirrorHolder;
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
-import value.qual.IntVal;
 import value.qual.StringVal;
 import value.qual.UnknownVal;
 import value.representation.TypeCheckValue;
-import value.representation.ValueRepresentationUtils;
 import value.solver.encoder.ValueConstraintEncoderFactory;
 import value.solver.representation.Z3InferenceValue;
 
@@ -60,11 +58,6 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 			AnnotationBuilder builder = new AnnotationBuilder(processingEnv, StringVal.class);
 	        return builder.build();
 		}
-		if (solution.isIntVal()) {
-			AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntVal.class);
-			builder.setValue("value", solution.getIntVals());
-	        return builder.build();
-		}
 		if (solution.isIntRange()) {
 			AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
 	        builder.setValue("from", solution.getIntRangeLower());
@@ -85,18 +78,6 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 		serializedSlots.put(slotID, encodedSlot);
 		return encodedSlot;
 	}
-	
-//	@Override
-//    public void preAnalyzeSlots(Collection<Slot> slots) {
-//        Set<ConstantSlot> constantSlots = new HashSet<>();
-//        for (Slot slot : slots) {
-//            if (slot.isConstant()) {
-//                constantSlots.add((ConstantSlot) slot);
-//            }
-//        }
-//        
-//        ValueRepresentationUtils.getInstance().setSerializedValue(constantSlots);
-//    }
 
 	@Override
 	protected Z3InferenceValue serializeConstantSlot(ConstantSlot slot) {
@@ -119,10 +100,6 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 		if(AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.STRINGVAL)) {
 			encodedSlot.setStringVal(true);
 		}
-		if(AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.INTVAL)) {
-			encodedSlot.setIntVal(true);
-			encodedSlot.setIntVals(AnnotationUtils.getElementValue(anno, "value", Long.class, true));
-		}
 		if(AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.INTRANGE)) {
 			encodedSlot.setIntRange(true);
 			encodedSlot.setIntRangeLower(AnnotationUtils.getElementValue(anno, "from", Long.class, true));
@@ -141,47 +118,45 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getBottomVal()));
         slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getBoolVal()));
         slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getIntRange()));
-        slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getIntVal()));
         slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getStringVal()));
         
         slotDeclaration.add(addZ3IntDefinition(encodedSlot.getIntRangeLower()));
         slotDeclaration.add(addZ3IntDefinition(encodedSlot.getIntRangeUpper()));
-        slotDeclaration.add(addZ3IntDefinition(encodedSlot.getIntVals()));
         
 		return String.join(System.lineSeparator(), slotDeclaration);
 	}
 
 	private String addZ3BoolDefinition(BoolExpr z3BoolVariable) {
-        return "(declare-const " + z3BoolVariable.toString() + " Bool)";
+        return "(declare-fun " + z3BoolVariable.toString() + " () Bool)";
     }
 
     private String addZ3IntDefinition(IntExpr z3IntVariable) {
-        return "(declare-const " + z3IntVariable.toString() + " Int)";
+        return "(declare-fun " + z3IntVariable.toString() + " () Int)";
     }
     
 	@Override
 	public BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot) {
         Z3InferenceValue value = slot.serialize(this);
-        if (slot instanceof ConstantSlot) {
-        	return ctx.mkTrue();
-        }
-        
-        return ctx.mkXor (
-        		ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
-        		ctx.mkAnd(
-	        		ctx.mkXor(ctx.mkXor(value.getBoolVal(), value.getStringVal()),value.getIntRange()),
-	        		ctx.mkNot(ctx.mkAnd(value.getBoolVal(), value.getStringVal(), value.getIntRange()))
-	        		)
+        return ctx.mkAnd(
+        			// one hot
+		    		ctx.mkXor(
+			    		ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+			    		ctx.mkAnd(
+			        		ctx.mkXor(ctx.mkXor(value.getBoolVal(), value.getStringVal()),value.getIntRange()),
+			        		ctx.mkNot(ctx.mkAnd(value.getBoolVal(), value.getStringVal(), value.getIntRange()))
+			        		)
+		    		),
+		    		// min <= from <= to <= max
+					ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+					ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)),
+					ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper())
         		);
 	}
 
 	@Override
 	public BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot) {
         Z3InferenceValue value = slot.serialize(this);
-		return ctx.mkAnd(
-				ctx.mkNot(value.getUnknownVal()),
-				ctx.mkNot(value.getBottomVal())
-				);
+		return ctx.mkNot(value.getUnknownVal());
 	}
 
 	@Override
@@ -228,17 +203,11 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (component.contentEquals("BOOLVAL")) {
             	z3Slot.setBoolVal(Boolean.parseBoolean(value));
             }
-            if (component.contentEquals("INTVAL")) {
-            	z3Slot.setIntVal(Boolean.parseBoolean(value));
-            }
             if (component.contentEquals("from")) {
             	z3Slot.setIntRangeLower(Long.parseLong(value));
             }
-            if (component.contentEquals("too")) {
+            if (component.contentEquals("to")) {
             	z3Slot.setIntRangeUpper(Long.parseLong(value));
-            }
-            if (component.contentEquals("intvalue")) {
-            	z3Slot.setIntVals(Long.parseLong(value));
             }
         }
         

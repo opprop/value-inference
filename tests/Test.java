@@ -1,5 +1,5 @@
 import java.lang.String;
-import security.qual.*;
+import value.qual.*;
 
 public class Test {
 	int zero = 0;
