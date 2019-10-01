@@ -15,5 +15,4 @@ public class CS4InputStream {
         }
         in.close();
     }
-
 }

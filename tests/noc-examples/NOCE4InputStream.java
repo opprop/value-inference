@@ -1,9 +1,8 @@
 package read;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
-
 
 public class NOCE4InputStream {
     public void unsafeWayOfCasting() throws IOException {
@@ -12,7 +11,7 @@ public class NOCE4InputStream {
         byte data;
         // :: error: (cast.unsafe)
         while ((data = (byte) in.read()) != -1) {
-            //...
+            // ...
         }
         in.close();
     }

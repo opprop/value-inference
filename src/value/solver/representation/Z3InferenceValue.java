@@ -1,36 +1,29 @@
 package value.solver.representation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import com.microsoft.z3.ArrayExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 
 public class Z3InferenceValue {
-	
-	/** The maximum number of values allowed in an annotation's array. */
+
+    /** The maximum number of values allowed in an annotation's array. */
     protected static final int MAX_VALUES = 10;
-	
-	private final Context ctx;
-	
-	private int slotID;
-	
-	private BoolExpr unknownval;
+
+    private final Context ctx;
+
+    private int slotID;
+
+    private BoolExpr unknownval;
     private BoolExpr bottomval;
     private BoolExpr boolval;
     private BoolExpr stringval;
-    
+
     private BoolExpr intrange;
     private IntExpr intrangelo;
     private IntExpr intrangehi;
-        
+
     public static Z3InferenceValue makeConstantSlot(Context ctx, int slotID) {
-    	Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
+        Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
 
         // default UnknownVal value is false
         slot.unknownval = ctx.mkBool(false);
@@ -42,16 +35,16 @@ public class Z3InferenceValue {
         slot.intrange = ctx.mkBool(false);
         // default BottomVal value is false
         slot.stringval = ctx.mkBool(false);
-        
+
         // default value is range everything
         slot.intrangelo = ctx.mkInt(Long.MIN_VALUE);
         slot.intrangehi = ctx.mkInt(Long.MAX_VALUE);
-        
+
         return slot;
     }
 
     public static Z3InferenceValue makeVariableSlot(Context ctx, int slotID) {
-    	Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
+        Z3InferenceValue slot = new Z3InferenceValue(ctx, slotID);
 
         slot.unknownval = ctx.mkBoolConst(String.valueOf(slotID) + "-TOP");
         slot.bottomval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOTTOM");
@@ -63,12 +56,12 @@ public class Z3InferenceValue {
 
         return slot;
     }
-    
+
     private Z3InferenceValue(Context ctx, int slotID) {
         this.ctx = ctx;
         this.slotID = slotID;
     }
-    
+
     public void setUnknownVal(boolean val) {
         unknownval = ctx.mkBool(val);
     }
@@ -76,15 +69,15 @@ public class Z3InferenceValue {
     public BoolExpr getUnknownVal() {
         return unknownval;
     }
-    
+
     public void setBottomVal(boolean val) {
-    	bottomval = ctx.mkBool(val);
+        bottomval = ctx.mkBool(val);
     }
 
     public BoolExpr getBottomVal() {
         return bottomval;
     }
-    
+
     public void setBoolVal(boolean val) {
         boolval = ctx.mkBool(val);
     }
@@ -92,15 +85,15 @@ public class Z3InferenceValue {
     public BoolExpr getBoolVal() {
         return boolval;
     }
-    
+
     public void setIntRange(boolean val) {
-    	intrange = ctx.mkBool(val);
+        intrange = ctx.mkBool(val);
     }
 
     public BoolExpr getIntRange() {
         return intrange;
     }
-    
+
     public void setStringVal(boolean val) {
         stringval = ctx.mkBool(val);
     }
@@ -108,20 +101,20 @@ public class Z3InferenceValue {
     public BoolExpr getStringVal() {
         return stringval;
     }
-    
+
     public void setIntRangeLower(long val) {
-    	intrangelo = ctx.mkInt(val);
+        intrangelo = ctx.mkInt(val);
     }
-    
+
     public IntExpr getIntRangeLower() {
-    	return intrangelo;
+        return intrangelo;
     }
 
     public void setIntRangeUpper(long val) {
-    	intrangehi = ctx.mkInt(val);
+        intrangehi = ctx.mkInt(val);
     }
-    
+
     public IntExpr getIntRangeUpper() {
-    	return intrangehi;
+        return intrangehi;
     }
 }

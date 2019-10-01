@@ -3,14 +3,14 @@ package read.typeHierarchy;
 import read.qual.SafeRead;
 import read.qual.UnsafeRead;
 
-// javac-dev -processorpath ./bin:./build-deps/framework.jar -processor read.ReadChecker -cp ./bin tests/read-typeHierarchy/TypeHierarchy.java
+// javac-dev -processorpath ./bin:./build-deps/framework.jar -processor read.ReadChecker -cp ./bin
+// tests/read-typeHierarchy/TypeHierarchy.java
 /**
  * type hierarchy is:
  *
- * SafeRead <: UnsafeRead
+ * <p>SafeRead <: UnsafeRead
  *
  * @author charleszhuochen
- *
  */
 public class TypeHierarchy {
 
@@ -21,5 +21,4 @@ public class TypeHierarchy {
 
         unsafeRead = safeRead; // OK: SafeRead <: UnsafeRead
     }
-
 }

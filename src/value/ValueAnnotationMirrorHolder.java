@@ -1,21 +1,16 @@
 package value;
 
 import javax.lang.model.element.AnnotationMirror;
-
+import javax.lang.model.util.Elements;
 import org.checkerframework.framework.source.SourceChecker;
 import org.checkerframework.javacutil.AnnotationBuilder;
-
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
 import value.qual.StringVal;
 import value.qual.UnknownVal;
 
-import javax.lang.model.util.Elements;
-
-/**
- * A holder class that holds AnnotationMirrors
- */
+/** A holder class that holds AnnotationMirrors */
 public class ValueAnnotationMirrorHolder {
 
     public static AnnotationMirror UNKNOWNVAL;

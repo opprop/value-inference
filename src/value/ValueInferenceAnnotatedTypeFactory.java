@@ -8,24 +8,15 @@ import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstraintManager;
-import value.qual.BoolVal;
-import value.qual.BottomVal;
-import value.qual.IntRange;
-import value.qual.StringVal;
-import value.qual.UnknownVal;
-
+import com.sun.source.tree.LiteralTree;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeMirror;
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -36,19 +27,22 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
-
-import com.sun.source.tree.LiteralTree;
+import value.qual.BoolVal;
+import value.qual.BottomVal;
+import value.qual.IntRange;
+import value.qual.StringVal;
+import value.qual.UnknownVal;
 
 public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
-	
-	/** The top type for this hierarchy. */
+
+    /** The top type for this hierarchy. */
     protected final AnnotationMirror UNKNOWNVAL =
             AnnotationBuilder.fromClass(elements, UnknownVal.class);
 
     /** The bottom type for this hierarchy. */
     protected final AnnotationMirror BOTTOMVAL =
             AnnotationBuilder.fromClass(elements, BottomVal.class);
-    
+
     public ValueInferenceAnnotatedTypeFactory(
             InferenceChecker inferenceChecker,
             boolean withCombineConstraints,
@@ -65,17 +59,28 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 constraintManager);
         postInit();
     }
-    
+
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
                 new ValueInferencePropagationTreeAnnotator(this),
-                new ValueInferenceTreeAnnotator(this, realChecker, realTypeFactory, variableAnnotator, slotManager));
+                new ValueInferenceTreeAnnotator(
+                        this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
-    
+
     protected class ValueInferenceTreeAnnotator extends InferenceTreeAnnotator {
-        public ValueInferenceTreeAnnotator(InferenceAnnotatedTypeFactory atypeFactory, InferrableChecker realChecker, AnnotatedTypeFactory realAnnotatedTypeFactory, VariableAnnotator variableAnnotator, SlotManager slotManager) {
-            super(atypeFactory, realChecker, realAnnotatedTypeFactory, variableAnnotator, slotManager);
+        public ValueInferenceTreeAnnotator(
+                InferenceAnnotatedTypeFactory atypeFactory,
+                InferrableChecker realChecker,
+                AnnotatedTypeFactory realAnnotatedTypeFactory,
+                VariableAnnotator variableAnnotator,
+                SlotManager slotManager) {
+            super(
+                    atypeFactory,
+                    realChecker,
+                    realAnnotatedTypeFactory,
+                    variableAnnotator,
+                    slotManager);
         }
     }
 
@@ -89,7 +94,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super(multiGraphFactory);
         }
     }
-    
+
     /**
      * The domain of the Constant Value Checker: the types for which it estimates possible values.
      */
@@ -115,12 +120,12 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     "short",
                                     "java.lang.Short",
                                     "char[]")));
-    
+
     private final class ValueInferencePropagationTreeAnnotator extends PropagationTreeAnnotator {
         public ValueInferencePropagationTreeAnnotator(AnnotatedTypeFactory factory) {
             super(factory);
         }
-        
+
         @Override
         public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
             if (!handledByValueChecker(type)) {
@@ -157,14 +162,14 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     return null;
             }
         }
-        
+
         /** Returns true iff the given type is in the domain of the Constant Value Checker. */
         private boolean handledByValueChecker(AnnotatedTypeMirror type) {
             TypeMirror tm = type.getUnderlyingType();
             return COVERED_CLASS_STRINGS.contains(tm.toString());
         }
     }
-    
+
     /**
      * Returns a {@link BoolVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
@@ -180,11 +185,11 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         if (values.isEmpty()) {
             return BOTTOMVAL;
         }
-        
+
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BoolVal.class);
         return builder.build();
     }
-    
+
     /** @param values must be a homogeneous list: every element of it has the same class. */
     public AnnotationMirror createNumberAnnotationMirror(List<Number> values) {
         if (values == null) {
@@ -206,7 +211,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         throw new UnsupportedOperationException(
                 "ValueAnnotatedTypeFactory: unexpected class: " + first.getClass());
     }
-    
+
     /**
      * Returns a {@link StringVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
@@ -227,7 +232,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, StringVal.class);
         return builder.build();
     }
-    
+
     /**
      * Returns a {@link IntVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
@@ -249,7 +254,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
         return createIntValAnnotation(longValues);
     }
-    
+
     /**
      * Returns a {@link IntVal} or {@link IntRange} annotation using the values. If {@code values}
      * is null, then UnknownVal is returned; if {@code values} is empty, then bottom is returned. If
@@ -270,7 +275,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         long valMax = Collections.max(values);
         return createIntRangeAnnotation(valMin, valMax);
     }
-    
+
     /**
      * Create an {@code @IntRange} annotation from the two (inclusive) bounds. Does not return
      * BOTTOMVAL or UNKNOWNVAL.
@@ -282,14 +287,14 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         builder.setValue("to", to);
         return builder.build();
     }
-    
+
     /**
      * If {@code anno} is equalient to UnknownVal, return UnknownVal; otherwise, return {@code
      * anno}.
      */
     private AnnotationMirror convertToUnknown(AnnotationMirror anno) {
         if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
-        	long from = AnnotationUtils.getElementValue(anno, "from", Long.class, true);
+            long from = AnnotationUtils.getElementValue(anno, "from", Long.class, true);
             long to = AnnotationUtils.getElementValue(anno, "to", Long.class, true);
             if (from == Long.MIN_VALUE && to == Long.MAX_VALUE) {
                 return UNKNOWNVAL;

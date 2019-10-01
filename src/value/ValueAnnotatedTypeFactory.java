@@ -1,5 +1,9 @@
 package value;
 
+import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.TypeCastTree;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,19 +12,13 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.value.ValueCheckerUtils;
 import org.checkerframework.common.value.qual.ArrayLenRange;
-import org.checkerframework.common.value.qual.IntRangeFromGTENegativeOne;
-import org.checkerframework.common.value.qual.IntRangeFromNonNegative;
-import org.checkerframework.common.value.qual.IntRangeFromPositive;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
@@ -34,17 +32,7 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ElementUtils;
-import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
-
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.LiteralTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.NewArrayTree;
-import com.sun.source.tree.TypeCastTree;
-import com.sun.source.tree.Tree.Kind;
-
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
@@ -52,10 +40,10 @@ import value.qual.StringVal;
 import value.qual.UnknownVal;
 
 public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
-	
-	/** The maximum number of values allowed in an annotation's array. */
+
+    /** The maximum number of values allowed in an annotation's array. */
     protected static final int MAX_VALUES = 10;
-    
+
     /** The top type for this hierarchy. */
     protected final AnnotationMirror UNKNOWNVAL =
             AnnotationBuilder.fromClass(elements, UnknownVal.class);
@@ -63,12 +51,12 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /** The bottom type for this hierarchy. */
     protected final AnnotationMirror BOTTOMVAL =
             AnnotationBuilder.fromClass(elements, BottomVal.class);
-	
+
     public ValueAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
         postInit();
     }
-    
+
     /**
      * The domain of the Constant Value Checker: the types for which it estimates possible values.
      */
@@ -95,7 +83,6 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                                     "java.lang.Short",
                                     "char[]")));
 
-    
     @Override
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // Because the Value Checker includes its own alias annotations,
@@ -108,12 +95,12 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         BottomVal.class,
                         UnknownVal.class));
     }
-    
+
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new ValueQualifierHierarchy(factory);
     }
-    
+
     /** The qualifier hierarchy for the Value type system. */
     private final class ValueQualifierHierarchy extends MultiGraphQualifierHierarchy {
 
@@ -129,7 +116,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             } else if (isSubtype(a2, a1)) {
                 return a2;
             }
-            
+
             return BOTTOMVAL;
         }
 
@@ -156,7 +143,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 // If both are the same type, determine the type and merge
                 if (AnnotationUtils.areSameByClass(a1, IntRange.class)) {
                     // special handling for IntRange
-                	long from1 = AnnotationUtils.getElementValue(a1, "from", Long.class, true);
+                    long from1 = AnnotationUtils.getElementValue(a1, "from", Long.class, true);
                     long to1 = AnnotationUtils.getElementValue(a1, "to", Long.class, true);
                     long from2 = AnnotationUtils.getElementValue(a2, "from", Long.class, true);
                     long to2 = AnnotationUtils.getElementValue(a2, "to", Long.class, true);
@@ -195,10 +182,13 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 // Same type, so might be subtype
                 if (AnnotationUtils.areSameByClass(subAnno, IntRange.class)) {
                     // Special case for range-based annotations
-                	long fromsub = AnnotationUtils.getElementValue(subAnno, "from", Long.class, true);
+                    long fromsub =
+                            AnnotationUtils.getElementValue(subAnno, "from", Long.class, true);
                     long tosub = AnnotationUtils.getElementValue(subAnno, "to", Long.class, true);
-                    long fromsuper = AnnotationUtils.getElementValue(superAnno, "from", Long.class, true);
-                    long tosuper = AnnotationUtils.getElementValue(superAnno, "to", Long.class, true);
+                    long fromsuper =
+                            AnnotationUtils.getElementValue(superAnno, "from", Long.class, true);
+                    long tosuper =
+                            AnnotationUtils.getElementValue(superAnno, "to", Long.class, true);
                     return fromsub >= fromsuper && tosub <= tosuper;
                 }
                 return true;
@@ -206,7 +196,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return false;
             }
         }
-        
+
         @Override
         public AnnotationMirror widenedUpperBound(
                 AnnotationMirror newQualifier, AnnotationMirror previousQualifier) {
@@ -221,7 +211,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return lub;
             }
         }
-        
+
         private Range widenedRange(Range newRange, Range oldRange, Range lubRange) {
             if (newRange == null || oldRange == null || lubRange.equals(oldRange)) {
                 return lubRange;
@@ -268,7 +258,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
     }
-    
+
     /**
      * Returns a {@code Range} bounded by the values specified in the given {@code @Range}
      * annotation. Also returns an appropriate range if an {@code @IntVal} annotation is passed.
@@ -289,7 +279,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         return null;
     }
-    
+
     /**
      * Finds the appropriate value for the {@code from} value of an annotated type mirror containing
      * an {@code IntRange} annotation.
@@ -324,7 +314,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
         return from;
     }
-    
+
     /**
      * Finds the appropriate value for the {@code to} value of an annotated type mirror containing
      * an {@code IntRange} annotation.
@@ -359,7 +349,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
         return to;
     }
-    
+
     @Override
     protected TreeAnnotator createTreeAnnotator() {
         // Don't call super.createTreeAnnotator because it includes the PropagationTreeAnnotator.
@@ -381,7 +371,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 new LiteralTreeAnnotator(this).addStandardLiteralQualifiers(),
                 arrayCreation);
     }
-    
+
     /** The TreeAnnotator for this AnnotatedTypeFactory. It adds/replaces annotations. */
     protected class ValueTreeAnnotator extends TreeAnnotator {
 
@@ -425,7 +415,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     return null;
             }
         }
-        
+
         @Override
         public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
             if (handledByValueChecker(atm)) {
@@ -471,7 +461,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return COVERED_CLASS_STRINGS.contains(tm.toString());
         }
     }
-    
+
     /**
      * Returns a constant value annotation with the {@code values}. The class of the annotation
      * reflects the {@code resultType} given.
@@ -558,7 +548,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 throw new UnsupportedOperationException("Unexpected kind:" + resultType);
         }
     }
-    
+
     /**
      * Returns a {@link BoolVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
@@ -577,7 +567,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BoolVal.class);
         return builder.build();
     }
-    
+
     /** @param values must be a homogeneous list: every element of it has the same class. */
     public AnnotationMirror createNumberAnnotationMirror(List<Number> values) {
         if (values == null) {
@@ -599,7 +589,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         throw new UnsupportedOperationException(
                 "ValueAnnotatedTypeFactory: unexpected class: " + first.getClass());
     }
-    
+
     /**
      * Returns a {@link StringVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
@@ -620,7 +610,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, StringVal.class);
         return builder.build();
     }
-    
+
     /**
      * Returns a {@link IntVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
@@ -642,7 +632,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
         return createIntValAnnotation(longValues);
     }
-    
+
     /**
      * Returns a {@link IntVal} or {@link IntRange} annotation using the values. If {@code values}
      * is null, then UnknownVal is returned; if {@code values} is empty, then bottom is returned. If
@@ -663,7 +653,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         long valMax = Collections.max(values);
         return createIntRangeAnnotation(valMin, valMax);
     }
-    
+
     /**
      * Create an {@code @IntRange} or {@code @IntVal} annotation from the range. May return
      * BOTTOMVAL or UNKNOWNVAL.
@@ -680,7 +670,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return createIntValAnnotation(newValues);
         }
     }
-    
+
     /**
      * Create an {@code @IntRange} annotation from the two (inclusive) bounds. Does not return
      * BOTTOMVAL or UNKNOWNVAL.
@@ -692,14 +682,14 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         builder.setValue("to", to);
         return builder.build();
     }
-    
+
     /**
      * If {@code anno} is equalient to UnknownVal, return UnknownVal; otherwise, return {@code
      * anno}.
      */
     private AnnotationMirror convertToUnknown(AnnotationMirror anno) {
         if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
-        	long from = AnnotationUtils.getElementValue(anno, "from", Long.class, true);
+            long from = AnnotationUtils.getElementValue(anno, "from", Long.class, true);
             long to = AnnotationUtils.getElementValue(anno, "to", Long.class, true);
             if (from == Long.MIN_VALUE && to == Long.MAX_VALUE) {
                 return UNKNOWNVAL;

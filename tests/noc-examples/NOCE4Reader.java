@@ -11,7 +11,7 @@ public class NOCE4Reader {
         char data;
         // :: error: (cast.unsafe)
         while ((data = (char) in.read()) != -1) {
-            //...
+            // ...
         }
         in.close();
     }

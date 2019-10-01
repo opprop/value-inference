@@ -1,5 +1,6 @@
-import java.io.Reader;
 import java.io.IOException;
+import java.io.Reader;
+
 public class BinaryOpRefinement {
     void testLessThan(Reader in) throws IOException {
         char cur;
@@ -14,8 +15,7 @@ public class BinaryOpRefinement {
 
         do {
             buff = in.read();
-            if (buff < 0) {
-                ;
+            if (buff < 0) {;
             }
             // :: error: (cast.unsafe)
             cur = (char) buff;
@@ -32,9 +32,9 @@ public class BinaryOpRefinement {
         while ((buff = in.read()) > 0) {
             // :: error: (cast.unsafe)
             cur = (char) buff; // this is because although the casting is safe,
-                               // 0x00 byte or 0x0000 char is still missed
+            // 0x00 byte or 0x0000 char is still missed
 
-            //TODO: better error message?
+            // TODO: better error message?
         }
     }
 
@@ -55,8 +55,7 @@ public class BinaryOpRefinement {
 
         do {
             buff = in.read();
-            if (buff == -1) {
-                ;
+            if (buff == -1) {;
             }
             // :: error: (cast.unsafe)
             cur = (char) buff;
