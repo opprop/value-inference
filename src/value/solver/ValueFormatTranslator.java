@@ -13,7 +13,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
-import value.ValueAnnotationMirrorHolder;
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
@@ -78,16 +77,16 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 
         AnnotationMirror anno = slot.getValue();
         Z3InferenceValue encodedSlot = Z3InferenceValue.makeConstantSlot(ctx, slotID);
-        if (AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.UNKNOWNVAL)) {
+        if (AnnotationUtils.areSameByClass(anno, UnknownVal.class)) {
             encodedSlot.setUnknownVal(true);
         }
-        if (AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.BOTTOMVAL)) {
+        if (AnnotationUtils.areSameByClass(anno, BottomVal.class)) {
             encodedSlot.setBottomVal(true);
         }
-        if (AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.BOOLVAL)) {
+        if (AnnotationUtils.areSameByClass(anno, BoolVal.class)) {
             encodedSlot.setBoolVal(true);
         }
-        if (AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.STRINGVAL)) {
+        if (AnnotationUtils.areSameByClass(anno, StringVal.class)) {
             encodedSlot.setStringVal(true);
         }
         if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {

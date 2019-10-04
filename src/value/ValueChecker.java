@@ -14,7 +14,6 @@ public class ValueChecker extends BaseInferrableChecker {
     @Override
     public void initChecker() {
         super.initChecker();
-        ValueAnnotationMirrorHolder.init(this);
     }
 
     @Override

@@ -8,6 +8,9 @@ import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.VariableSlot;
+
+import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.LiteralTree;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +30,8 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.Pair;
+
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
@@ -121,6 +126,63 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     "java.lang.Short",
                                     "char[]")));
 
+    @Override
+    public VariableAnnotator createVariableAnnotator() {
+        return new ValueVariableAnnotator(
+                this, realTypeFactory, realChecker, slotManager, constraintManager);
+    }
+    
+    private final class ValueVariableAnnotator extends VariableAnnotator {
+        public ValueVariableAnnotator(
+                InferenceAnnotatedTypeFactory typeFactory,
+                AnnotatedTypeFactory realTypeFactory,
+                InferrableChecker realChecker,
+                SlotManager slotManager,
+                ConstraintManager constraintManager) {
+            super(typeFactory, realTypeFactory, realChecker, slotManager, constraintManager);
+        }
+
+        @Override
+        public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
+        	// Super creates an LUB constraint by default, we create an VariableSlot here
+            // instead for the result of the binary op and create LUB constraint
+
+            // create varslot for the result of the binary tree computation
+            // note: constraints for binary ops are added in Visitor
+            if (this.treeToVarAnnoPair.containsKey(binaryTree)) {
+                atm.replaceAnnotations((Iterable)((Pair)this.treeToVarAnnoPair.get(binaryTree)).second);
+            } else {
+                AnnotatedTypeMirror lhsATM = this.inferenceTypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
+                AnnotatedTypeMirror rhsATM = this.inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+                // grab slots for the component (only for lub slot)
+                VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
+                VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+
+                VariableSlot result;
+                switch (binaryTree.getKind()) {
+                    case PLUS:
+                    	result = slotManager.createArithmeticVariableSlot(
+                                VariableAnnotator.treeToLocation(
+                                        inferenceTypeFactory, binaryTree));
+                        break;
+                    default:
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
+                }
+
+                // insert varAnnot of the slot into the ATM
+                AnnotationMirror resultAM = slotManager.getAnnotation(result);
+                atm.clearAnnotations();
+                atm.replaceAnnotation(resultAM);
+
+                Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
+                resultSet.add(resultAM);
+                final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair = Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                treeToVarAnnoPair.put(binaryTree, varATMPair);
+            }
+        }
+    }
+   
     private final class ValueInferencePropagationTreeAnnotator extends PropagationTreeAnnotator {
         public ValueInferencePropagationTreeAnnotator(AnnotatedTypeFactory factory) {
             super(factory);

@@ -35,12 +35,12 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                         ctx.mkNot(left.getBoolVal()),
                         ctx.mkNot(right.getBoolVal()),
                         ctx.mkNot(res.getBoolVal()),
+                        ctx.mkNot(left.getBottomVal()),
+                        ctx.mkNot(right.getBottomVal()),
+                        ctx.mkNot(res.getBottomVal()),
                         ctx.mkImplies(
                                 ctx.mkAnd(left.getUnknownVal(), right.getUnknownVal()),
                                 res.getUnknownVal()),
-                        ctx.mkImplies(
-                                ctx.mkAnd(left.getBottomVal(), right.getBottomVal()),
-                                res.getBottomVal()),
                         ctx.mkImplies(
                                 ctx.mkAnd(left.getUnknownVal(), right.getIntRange()),
                                 res.getUnknownVal()),
@@ -76,25 +76,24 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeUpper(),
                                                                 right.getIntRangeUpper())),
                                                 ctx.mkAnd(
-                                                        ctx.mkEq(
-                                                                res.getIntRangeUpper(),
+                                                		ctx.mkLt(
+                                                                ctx.mkAdd(
+                                                                        left.getIntRangeUpper(),
+                                                                        right.getIntRangeUpper()),
                                                                 ctx.mkInt(Long.MIN_VALUE)),
-                                                        ctx.mkLt(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkLt(
-                                                                right.getIntRangeUpper(),
-                                                                ctx.mkInt(0))),
-                                                ctx.mkAnd(
                                                         ctx.mkEq(
                                                                 res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkGt(
+                                                                ctx.mkAdd(
+                                                                        left.getIntRangeUpper(),
+                                                                        right.getIntRangeUpper()),
                                                                 ctx.mkInt(Long.MAX_VALUE)),
-                                                        ctx.mkGt(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkGt(
-                                                                right.getIntRangeUpper(),
-                                                                ctx.mkInt(0)))),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MAX_VALUE)))),
+
                                         ctx.mkOr(
                                                 ctx.mkEq(
                                                         res.getIntRangeLower(),
@@ -102,28 +101,27 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeLower(),
                                                                 right.getIntRangeLower())),
                                                 ctx.mkAnd(
-                                                        ctx.mkEq(
-                                                                res.getIntRangeLower(),
+                                                		ctx.mkLt(
+                                                                ctx.mkAdd(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
                                                                 ctx.mkInt(Long.MIN_VALUE)),
-                                                        ctx.mkLt(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkLt(
-                                                                right.getIntRangeLower(),
-                                                                ctx.mkInt(0))),
-                                                ctx.mkAnd(
                                                         ctx.mkEq(
                                                                 res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkGt(
+                                                                ctx.mkAdd(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
                                                                 ctx.mkInt(Long.MAX_VALUE)),
-                                                        ctx.mkGt(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkGt(
-                                                                right.getIntRangeLower(),
-                                                                ctx.mkInt(0))))),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MAX_VALUE))))),
                                 ctx.mkAnd(
                                         ctx.mkNot(left.getIntRange()),
-                                        ctx.mkNot(right.getIntRange()))));
+                                        ctx.mkNot(right.getIntRange()),
+                                        ctx.mkNot(res.getIntRange()))));
             case MINUS:
                 return ctx.mkAnd(
                         encoding,
@@ -142,25 +140,23 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeUpper(),
                                                                 right.getIntRangeUpper())),
                                                 ctx.mkAnd(
-                                                        ctx.mkEq(
-                                                                res.getIntRangeUpper(),
+                                                		ctx.mkLt(
+                                                                ctx.mkSub(
+                                                                        left.getIntRangeUpper(),
+                                                                        right.getIntRangeUpper()),
                                                                 ctx.mkInt(Long.MIN_VALUE)),
-                                                        ctx.mkLt(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkLt(
-                                                                right.getIntRangeUpper(),
-                                                                ctx.mkInt(0))),
-                                                ctx.mkAnd(
                                                         ctx.mkEq(
                                                                 res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkGt(
+                                                                ctx.mkSub(
+                                                                        left.getIntRangeUpper(),
+                                                                        right.getIntRangeUpper()),
                                                                 ctx.mkInt(Long.MAX_VALUE)),
-                                                        ctx.mkGt(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkGt(
-                                                                right.getIntRangeUpper(),
-                                                                ctx.mkInt(0)))),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MAX_VALUE)))),
                                         ctx.mkOr(
                                                 ctx.mkEq(
                                                         res.getIntRangeLower(),
@@ -168,25 +164,23 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeLower(),
                                                                 right.getIntRangeLower())),
                                                 ctx.mkAnd(
-                                                        ctx.mkEq(
-                                                                res.getIntRangeLower(),
+                                                		ctx.mkLt(
+                                                                ctx.mkSub(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
                                                                 ctx.mkInt(Long.MIN_VALUE)),
-                                                        ctx.mkLt(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkLt(
-                                                                right.getIntRangeLower(),
-                                                                ctx.mkInt(0))),
-                                                ctx.mkAnd(
                                                         ctx.mkEq(
                                                                 res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkGt(
+                                                                ctx.mkSub(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
                                                                 ctx.mkInt(Long.MAX_VALUE)),
-                                                        ctx.mkGt(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkGt(
-                                                                right.getIntRangeLower(),
-                                                                ctx.mkInt(0))))),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MAX_VALUE))))),
                                 ctx.mkAnd(
                                         ctx.mkNot(left.getIntRange()),
                                         ctx.mkNot(right.getIntRange()))));
@@ -207,24 +201,48 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkMul(
                                                                 left.getIntRangeUpper(),
                                                                 right.getIntRangeUpper())),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeUpper(),
+                                                ctx.mkAnd(
+                                                		ctx.mkLt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeUpper(),
+                                                                        right.getIntRangeUpper()),
                                                                 ctx.mkInt(Long.MIN_VALUE)),
                                                         ctx.mkEq(
                                                                 res.getIntRangeUpper(),
-                                                                ctx.mkInt(Long.MAX_VALUE))),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkGt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeUpper(),
+                                                                        right.getIntRangeUpper()),
+                                                                ctx.mkInt(Long.MAX_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MAX_VALUE)))),
                                         ctx.mkOr(
                                                 ctx.mkEq(
                                                         res.getIntRangeLower(),
                                                         ctx.mkMul(
                                                                 left.getIntRangeLower(),
                                                                 right.getIntRangeLower())),
-                                                ctx.mkEq(
-                                                        res.getIntRangeLower(),
-                                                        ctx.mkInt(Long.MIN_VALUE)),
-                                                ctx.mkEq(
-                                                        res.getIntRangeLower(),
-                                                        ctx.mkInt(Long.MAX_VALUE)))),
+                                                ctx.mkAnd(
+                                                		ctx.mkLt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
+                                                                ctx.mkInt(Long.MIN_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkGt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
+                                                                ctx.mkInt(Long.MAX_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MAX_VALUE))))),
                                 ctx.mkAnd(
                                         ctx.mkNot(left.getIntRange()),
                                         ctx.mkNot(right.getIntRange()))));
