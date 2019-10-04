@@ -126,7 +126,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
     @Override
     public BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot) {
         Z3InferenceValue value = slot.serialize(this);
-        return ctx.mkNot(value.getUnknownVal());
+        return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
     }
 
     @Override

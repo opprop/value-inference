@@ -6,6 +6,10 @@ public class Test {
     boolean no = false;
 
     public int testing(int value) {
-        return zero;
+        return testing2(zero);
+    }
+
+    public int testing2(int value) {
+        return value;
     }
 }
