@@ -59,8 +59,7 @@ public class ValueEncoderUtils {
                                 ctx.mkAnd(
                                         left.getIntRange(),
                                         ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
-                                        ctx.mkEq(
-                                                left.getIntRangeUpper(), right.getIntRangeUpper())),
+                                        ctx.mkEq(left.getIntRangeUpper(), right.getIntRangeUpper())),
                                 ctx.mkNot(left.getIntRange())));
 
         return equalityEncoding;

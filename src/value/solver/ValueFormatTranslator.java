@@ -90,7 +90,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         if (AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.STRINGVAL)) {
             encodedSlot.setStringVal(true);
         }
-        if (AnnotationUtils.areSame(anno, ValueAnnotationMirrorHolder.INTRANGE)) {
+        if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
             encodedSlot.setIntRange(true);
             encodedSlot.setIntRangeLower(
                     AnnotationUtils.getElementValue(anno, "from", Long.class, true));

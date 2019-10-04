@@ -21,20 +21,9 @@ public class ValueSubtypeConstraintEncoder extends ValueAbstractConstraintEncode
     protected BoolExpr encode(Slot subtype, Slot supertype) {
         Z3InferenceValue subT = subtype.serialize(z3SmtFormatTranslator);
         Z3InferenceValue superT = supertype.serialize(z3SmtFormatTranslator);
-        
-        BoolExpr constraint = valueZ3SmtEncoderUtils.subtype(ctx, subT, superT);
-        
-        // if subtype then subT = superT
-        return ctx.mkOr(
-        		ctx.mkAnd(constraint, 
-	        		ctx.mkEq(subT.getUnknownVal(), superT.getUnknownVal()),
-	        		ctx.mkEq(subT.getBottomVal(), superT.getBottomVal()),
-	        		ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
-	                ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
-	                ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
-	                ctx.mkEq(subT.getIntRangeUpper(), superT.getIntRangeUpper()),
-	                ctx.mkEq(subT.getIntRangeLower(), superT.getIntRangeLower())),
-        		ctx.mkNot(constraint));
+                
+        return valueZ3SmtEncoderUtils.subtype(ctx, subT, superT);
+
     }
 
     @Override
