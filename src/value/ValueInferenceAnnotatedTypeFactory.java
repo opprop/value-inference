@@ -21,6 +21,8 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.common.value.ValueCheckerUtils;
+import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
@@ -31,6 +33,7 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
+import org.checkerframework.javacutil.TreeUtils;
 
 import value.qual.BoolVal;
 import value.qual.BottomVal;
@@ -154,6 +157,8 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             } else {
                 AnnotatedTypeMirror lhsATM = this.inferenceTypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
                 AnnotatedTypeMirror rhsATM = this.inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+                AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
+                AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
                 // grab slots for the component (only for lub slot)
                 VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
                 VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
@@ -161,10 +166,230 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 VariableSlot result;
                 switch (binaryTree.getKind()) {
                     case PLUS:
-                    	result = slotManager.createArithmeticVariableSlot(
-                                VariableAnnotator.treeToLocation(
-                                        inferenceTypeFactory, binaryTree));
-                        break;
+                    	if (TreeUtils.isStringConcatenation(binaryTree)) {
+                			result = slotManager.createConstantSlot(AnnotationBuilder.fromClass(elements, StringVal.class));
+                			break;
+                        }
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createArithmeticVariableSlot(VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).plus(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case MINUS:
+                    	if (lhsAM == null || rhsAM == null) {
+                        	result = slotManager.createArithmeticVariableSlot(VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).minus(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case MULTIPLY:
+                    	if (lhsAM == null || rhsAM == null) {
+                        	result = slotManager.createArithmeticVariableSlot(VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).times(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case DIVIDE:
+                    	if (lhsAM == null || rhsAM == null) {
+                        	result = slotManager.createArithmeticVariableSlot(VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).divide(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case REMAINDER:
+                    	if (lhsAM == null || rhsAM == null) {
+                        	result = slotManager.createArithmeticVariableSlot(VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).remainder(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case LEFT_SHIFT:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).shiftLeft(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case RIGHT_SHIFT:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).signedShiftRight(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case UNSIGNED_RIGHT_SHIFT:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).unsignedShiftRight(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case AND:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).bitwiseAnd(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case OR:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).bitwiseOr(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case XOR:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).bitwiseXor(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case GREATER_THAN:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).refineGreaterThan(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case GREATER_THAN_EQUAL:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).refineGreaterThanEq(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case LESS_THAN:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).refineLessThan(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case LESS_THAN_EQUAL:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).refineLessThanEq(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case EQUAL_TO:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).refineEqualTo(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
+                    case NOT_EQUAL_TO:
+                    	if (lhsAM == null || rhsAM == null) {
+                    		result = slotManager.createLubVariableSlot(lhs, rhs);
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
+                        	Range range = getRange(lhsAM).refineNotEqualTo(getRange(rhsAM));
+                        	result = slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    	break;
                     default:
                         result = slotManager.createLubVariableSlot(lhs, rhs);
                         break;
@@ -349,6 +574,20 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         builder.setValue("to", to);
         return builder.build();
     }
+    
+    /**
+     * Create an {@code @IntRange} or {@code @IntVal} annotation from the range. May return
+     * BOTTOMVAL or UNKNOWNVAL.
+     */
+    public AnnotationMirror createIntRangeAnnotation(Range range) {
+        if (range.isNothing()) {
+            return BOTTOMVAL;
+        } else if (range.isLongEverything()) {
+            return UNKNOWNVAL;
+        } else {
+            return createIntRangeAnnotation(range.from, range.to);
+        }
+    }
 
     /**
      * If {@code anno} is equalient to UnknownVal, return UnknownVal; otherwise, return {@code
@@ -363,5 +602,26 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             }
         }
         return anno;
+    }
+    
+    /**
+     * Returns a {@code Range} bounded by the values specified in the given {@code @Range}
+     * annotation. Also returns an appropriate range if an {@code @IntVal} annotation is passed.
+     * Returns {@code null} if the annotation is null or if the annotation is not an {@code
+     * IntRange}, {@code IntRangeFromPositive}, {@code IntVal}, or {@code ArrayLenRange}.
+     */
+    public static Range getRange(AnnotationMirror rangeAnno) {
+        if (rangeAnno == null) {
+            return null;
+        }
+
+        // Assume rangeAnno is well-formed, i.e., 'from' is less than or equal to 'to'.
+        if (AnnotationUtils.areSameByClass(rangeAnno, IntRange.class)) {
+            return new Range(
+                    AnnotationUtils.getElementValue(rangeAnno, "from", Long.class, true),
+                    AnnotationUtils.getElementValue(rangeAnno, "to", Long.class, true));
+        }
+
+        return null;
     }
 }

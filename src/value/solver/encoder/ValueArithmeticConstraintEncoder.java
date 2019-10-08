@@ -32,11 +32,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
 
         BoolExpr encoding =
                 ctx.mkAnd(
-                        ctx.mkNot(left.getBoolVal()),
-                        ctx.mkNot(right.getBoolVal()),
                         ctx.mkNot(res.getBoolVal()),
-                        ctx.mkNot(left.getBottomVal()),
-                        ctx.mkNot(right.getBottomVal()),
                         ctx.mkNot(res.getBottomVal()),
                         ctx.mkImplies(
                                 ctx.mkAnd(left.getUnknownVal(), right.getUnknownVal()),
@@ -47,7 +43,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                         ctx.mkImplies(
                                 ctx.mkAnd(left.getIntRange(), right.getUnknownVal()),
                                 res.getUnknownVal()),
-                        ctx.mkImplies(
+                        ctx.mkEq(
                                 ctx.mkAnd(left.getIntRange(), right.getIntRange()),
                                 res.getIntRange()));
 
@@ -66,8 +62,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                 res.getStringVal()),
                         ctx.mkOr(
                                 ctx.mkAnd(
-                                        left.getIntRange(),
-                                        right.getIntRange(),
                                         res.getIntRange(),
                                         ctx.mkOr(
                                                 ctx.mkEq(
@@ -118,15 +112,10 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkEq(
                                                                 res.getIntRangeLower(),
                                                                 ctx.mkInt(Long.MAX_VALUE))))),
-                                ctx.mkAnd(
-                                        ctx.mkNot(left.getIntRange()),
-                                        ctx.mkNot(right.getIntRange()),
-                                        ctx.mkNot(res.getIntRange()))));
+                                ctx.mkNot(res.getIntRange())));
             case MINUS:
                 return ctx.mkAnd(
                         encoding,
-                        ctx.mkNot(left.getStringVal()),
-                        ctx.mkNot(right.getStringVal()),
                         ctx.mkNot(res.getStringVal()),
                         ctx.mkOr(
                                 ctx.mkAnd(
@@ -187,8 +176,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
             case MULTIPLY:
                 return ctx.mkAnd(
                         encoding,
-                        ctx.mkNot(left.getStringVal()),
-                        ctx.mkNot(right.getStringVal()),
                         ctx.mkNot(res.getStringVal()),
                         ctx.mkOr(
                                 ctx.mkAnd(
@@ -249,8 +236,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
             case DIVIDE:
                 return ctx.mkAnd(
                         encoding,
-                        ctx.mkNot(left.getStringVal()),
-                        ctx.mkNot(right.getStringVal()),
                         ctx.mkNot(res.getStringVal()),
                         ctx.mkOr(
                                 ctx.mkAnd(
@@ -273,8 +258,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
             case REMAINDER:
                 return ctx.mkAnd(
                         encoding,
-                        ctx.mkNot(left.getStringVal()),
-                        ctx.mkNot(right.getStringVal()),
                         ctx.mkNot(res.getStringVal()),
                         ctx.mkOr(
                                 ctx.mkAnd(

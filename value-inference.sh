@@ -10,10 +10,9 @@ export PATH=$AFU/scripts:$PATH
 CHECKER=value.ValueChecker
 
 SOLVER=value.solver.ValueSolverEngine
-#SOLVER=checkers.inference.solver.DebugSolver
+DEBUG_SOLVER=checkers.inference.solver.DebugSolver
 IS_HACK=true
 
-# DEBUG_SOLVER=checkers.inference.solver.DebugSolver
 # SOLVER="$DEBUG_SOLVER"
 # IS_HACK=false
 # DEBUG_CLASSPATH=""

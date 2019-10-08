@@ -7,10 +7,17 @@ public class Test {
     boolean no = false;
 
     public int testing(int value) {
-        return two + zero;
+        if (two + 2 == 4){
+        	return 0;
+        }
+        return 1;
     }
 
-    public int testing2(int value) {
-        return value;
+    public String testing2(int value) {
+        return one + 2;
+    }
+
+    public int testing3(int value) {
+        return two + 2;
     }
 }
