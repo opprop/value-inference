@@ -20,4 +20,16 @@ public class Test {
     public int testing3(int value) {
         return two + 2;
     }
+
+    public char casting(int value) {
+    	value = 254;
+    	value = -1;
+    	return (char)(value & 0xff);
+    }
+
+    void refineParam(int x, int y) {
+        x = 0;
+        x = 1;
+        y = x;
+    }
 }

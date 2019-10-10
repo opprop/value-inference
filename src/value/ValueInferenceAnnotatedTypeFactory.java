@@ -12,6 +12,9 @@ import checkers.inference.model.VariableSlot;
 
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.Tree.Kind;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,9 +22,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueCheckerUtils;
+import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -34,6 +39,7 @@ import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
+import org.checkerframework.javacutil.TypesUtils;
 
 import value.qual.BoolVal;
 import value.qual.BottomVal;
@@ -449,11 +455,136 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     return null;
             }
         }
+        
+        @Override
+        public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
+            if (handledByValueChecker(atm)) {
+                AnnotationMirror oldAnno =
+                        getAnnotatedType(tree.getExpression()).getAnnotationInHierarchy(UNKNOWNVAL);
+                if (oldAnno == null) {
+                    return null;
+                }
+                TypeMirror newType = atm.getUnderlyingType();
+                AnnotationMirror newAnno;
+
+                if (TypesUtils.isString(newType) || newType.getKind() == TypeKind.ARRAY) {
+                    // Strings and arrays do not allow conversions
+                    newAnno = oldAnno;
+                } else if (AnnotationUtils.areSameByClass(oldAnno, IntRange.class)) {
+                    Class<?> newClass = ValueCheckerUtils.getClassFromType(newType);
+                    Range range = getRange(oldAnno);
+                    if (newClass == String.class) {
+                        newAnno = UNKNOWNVAL;
+                    } else if (newClass == Boolean.class || newClass == boolean.class) {
+                        throw new UnsupportedOperationException(
+                                "ValueAnnotatedTypeFactory: can't convert int to boolean");
+                    } else {
+                        newAnno = createIntRangeAnnotation(NumberUtils.castRange(newType, range));
+                    }
+                } else {
+                    List<?> values = ValueCheckerUtils.getValuesCastedToType(oldAnno, newType);
+                    newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
+                }
+                atm.addMissingAnnotations(Collections.singleton(newAnno));
+            } else if (atm.getKind() == TypeKind.ARRAY) {
+                if (tree.getExpression().getKind() == Kind.NULL_LITERAL) {
+                    atm.addMissingAnnotations(Collections.singleton(BOTTOMVAL));
+                }
+            }
+            return null;
+        }
 
         /** Returns true iff the given type is in the domain of the Constant Value Checker. */
         private boolean handledByValueChecker(AnnotatedTypeMirror type) {
             TypeMirror tm = type.getUnderlyingType();
             return COVERED_CLASS_STRINGS.contains(tm.toString());
+        }
+    }
+    
+    /**
+     * Returns a constant value annotation with the {@code values}. The class of the annotation
+     * reflects the {@code resultType} given.
+     *
+     * @param resultType used to selected which kind of value annotation is returned
+     * @param values must be a homogeneous list: every element of it has the same class
+     * @return a constant value annotation with the {@code values}
+     */
+    AnnotationMirror createResultingAnnotation(TypeMirror resultType, List<?> values) {
+        if (values == null) {
+            return UNKNOWNVAL;
+        }
+        // For some reason null is included in the list of values,
+        // so remove it so that it does not cause a NPE elsewhere.
+        values.remove(null);
+        if (values.isEmpty()) {
+            return BOTTOMVAL;
+        }
+
+        if (TypesUtils.isString(resultType)) {
+            List<String> stringVals = new ArrayList<>(values.size());
+            for (Object o : values) {
+                stringVals.add((String) o);
+            }
+            return createStringAnnotation(stringVals);
+        } else if (ValueCheckerUtils.getClassFromType(resultType) == char[].class) {
+            List<String> stringVals = new ArrayList<>(values.size());
+            for (Object o : values) {
+                if (o instanceof char[]) {
+                    stringVals.add(new String((char[]) o));
+                } else {
+                    stringVals.add(o.toString());
+                }
+            }
+            return createStringAnnotation(stringVals);
+        }
+
+        TypeKind primitiveKind;
+        if (TypesUtils.isPrimitive(resultType)) {
+            primitiveKind = resultType.getKind();
+        } else if (TypesUtils.isBoxedPrimitive(resultType)) {
+            primitiveKind = types.unboxedType(resultType).getKind();
+        } else {
+            return UNKNOWNVAL;
+        }
+
+        switch (primitiveKind) {
+            case BOOLEAN:
+                List<Boolean> boolVals = new ArrayList<>(values.size());
+                for (Object o : values) {
+                    boolVals.add((Boolean) o);
+                }
+                return createBooleanAnnotation(boolVals);
+            case DOUBLE:
+            case FLOAT:
+            case INT:
+            case LONG:
+            case SHORT:
+            case BYTE:
+                List<Number> numberVals = new ArrayList<>(values.size());
+                List<Character> characterVals = new ArrayList<>(values.size());
+                for (Object o : values) {
+                    if (o instanceof Character) {
+                        characterVals.add((Character) o);
+                    } else {
+                        numberVals.add((Number) o);
+                    }
+                }
+                if (numberVals.isEmpty()) {
+                    return createCharAnnotation(characterVals);
+                }
+                return createNumberAnnotationMirror(new ArrayList<>(numberVals));
+            case CHAR:
+                List<Character> charVals = new ArrayList<>(values.size());
+                for (Object o : values) {
+                    if (o instanceof Number) {
+                        charVals.add((char) ((Number) o).intValue());
+                    } else {
+                        charVals.add((char) o);
+                    }
+                }
+                return createCharAnnotation(charVals);
+            default:
+                throw new UnsupportedOperationException("Unexpected kind:" + resultType);
         }
     }
 
