@@ -4,18 +4,21 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
+import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import value.solver.ValueFormatTranslator;
+import value.representation.TypeCheckValue;
 import value.solver.representation.Z3InferenceValue;
 
 public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEncoder
         implements ComparableConstraintEncoder<BoolExpr> {
 
     public ValueComparableConstraintEncoder(
-            Lattice lattice, Context ctx, ValueFormatTranslator z3SmtFormatTranslator) {
-        super(lattice, ctx, z3SmtFormatTranslator);
+            Lattice lattice,
+            Context ctx,
+            Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> formatTranslator) {
+        super(lattice, ctx, formatTranslator);
     }
 
     protected BoolExpr encode(Slot fst, Slot snd) {

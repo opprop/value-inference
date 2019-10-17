@@ -18,13 +18,11 @@ import value.solver.ValueFormatTranslator;
 import value.solver.representation.Z3InferenceValue;
 
 public class ValueConstraintEncoderFactory
-        extends Z3SmtConstraintEncoderFactory<
-                Z3InferenceValue, TypeCheckValue, ValueFormatTranslator> {
+        extends Z3SmtConstraintEncoderFactory<Z3InferenceValue, TypeCheckValue> {
 
     public ValueConstraintEncoderFactory(
             Lattice lattice, Context ctx, ValueFormatTranslator z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
