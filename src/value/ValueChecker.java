@@ -49,14 +49,4 @@ public class ValueChecker extends BaseInferrableChecker {
                         constraintManager);
         return securityInferenceATF;
     }
-
-    @Override
-    public boolean isInsertMainModOfLocalVar() {
-        return false;
-    }
-
-    @Override
-    public boolean withCombineConstraints() {
-        return false;
-    }
 }

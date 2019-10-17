@@ -51,13 +51,13 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             long from = solution.getIntRangeLower();
             long to = solution.getIntRangeUpper();
             if (from == Long.MIN_VALUE && to == Long.MAX_VALUE) {
-            	AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnknownVal.class);
+                AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnknownVal.class);
                 return builder.build();
             } else {
-	            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
-	            builder.setValue("from", solution.getIntRangeLower());
-	            builder.setValue("to", solution.getIntRangeUpper());
-	            return builder.build();
+                AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
+                builder.setValue("from", solution.getIntRangeLower());
+                builder.setValue("to", solution.getIntRangeUpper());
+                return builder.build();
             }
         }
 

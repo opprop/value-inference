@@ -182,8 +182,8 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 // Same type, so might be subtype
                 if (AnnotationUtils.areSameByClass(subAnno, IntRange.class)) {
                     // Special case for range-based annotations
-                	Range sub = getRange(subAnno);
-                	Range sup = getRange(superAnno);
+                    Range sub = getRange(subAnno);
+                    Range sup = getRange(superAnno);
                     return sub.from >= sup.from && sub.to <= sup.to;
                 }
                 return true;

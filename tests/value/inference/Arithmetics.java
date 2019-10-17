@@ -77,5 +77,4 @@ public class Arithmetics {
 		@UnknownVal int yval = val % y;
 		@UnknownVal int vval = val % val;
 	}
-
 }

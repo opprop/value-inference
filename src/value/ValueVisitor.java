@@ -8,31 +8,26 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
-import value.qual.IntRange;
-import value.qual.StringVal;
-import value.qual.UnknownVal;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.Tree.Kind;
 import javax.lang.model.element.AnnotationMirror;
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TreeUtils;
-
-import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.Tree.Kind;
+import value.qual.IntRange;
+import value.qual.UnknownVal;
 
 public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTypeFactory> {
-	
-	/** The top type for this hierarchy. */
+
+    /** The top type for this hierarchy. */
     protected final AnnotationMirror UNKNOWNVAL =
             AnnotationBuilder.fromClass(elements, UnknownVal.class);
-	
+
     public ValueVisitor(
             ValueChecker checker,
             InferenceChecker ichecker,
@@ -40,10 +35,10 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             boolean infer) {
         super(checker, ichecker, factory, infer);
     }
-    
+
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {
-    	// infer mode, adds constraints for binary operations
+        // infer mode, adds constraints for binary operations
         if (infer) {
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
             ConstraintManager constraintManager =
@@ -64,29 +59,32 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             Kind kind = binaryTree.getKind();
             switch (binaryTree.getKind()) {
                 case PLUS:
-                	if (TreeUtils.isStringConcatenation(binaryTree)) {
+                    if (TreeUtils.isStringConcatenation(binaryTree)) {
                         break;
                     }
                 case MINUS:
                 case MULTIPLY:
                 case DIVIDE:
                 case REMAINDER:
-                	if (lhsAMVal == null || rhsAMVal == null) {
-	                	ArithmeticOperationKind opKindplus = ArithmeticOperationKind.fromTreeKind(kind);
-	                    ArithmeticVariableSlot avsResplus =
-	                            slotManager.getArithmeticVariableSlot(
-	                                    VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
-	                    constraintManager.addArithmeticConstraint(opKindplus, lhs, rhs, avsResplus);
-	                    break;
-                	}
-                	if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class) && AnnotationUtils.areSameByClass(rhsAMVal, IntRange.class)) {
-                	} else {
-	                	VariableSlot lubSlot =
-	                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));
-	                    // Create LUB constraint by default
-	                    constraintManager.addSubtypeConstraint(lhs, lubSlot);
-	                    constraintManager.addSubtypeConstraint(rhs, lubSlot);
-                	}
+                    if (lhsAMVal == null || rhsAMVal == null) {
+                        ArithmeticOperationKind opKindplus =
+                                ArithmeticOperationKind.fromTreeKind(kind);
+                        ArithmeticVariableSlot avsResplus =
+                                slotManager.getArithmeticVariableSlot(
+                                        VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
+                        constraintManager.addArithmeticConstraint(opKindplus, lhs, rhs, avsResplus);
+                        break;
+                    }
+                    if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class)
+                            && AnnotationUtils.areSameByClass(rhsAMVal, IntRange.class)) {
+                    } else {
+                        VariableSlot lubSlot =
+                                slotManager.getVariableSlot(
+                                        atypeFactory.getAnnotatedType(binaryTree));
+                        // Create LUB constraint by default
+                        constraintManager.addSubtypeConstraint(lhs, lubSlot);
+                        constraintManager.addSubtypeConstraint(rhs, lubSlot);
+                    }
                     break;
                 case LEFT_SHIFT:
                 case RIGHT_SHIFT:
@@ -100,17 +98,19 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case GREATER_THAN_EQUAL: // >=
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL:
-                	if (lhsAMVal == null || rhsAMVal == null) {
-                		VariableSlot lubSlot =
-                                slotManager.getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));
+                    if (lhsAMVal == null || rhsAMVal == null) {
+                        VariableSlot lubSlot =
+                                slotManager.getVariableSlot(
+                                        atypeFactory.getAnnotatedType(binaryTree));
                         // Create LUB constraint by default
                         constraintManager.addSubtypeConstraint(lhs, lubSlot);
                         constraintManager.addSubtypeConstraint(rhs, lubSlot);
                         break;
-                	}
-                	if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class) && AnnotationUtils.areSameByClass(rhsAMVal, IntRange.class)) {
-                		break;
-                	}  // else create LUB constraint
+                    }
+                    if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class)
+                            && AnnotationUtils.areSameByClass(rhsAMVal, IntRange.class)) {
+                        break;
+                    } // else create LUB constraint
                 default:
                     VariableSlot lubSlot =
                             slotManager.getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));

@@ -70,7 +70,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeUpper(),
                                                                 right.getIntRangeUpper())),
                                                 ctx.mkAnd(
-                                                		ctx.mkLt(
+                                                        ctx.mkLt(
                                                                 ctx.mkAdd(
                                                                         left.getIntRangeUpper(),
                                                                         right.getIntRangeUpper()),
@@ -79,7 +79,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 res.getIntRangeUpper(),
                                                                 ctx.mkInt(Long.MIN_VALUE))),
                                                 ctx.mkAnd(
-                                                		ctx.mkGt(
+                                                        ctx.mkGt(
                                                                 ctx.mkAdd(
                                                                         left.getIntRangeUpper(),
                                                                         right.getIntRangeUpper()),
@@ -87,7 +87,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkEq(
                                                                 res.getIntRangeUpper(),
                                                                 ctx.mkInt(Long.MAX_VALUE)))),
-
                                         ctx.mkOr(
                                                 ctx.mkEq(
                                                         res.getIntRangeLower(),
@@ -95,7 +94,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeLower(),
                                                                 right.getIntRangeLower())),
                                                 ctx.mkAnd(
-                                                		ctx.mkLt(
+                                                        ctx.mkLt(
                                                                 ctx.mkAdd(
                                                                         left.getIntRangeLower(),
                                                                         right.getIntRangeLower()),
@@ -104,7 +103,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 res.getIntRangeLower(),
                                                                 ctx.mkInt(Long.MIN_VALUE))),
                                                 ctx.mkAnd(
-                                                		ctx.mkGt(
+                                                        ctx.mkGt(
                                                                 ctx.mkAdd(
                                                                         left.getIntRangeLower(),
                                                                         right.getIntRangeLower()),
@@ -129,7 +128,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeUpper(),
                                                                 right.getIntRangeUpper())),
                                                 ctx.mkAnd(
-                                                		ctx.mkLt(
+                                                        ctx.mkLt(
                                                                 ctx.mkSub(
                                                                         left.getIntRangeUpper(),
                                                                         right.getIntRangeUpper()),
@@ -138,7 +137,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 res.getIntRangeUpper(),
                                                                 ctx.mkInt(Long.MIN_VALUE))),
                                                 ctx.mkAnd(
-                                                		ctx.mkGt(
+                                                        ctx.mkGt(
                                                                 ctx.mkSub(
                                                                         left.getIntRangeUpper(),
                                                                         right.getIntRangeUpper()),
@@ -153,7 +152,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeLower(),
                                                                 right.getIntRangeLower())),
                                                 ctx.mkAnd(
-                                                		ctx.mkLt(
+                                                        ctx.mkLt(
                                                                 ctx.mkSub(
                                                                         left.getIntRangeLower(),
                                                                         right.getIntRangeLower()),
@@ -162,7 +161,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 res.getIntRangeLower(),
                                                                 ctx.mkInt(Long.MIN_VALUE))),
                                                 ctx.mkAnd(
-                                                		ctx.mkGt(
+                                                        ctx.mkGt(
                                                                 ctx.mkSub(
                                                                         left.getIntRangeLower(),
                                                                         right.getIntRangeLower()),
@@ -189,7 +188,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeUpper(),
                                                                 right.getIntRangeUpper())),
                                                 ctx.mkAnd(
-                                                		ctx.mkLt(
+                                                        ctx.mkLt(
                                                                 ctx.mkMul(
                                                                         left.getIntRangeUpper(),
                                                                         right.getIntRangeUpper()),
@@ -198,7 +197,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 res.getIntRangeUpper(),
                                                                 ctx.mkInt(Long.MIN_VALUE))),
                                                 ctx.mkAnd(
-                                                		ctx.mkGt(
+                                                        ctx.mkGt(
                                                                 ctx.mkMul(
                                                                         left.getIntRangeUpper(),
                                                                         right.getIntRangeUpper()),
@@ -213,7 +212,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 left.getIntRangeLower(),
                                                                 right.getIntRangeLower())),
                                                 ctx.mkAnd(
-                                                		ctx.mkLt(
+                                                        ctx.mkLt(
                                                                 ctx.mkMul(
                                                                         left.getIntRangeLower(),
                                                                         right.getIntRangeLower()),
@@ -222,7 +221,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 res.getIntRangeLower(),
                                                                 ctx.mkInt(Long.MIN_VALUE))),
                                                 ctx.mkAnd(
-                                                		ctx.mkGt(
+                                                        ctx.mkGt(
                                                                 ctx.mkMul(
                                                                         left.getIntRangeLower(),
                                                                         right.getIntRangeLower()),
