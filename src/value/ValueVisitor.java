@@ -8,11 +8,15 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
+import checkers.inference.model.ComparableConstraint.ComparableOperationKind;
+import checkers.inference.model.ComparableVariableSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.TypeCastTree;
+
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -44,7 +48,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             ConstraintManager constraintManager =
                     InferenceMain.getInstance().getConstraintManager();
 
-            // Candidate Fix 1:
             InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
 
             AnnotatedTypeMirror lhsATM = iatf.getAnnotatedType(binaryTree.getLeftOperand());
@@ -66,6 +69,12 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case MULTIPLY:
                 case DIVIDE:
                 case REMAINDER:
+                case LEFT_SHIFT:
+                case RIGHT_SHIFT:
+                case UNSIGNED_RIGHT_SHIFT:
+                case AND:
+                case OR:
+                case XOR:
                     if (lhsAMVal == null || rhsAMVal == null) {
                         ArithmeticOperationKind opKindplus =
                                 ArithmeticOperationKind.fromTreeKind(kind);
@@ -86,12 +95,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addSubtypeConstraint(rhs, lubSlot);
                     }
                     break;
-                case LEFT_SHIFT:
-                case RIGHT_SHIFT:
-                case UNSIGNED_RIGHT_SHIFT:
-                case AND:
-                case OR:
-                case XOR:
                 case EQUAL_TO: // ==
                 case NOT_EQUAL_TO: // !=
                 case GREATER_THAN: // >
@@ -99,18 +102,18 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL:
                     if (lhsAMVal == null || rhsAMVal == null) {
-                        VariableSlot lubSlot =
-                                slotManager.getVariableSlot(
-                                        atypeFactory.getAnnotatedType(binaryTree));
-                        // Create LUB constraint by default
-                        constraintManager.addSubtypeConstraint(lhs, lubSlot);
-                        constraintManager.addSubtypeConstraint(rhs, lubSlot);
+                    	ComparableOperationKind opKindplus =
+                    			ComparableOperationKind.fromTreeKind(kind);
+                    	ComparableVariableSlot avsResplus =
+                                slotManager.getComparableVariableSlot(
+                                        VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
+                        constraintManager.addComparableConstraint(opKindplus, lhs, rhs, avsResplus);
                         break;
                     }
                     if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class)
                             && AnnotationUtils.areSameByClass(rhsAMVal, IntRange.class)) {
-                        break;
-                    } // else create LUB constraint
+                    	break;
+                    } // Create LUB constraint by default
                 default:
                     VariableSlot lubSlot =
                             slotManager.getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));
@@ -122,5 +125,28 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
         }
 
         return super.visitBinary(binaryTree, p);
+    }
+    
+    @Override
+    public Void visitTypeCast(TypeCastTree tree, Void p) {
+    	// infer mode, adds constraints for cast operations
+        if (infer) {
+            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+            ConstraintManager constraintManager =
+                    InferenceMain.getInstance().getConstraintManager();
+
+            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
+
+            AnnotatedTypeMirror castATM = iatf.getAnnotatedType(tree);
+            AnnotatedTypeMirror exprATM = iatf.getAnnotatedType(tree.getExpression());
+            AnnotationMirror castAM = castATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            Slot cast = slotManager.getSlot(castAM);
+            Slot expr = slotManager.getSlot(exprAM);
+            
+            constraintManager.addSubtypeConstraint(expr, cast);
+        }
+        
+        return super.visitTypeCast(tree, p);
     }
 }

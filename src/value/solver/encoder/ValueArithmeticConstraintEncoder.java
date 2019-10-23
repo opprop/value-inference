@@ -279,6 +279,278 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                 ctx.mkAnd(
                                         ctx.mkNot(left.getIntRange()),
                                         ctx.mkNot(right.getIntRange()))));
+            case LEFT_SHIFT:
+            	// The value of n << s is n left-shifted s bit positions. Equivalent to multiplication by 2 to the power s.
+            	return ctx.mkAnd(
+                        encoding,
+                        ctx.mkNot(res.getStringVal()),
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkOr(
+                                                ctx.mkEq(
+                                                        res.getIntRangeUpper(),
+                                                        ctx.mkMul(
+                                                                left.getIntRangeUpper(),
+                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()))),
+                                                ctx.mkAnd(
+                                                        ctx.mkLt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeUpper(),
+                                                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())),
+                                                                ctx.mkInt(Long.MIN_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                        ctx.mkGt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeUpper(),
+                                                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())),
+                                                                ctx.mkInt(Long.MAX_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MAX_VALUE)))),
+                                        ctx.mkOr(
+                                                ctx.mkEq(
+                                                        res.getIntRangeLower(),
+                                                        ctx.mkMul(
+                                                                left.getIntRangeLower(),
+                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()))),
+                                                ctx.mkAnd(
+                                                        ctx.mkLt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeLower(),
+                                                                        right.getIntRangeLower()),
+                                                                ctx.mkInt(Long.MIN_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                        ctx.mkGt(
+                                                                ctx.mkMul(
+                                                                        left.getIntRangeLower(),
+                                                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())),
+                                                                ctx.mkInt(Long.MAX_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MAX_VALUE))))),
+                                ctx.mkAnd(
+                                        ctx.mkNot(left.getIntRange()),
+                                        ctx.mkNot(right.getIntRange()))));
+            case RIGHT_SHIFT:
+            	// The value of n >> s is n right-shifted s bit positions with sign-extension. Resulting value is ⌊ n / 2s ⌋.
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkNot(res.getStringVal()),
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkEq(
+                                                res.getIntRangeUpper(),
+                                                ctx.mkDiv(
+                                                        left.getIntRangeUpper(),
+                                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()))),
+                                        ctx.mkEq(
+                                                res.getIntRangeLower(),
+                                                ctx.mkDiv(
+                                                        left.getIntRangeLower(),
+                                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())))),
+                                ctx.mkAnd(
+                                        ctx.mkNot(left.getIntRange()),
+                                        ctx.mkNot(right.getIntRange()))));
+            case UNSIGNED_RIGHT_SHIFT:
+            	/* The value of n >>> s is n right-shifted s bit positions with zero-extension:
+				     If n >= 0, then the result is n >> s.
+				     If n < 0, then the result is (n >> s) + (2L << ~s). where ~s == (-s)-1. */
+            	return ctx.mkAnd(
+                        encoding,
+                        ctx.mkNot(res.getStringVal()),
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkOr(
+                                        		ctx.mkAnd(
+                                    				ctx.mkGe(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                    				ctx.mkEq(
+                                                            res.getIntRangeUpper(),
+                                                            ctx.mkDiv(
+                                                                    left.getIntRangeUpper(),
+                                                                    ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())))),
+                                        		ctx.mkAnd(
+	                                                	ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+		                                        		ctx.mkEq(
+		                                                        res.getIntRangeUpper(),
+		                                                        ctx.mkAdd(
+		                                                        	ctx.mkDiv(
+		                                                                left.getIntRangeUpper(),
+		                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())),
+		                                                        	ctx.mkMul(
+		                                                                ctx.mkInt(2),
+		                                                                ctx.mkPower(ctx.mkInt(2), ctx.mkSub(
+		                                                                    ctx.mkMul(ctx.mkInt(-1), right.getIntRangeUpper()), 
+		                                                                    ctx.mkInt(1))))))),
+                                                ctx.mkAnd(
+                                                		ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                                        ctx.mkLt(
+                                                        		ctx.mkAdd(
+    		                                                        	ctx.mkDiv(
+    		                                                                left.getIntRangeUpper(),
+    		                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())),
+    		                                                        	ctx.mkMul(
+    		                                                                ctx.mkInt(2),
+    		                                                                ctx.mkPower(ctx.mkInt(2), ctx.mkSub(
+    		                                                                    ctx.mkMul(ctx.mkInt(-1), right.getIntRangeUpper()), 
+    		                                                                    ctx.mkInt(1))))),
+                                                                ctx.mkInt(Long.MIN_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                                        ctx.mkGt(
+                                                        		ctx.mkAdd(
+    		                                                        	ctx.mkDiv(
+    		                                                                left.getIntRangeUpper(),
+    		                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())),
+    		                                                        	ctx.mkMul(
+    		                                                                ctx.mkInt(2),
+    		                                                                ctx.mkPower(ctx.mkInt(2), ctx.mkSub(
+    		                                                                    ctx.mkMul(ctx.mkInt(-1), right.getIntRangeUpper()), 
+    		                                                                    ctx.mkInt(1))))),
+                                                                ctx.mkInt(Long.MAX_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(Long.MAX_VALUE)))),
+                                        ctx.mkOr(
+                                        		ctx.mkAnd(
+                                    				ctx.mkGe(left.getIntRangeLower(), ctx.mkInt(0)),
+                                    				ctx.mkEq(
+                                                            res.getIntRangeLower(),
+                                                            ctx.mkDiv(
+                                                                    left.getIntRangeLower(),
+                                                                    ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())))),
+                                        		ctx.mkAnd(
+	                                                	ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+		                                        		ctx.mkEq(
+		                                                        res.getIntRangeLower(),
+		                                                        ctx.mkAdd(
+		                                                        	ctx.mkDiv(
+		                                                                left.getIntRangeLower(),
+		                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())),
+		                                                        	ctx.mkMul(
+		                                                                ctx.mkInt(2),
+		                                                                ctx.mkPower(ctx.mkInt(2), ctx.mkSub(
+		                                                                    ctx.mkMul(ctx.mkInt(-1), right.getIntRangeLower()), 
+		                                                                    ctx.mkInt(1))))))),
+                                                ctx.mkAnd(
+                                                		ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                                        ctx.mkLt(
+                                                        		ctx.mkAdd(
+    		                                                        	ctx.mkDiv(
+    		                                                                left.getIntRangeLower(),
+    		                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())),
+    		                                                        	ctx.mkMul(
+    		                                                                ctx.mkInt(2),
+    		                                                                ctx.mkPower(ctx.mkInt(2), ctx.mkSub(
+    		                                                                    ctx.mkMul(ctx.mkInt(-1), right.getIntRangeLower()), 
+    		                                                                    ctx.mkInt(1))))),
+                                                                ctx.mkInt(Long.MIN_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MIN_VALUE))),
+                                                ctx.mkAnd(
+                                                		ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                                        ctx.mkGt(
+                                                        		ctx.mkAdd(
+    		                                                        	ctx.mkDiv(
+    		                                                                left.getIntRangeLower(),
+    		                                                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())),
+    		                                                        	ctx.mkMul(
+    		                                                                ctx.mkInt(2),
+    		                                                                ctx.mkPower(ctx.mkInt(2), ctx.mkSub(
+    		                                                                    ctx.mkMul(ctx.mkInt(-1), right.getIntRangeLower()), 
+    		                                                                    ctx.mkInt(1))))),
+                                                                ctx.mkInt(Long.MAX_VALUE)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(Long.MAX_VALUE))))),
+                                ctx.mkAnd(
+                                        ctx.mkNot(left.getIntRange()),
+                                        ctx.mkNot(right.getIntRange()))));
+            case XOR:
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkNot(res.getStringVal()),
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkEq(
+                                                res.getIntRangeUpper(),
+                                                ctx.mkBV2Int(ctx.mkBVXOR(
+                                                        ctx.mkInt2BV(64, left.getIntRangeUpper()),
+                                                        ctx.mkInt2BV(64, right.getIntRangeUpper())), true)),
+                                        ctx.mkEq(
+                                                res.getIntRangeLower(),
+                                                ctx.mkBV2Int(ctx.mkBVXOR(
+                                                		ctx.mkInt2BV(64, left.getIntRangeUpper()),
+                                                		ctx.mkInt2BV(64, right.getIntRangeUpper())), true))),
+                                ctx.mkAnd(
+                                        ctx.mkNot(left.getIntRange()),
+                                        ctx.mkNot(right.getIntRange()))));
+            case AND:
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkNot(res.getStringVal()),
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkEq(
+                                                res.getIntRangeUpper(),
+                                                ctx.mkBV2Int(ctx.mkBVAND(
+                                                        ctx.mkInt2BV(64, left.getIntRangeUpper()),
+                                                        ctx.mkInt2BV(64, right.getIntRangeUpper())), true)),
+                                        ctx.mkEq(
+                                                res.getIntRangeLower(),
+                                                ctx.mkBV2Int(ctx.mkBVAND(
+                                                		ctx.mkInt2BV(64, left.getIntRangeUpper()),
+                                                		ctx.mkInt2BV(64, right.getIntRangeUpper())), true))),
+                                ctx.mkAnd(
+                                        ctx.mkNot(left.getIntRange()),
+                                        ctx.mkNot(right.getIntRange()))));
+            case OR:
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkNot(res.getStringVal()),
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkEq(
+                                                res.getIntRangeUpper(),
+                                                ctx.mkBV2Int(ctx.mkBVOR(
+                                                        ctx.mkInt2BV(64, left.getIntRangeUpper()),
+                                                        ctx.mkInt2BV(64, right.getIntRangeUpper())), true)),
+                                        ctx.mkEq(
+                                                res.getIntRangeLower(),
+                                                ctx.mkBV2Int(ctx.mkBVOR(
+                                                		ctx.mkInt2BV(64, left.getIntRangeUpper()),
+                                                		ctx.mkInt2BV(64, right.getIntRangeUpper())), true))),
+                                ctx.mkAnd(
+                                        ctx.mkNot(left.getIntRange()),
+                                        ctx.mkNot(right.getIntRange()))));
+                
             default:
                 throw new BugInCF(
                         "Attempting to encode an unsupported arithmetic operation: "

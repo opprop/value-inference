@@ -21,15 +21,19 @@ public class Test {
         return two + 2;
     }
 
-    public char casting(int value) {
+    public byte casting(int value) {
     	value = 254;
-    	value = -1;
-    	return (char)(value & 0xff);
+    	value = 1;
+    	return (byte)(value);
     }
 
     void refineParam(int x, int y) {
         x = 0;
         x = 1;
         y = x;
+    }
+
+    public int left_shift(int value) {
+    	return -8 >>> two;
     }
 }

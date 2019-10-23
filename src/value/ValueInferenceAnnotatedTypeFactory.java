@@ -264,7 +264,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LEFT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -278,7 +281,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -292,7 +298,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case UNSIGNED_RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -306,7 +315,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case AND:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -320,7 +332,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case OR:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -334,7 +349,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case XOR:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -348,7 +366,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case GREATER_THAN:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createComparableVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -362,7 +383,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case GREATER_THAN_EQUAL:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createComparableVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -376,7 +400,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LESS_THAN:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createComparableVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -390,7 +417,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LESS_THAN_EQUAL:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createComparableVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -404,7 +434,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case EQUAL_TO:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createComparableVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -418,7 +451,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case NOT_EQUAL_TO:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        	result =
+                                    slotManager.createComparableVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, binaryTree));
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
