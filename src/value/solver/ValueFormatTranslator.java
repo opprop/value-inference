@@ -1,6 +1,7 @@
 package value.solver;
 
 import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeMirror;
+
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import value.qual.BoolVal;
@@ -65,7 +68,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
     }
 
     @Override
-    protected Z3InferenceValue serializeVarSlot(VariableSlot slot) {
+    protected Z3InferenceValue serializeVarSlot(Slot slot) {
         int slotID = slot.getId();
         if (serializedSlots.containsKey(slotID)) {
             return serializedSlots.get(slotID);
@@ -108,8 +111,74 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
     }
 
     @Override
-    public BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot) {
+    public BoolExpr encodeSlotWellformnessConstraint(Slot slot) {
         Z3InferenceValue value = slot.serialize(this);
+        BoolExpr range = ctx.mkAnd(ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
+        if (slot instanceof VariableSlot) {
+        	VariableSlot vslot = (VariableSlot) slot;
+	        TypeMirror type = vslot.getUnderlyingType();
+	        
+	        switch(type.getKind()) {
+		        case BYTE:
+		        	range = ctx.mkAnd(value.getIntRange(),
+		        			ctx.mkNot(value.getUnknownVal()),
+		        			ctx.mkNot(value.getBoolVal()),
+		        			ctx.mkNot(value.getStringVal()),
+		        			ctx.mkNot(value.getBottomVal()),
+		        			ctx.mkOr(
+		        				ctx.mkAnd(
+		        						ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Byte.MIN_VALUE)),
+		        						  ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Byte.MAX_VALUE))),
+		        				ctx.mkAnd(
+		        						ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+		        						  ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
+		        	break;
+		        case SHORT:
+		        	range = ctx.mkAnd(value.getIntRange(),
+		        			ctx.mkNot(value.getUnknownVal()),
+		        			ctx.mkNot(value.getBoolVal()),
+		        			ctx.mkNot(value.getStringVal()),
+		        			ctx.mkNot(value.getBottomVal()),
+		        			ctx.mkOr(
+	        				ctx.mkAnd(value.getIntRange(),
+	        						ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Short.MIN_VALUE)),
+	        						  ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Short.MAX_VALUE))),
+	        				ctx.mkAnd(value.getIntRange(),
+	        						ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+	        						  ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
+		        	break;
+		        case CHAR:
+		        	range = ctx.mkAnd(value.getIntRange(),
+		        			ctx.mkNot(value.getUnknownVal()),
+		        			ctx.mkNot(value.getBoolVal()),
+		        			ctx.mkNot(value.getStringVal()),
+		        			ctx.mkNot(value.getBottomVal()),
+		        			ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
+		                    ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
+		        	break;
+		        case INT:
+		        	range = ctx.mkAnd(value.getIntRange(),
+		        			ctx.mkNot(value.getUnknownVal()),
+		        			ctx.mkNot(value.getBoolVal()),
+		        			ctx.mkNot(value.getStringVal()),
+		        			ctx.mkNot(value.getBottomVal()),
+		        			ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
+		                    ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
+		        	break;
+		        case LONG:
+		        	range = ctx.mkAnd(value.getIntRange(),
+		        			ctx.mkNot(value.getUnknownVal()),
+		        			ctx.mkNot(value.getBoolVal()),
+		        			ctx.mkNot(value.getStringVal()),
+		        			ctx.mkNot(value.getBottomVal()),
+		        			ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+		                    ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
+		        	break;
+		        default:
+		        	break;
+	        }
+        }
         return ctx.mkAnd(
                 // one hot
                 ctx.mkXor(
@@ -124,13 +193,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                 value.getStringVal(),
                                                 value.getIntRange())))),
                 // min <= from <= to <= max
-                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
-                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)),
+                range,
                 ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
     }
 
     @Override
-    public BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot) {
+    public BoolExpr encodeSlotPreferenceConstraint(Slot slot) {
         Z3InferenceValue value = slot.serialize(this);
         return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
     }

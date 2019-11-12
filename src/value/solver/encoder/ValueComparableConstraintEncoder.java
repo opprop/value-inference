@@ -1,13 +1,14 @@
 package value.solver.encoder;
 
 import checkers.inference.model.ComparableConstraint.ComparableOperationKind;
-import checkers.inference.model.ComparableVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
+
+import org.checkerframework.javacutil.BugInCF;
+
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import value.representation.TypeCheckValue;
@@ -27,71 +28,97 @@ public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEnc
         Z3InferenceValue first = fst.serialize(z3SmtFormatTranslator);
         Z3InferenceValue second = snd.serialize(z3SmtFormatTranslator);
 
-        return ctx.mkOr(
-                valueZ3SmtEncoderUtils.subtype(ctx, first, second),
-                valueZ3SmtEncoderUtils.subtype(ctx, second, first));
+        return ctx.mkAnd(
+                ctx.mkEq(first.getBottomVal(), second.getBottomVal()),
+                ctx.mkEq(first.getUnknownVal(), second.getUnknownVal()),
+                ctx.mkEq(first.getBoolVal(), second.getBoolVal()),
+                ctx.mkEq(first.getStringVal(), second.getStringVal()),
+                ctx.mkEq(first.getIntRange(), second.getIntRange()));
     }
     
     protected BoolExpr encode(ComparableOperationKind operation,
-            VariableSlot fst,
-            VariableSlot snd,
-            ComparableVariableSlot result) {
-        Z3InferenceValue first = fst.serialize(z3SmtFormatTranslator);
-        Z3InferenceValue second = snd.serialize(z3SmtFormatTranslator);
+            Slot first,
+            Slot second) {
+        Z3InferenceValue fst = first.serialize(z3SmtFormatTranslator);
+        Z3InferenceValue snd = second.serialize(z3SmtFormatTranslator);
+        
+        BoolExpr encoding = ctx.mkAnd(
+                ctx.mkEq(fst.getBottomVal(), snd.getBottomVal()),
+                ctx.mkEq(fst.getUnknownVal(), snd.getUnknownVal()),
+                ctx.mkEq(fst.getBoolVal(), snd.getBoolVal()),
+                ctx.mkEq(fst.getStringVal(), snd.getStringVal()),
+                ctx.mkEq(fst.getIntRange(), snd.getIntRange()));
+        		
+        switch (operation) {
+		    case EQUAL_TO:
+				break;
+		    case NOT_EQUAL_TO:
+		    	break;
+		    case GREATER_THAN:
+		    	break;
+		    case GREATER_THAN_EQUAL:
+		    	break;
+		    case LESS_THAN:
+		    	break;
+		    case LESS_THAN_EQUAL:
+		    	break;
+		    default:
+		    	throw new BugInCF(
+                        "Attempting to encode an unsupported comparable operation: "
+                                + operation
+                                + " first: "
+                                + first
+                                + " second: "
+                                + second);
+        }
 
-        return ctx.mkOr(
-                valueZ3SmtEncoderUtils.subtype(ctx, first, second),
-                valueZ3SmtEncoderUtils.subtype(ctx, second, first));
+        return encoding;
     }
 
     @Override
-    public BoolExpr encodeVariable_Variable(VariableSlot fst, VariableSlot snd) {
+    public BoolExpr encodeVariable_Variable(Slot fst, Slot snd) {
         return encode(fst, snd);
     }
 
     @Override
-    public BoolExpr encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
+    public BoolExpr encodeVariable_Constant(Slot fst, ConstantSlot snd) {
         return encode(fst, snd);
     }
 
     @Override
-    public BoolExpr encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
+    public BoolExpr encodeConstant_Variable(ConstantSlot fst, Slot snd) {
         return encode(fst, snd);
     }
     
     @Override
     public BoolExpr encodeVariable_Variable(
             ComparableOperationKind operation,
-            VariableSlot first,
-            VariableSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            Slot fst,
+            Slot snd) {
+        return encode(operation, fst, snd);
     }
 
     @Override
     public BoolExpr encodeVariable_Constant(
     		ComparableOperationKind operation,
-            VariableSlot first,
-            ConstantSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            Slot fst,
+            ConstantSlot snd) {
+        return encode(operation, fst, snd);
     }
 
     @Override
     public BoolExpr encodeConstant_Variable(
     		ComparableOperationKind operation,
-            ConstantSlot first,
-            VariableSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            ConstantSlot fst,
+            Slot snd) {
+        return encode(operation, fst, snd);
     }
 
     @Override
     public BoolExpr encodeConstant_Constant(
     		ComparableOperationKind operation,
-            ConstantSlot first,
-            ConstantSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            ConstantSlot fst,
+            ConstantSlot snd) {
+        return encode(operation, fst, snd);
     }
 }

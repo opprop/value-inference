@@ -4,7 +4,6 @@ import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
@@ -323,7 +322,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkLt(
                                                                 ctx.mkMul(
                                                                         left.getIntRangeLower(),
-                                                                        right.getIntRangeLower()),
+                                                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())),
                                                                 ctx.mkInt(Long.MIN_VALUE)),
                                                         ctx.mkEq(
                                                                 res.getIntRangeLower(),
@@ -567,8 +566,8 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
     @Override
     public BoolExpr encodeVariable_Variable(
             ArithmeticOperationKind operation,
-            VariableSlot leftOperand,
-            VariableSlot rightOperand,
+            Slot leftOperand,
+            Slot rightOperand,
             ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
@@ -576,7 +575,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
     @Override
     public BoolExpr encodeVariable_Constant(
             ArithmeticOperationKind operation,
-            VariableSlot leftOperand,
+            Slot leftOperand,
             ConstantSlot rightOperand,
             ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
@@ -586,7 +585,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
     public BoolExpr encodeConstant_Variable(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
-            VariableSlot rightOperand,
+            Slot rightOperand,
             ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
