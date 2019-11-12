@@ -366,10 +366,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case GREATER_THAN:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
-                                    slotManager.createComparableVariableSlot(
-                                            VariableAnnotator.treeToLocation(
-                                                    inferenceTypeFactory, binaryTree));
+                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -383,10 +380,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case GREATER_THAN_EQUAL:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
-                                    slotManager.createComparableVariableSlot(
-                                            VariableAnnotator.treeToLocation(
-                                                    inferenceTypeFactory, binaryTree));
+                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -400,10 +394,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LESS_THAN:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
-                                    slotManager.createComparableVariableSlot(
-                                            VariableAnnotator.treeToLocation(
-                                                    inferenceTypeFactory, binaryTree));
+                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -417,10 +408,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LESS_THAN_EQUAL:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
-                                    slotManager.createComparableVariableSlot(
-                                            VariableAnnotator.treeToLocation(
-                                                    inferenceTypeFactory, binaryTree));
+                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -434,10 +422,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case EQUAL_TO:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
-                                    slotManager.createComparableVariableSlot(
-                                            VariableAnnotator.treeToLocation(
-                                                    inferenceTypeFactory, binaryTree));
+                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
@@ -451,10 +436,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case NOT_EQUAL_TO:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
-                                    slotManager.createComparableVariableSlot(
-                                            VariableAnnotator.treeToLocation(
-                                                    inferenceTypeFactory, binaryTree));
+                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
                             break;
                         }
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)

@@ -1,7 +1,6 @@
 package value.solver.encoder;
 
 import checkers.inference.model.ComparableConstraint.ComparableOperationKind;
-import checkers.inference.model.ComparableVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -34,8 +33,7 @@ public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEnc
     
     protected BoolExpr encode(ComparableOperationKind operation,
             VariableSlot fst,
-            VariableSlot snd,
-            ComparableVariableSlot result) {
+            VariableSlot snd) {
         Z3InferenceValue first = fst.serialize(z3SmtFormatTranslator);
         Z3InferenceValue second = snd.serialize(z3SmtFormatTranslator);
 
@@ -63,35 +61,31 @@ public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEnc
     public BoolExpr encodeVariable_Variable(
             ComparableOperationKind operation,
             VariableSlot first,
-            VariableSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            VariableSlot second) {
+        return encode(operation, first, second);
     }
 
     @Override
     public BoolExpr encodeVariable_Constant(
     		ComparableOperationKind operation,
             VariableSlot first,
-            ConstantSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            ConstantSlot second) {
+        return encode(operation, first, second);
     }
 
     @Override
     public BoolExpr encodeConstant_Variable(
     		ComparableOperationKind operation,
             ConstantSlot first,
-            VariableSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            VariableSlot second) {
+        return encode(operation, first, second);
     }
 
     @Override
     public BoolExpr encodeConstant_Constant(
     		ComparableOperationKind operation,
             ConstantSlot first,
-            ConstantSlot second,
-            ComparableVariableSlot result) {
-        return encode(operation, first, second, result);
+            ConstantSlot second) {
+        return encode(operation, first, second);
     }
 }

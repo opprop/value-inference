@@ -9,7 +9,6 @@ import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ComparableConstraint.ComparableOperationKind;
-import checkers.inference.model.ComparableVariableSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -104,10 +103,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     if (lhsAMVal == null || rhsAMVal == null) {
                     	ComparableOperationKind opKindplus =
                     			ComparableOperationKind.fromTreeKind(kind);
-                    	ComparableVariableSlot avsResplus =
-                                slotManager.getComparableVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
-                        constraintManager.addComparableConstraint(opKindplus, lhs, rhs, avsResplus);
+                        constraintManager.addComparableConstraint(opKindplus, lhs, rhs);
                         break;
                     }
                     if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class)
