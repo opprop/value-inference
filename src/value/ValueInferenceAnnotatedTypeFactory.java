@@ -7,14 +7,14 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
+import checkers.inference.qual.VarAnnot;
+
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.LiteralTree;
-import com.sun.source.tree.Tree.Kind;
-import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
 
 import java.util.ArrayList;
@@ -28,14 +28,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueCheckerUtils;
-import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
-import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
@@ -79,7 +76,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new ValueInferencePropagationTreeAnnotator(this),
                 new ValueInferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
@@ -109,6 +105,49 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         public Void visitCompoundAssignment(CompoundAssignmentTree node, AnnotatedTypeMirror type) {
         	variableAnnotator.visit(type, node);
             return null;
+        }
+        
+        @Override
+        public Void visitLiteral(final LiteralTree tree, AnnotatedTypeMirror type) {
+            if (!handledByValueChecker(type)) {
+                return null;
+            }
+            Object value = tree.getValue();
+            switch (tree.getKind()) {
+                case BOOLEAN_LITERAL:
+                    AnnotationMirror boolAnno =
+                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
+                    replaceATM(type, boolAnno);
+                    return null;
+                case CHAR_LITERAL:
+                    AnnotationMirror charAnno =
+                            createCharAnnotation(Collections.singletonList((Character) value));
+                    replaceATM(type, charAnno);
+                    return null;
+                case DOUBLE_LITERAL:
+                case FLOAT_LITERAL:
+                case INT_LITERAL:
+                case LONG_LITERAL:
+                    AnnotationMirror numberAnno =
+                            createNumberAnnotationMirror(Collections.singletonList((Number) value));
+                    replaceATM(type, numberAnno);
+                    return null;
+                case STRING_LITERAL:
+                    AnnotationMirror stringAnno =
+                            createStringAnnotation(Collections.singletonList((String) value));
+                    replaceATM(type, stringAnno);
+                    return null;
+                default:
+                    return super.visitLiteral(tree, type);
+            }
+        }
+        
+        private void replaceATM(AnnotatedTypeMirror atm, AnnotationMirror dataflowAM) {
+            final ConstantSlot cs = slotManager.createConstantSlot(dataflowAM);
+            slotManager.createConstantSlot(dataflowAM);
+            AnnotationBuilder ab = new AnnotationBuilder(realTypeFactory.getProcessingEnv(), VarAnnot.class);
+            ab.setValue("value", cs.getId());
+            atm.replaceAnnotation(ab.build());
         }
     }
 
@@ -655,55 +694,11 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             }
         }
     }
-
-    private final class ValueInferencePropagationTreeAnnotator extends PropagationTreeAnnotator {
-        public ValueInferencePropagationTreeAnnotator(AnnotatedTypeFactory factory) {
-            super(factory);
-        }
-
-        @Override
-        public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
-            if (!handledByValueChecker(type)) {
-                return null;
-            }
-            Object value = tree.getValue();
-            switch (tree.getKind()) {
-                case BOOLEAN_LITERAL:
-                    AnnotationMirror boolAnno =
-                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
-                    type.replaceAnnotation(boolAnno);
-                    return null;
-
-                case CHAR_LITERAL:
-                    AnnotationMirror charAnno =
-                            createCharAnnotation(Collections.singletonList((Character) value));
-                    type.replaceAnnotation(charAnno);
-                    return null;
-
-                case DOUBLE_LITERAL:
-                case FLOAT_LITERAL:
-                case INT_LITERAL:
-                case LONG_LITERAL:
-                    AnnotationMirror numberAnno =
-                            createNumberAnnotationMirror(Collections.singletonList((Number) value));
-                    type.replaceAnnotation(numberAnno);
-                    return null;
-                case STRING_LITERAL:
-                    AnnotationMirror stringAnno =
-                            createStringAnnotation(Collections.singletonList((String) value));
-                    type.replaceAnnotation(stringAnno);
-                    return null;
-                default:
-                    return null;
-            }
-        }
-
-
-        /** Returns true iff the given type is in the domain of the Constant Value Checker. */
-        private boolean handledByValueChecker(AnnotatedTypeMirror type) {
-            TypeMirror tm = type.getUnderlyingType();
-            return COVERED_CLASS_STRINGS.contains(tm.toString());
-        }
+    
+    /** Returns true iff the given type is in the domain of the Constant Value Checker. */
+    private boolean handledByValueChecker(AnnotatedTypeMirror type) {
+        TypeMirror tm = type.getUnderlyingType();
+        return COVERED_CLASS_STRINGS.contains(tm.toString());
     }
 
     /**
