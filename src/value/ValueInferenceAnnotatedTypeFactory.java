@@ -7,12 +7,16 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
-import checkers.inference.model.VariableSlot;
+import checkers.inference.model.Slot;
+import checkers.inference.qual.VarAnnot;
+
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.LiteralTree;
-import com.sun.source.tree.Tree.Kind;
-import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.UnaryTree;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,13 +28,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueCheckerUtils;
-import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
-import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
@@ -74,7 +76,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new ValueInferencePropagationTreeAnnotator(this),
                 new ValueInferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
@@ -92,6 +93,61 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     realAnnotatedTypeFactory,
                     variableAnnotator,
                     slotManager);
+        }
+        
+        @Override
+        public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
+        	variableAnnotator.visit(type, node);
+            return null;
+        }
+        
+        @Override
+        public Void visitCompoundAssignment(CompoundAssignmentTree node, AnnotatedTypeMirror type) {
+        	variableAnnotator.visit(type, node);
+            return null;
+        }
+        
+        @Override
+        public Void visitLiteral(final LiteralTree tree, AnnotatedTypeMirror type) {
+            if (!handledByValueChecker(type)) {
+                return null;
+            }
+            Object value = tree.getValue();
+            switch (tree.getKind()) {
+                case BOOLEAN_LITERAL:
+                    AnnotationMirror boolAnno =
+                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
+                    replaceATM(type, boolAnno);
+                    return null;
+                case CHAR_LITERAL:
+                    AnnotationMirror charAnno =
+                            createCharAnnotation(Collections.singletonList((Character) value));
+                    replaceATM(type, charAnno);
+                    return null;
+                case DOUBLE_LITERAL:
+                case FLOAT_LITERAL:
+                case INT_LITERAL:
+                case LONG_LITERAL:
+                    AnnotationMirror numberAnno =
+                            createNumberAnnotationMirror(Collections.singletonList((Number) value));
+                    replaceATM(type, numberAnno);
+                    return null;
+                case STRING_LITERAL:
+                    AnnotationMirror stringAnno =
+                            createStringAnnotation(Collections.singletonList((String) value));
+                    replaceATM(type, stringAnno);
+                    return null;
+                default:
+                    return super.visitLiteral(tree, type);
+            }
+        }
+        
+        private void replaceATM(AnnotatedTypeMirror atm, AnnotationMirror dataflowAM) {
+            final ConstantSlot cs = slotManager.createConstantSlot(dataflowAM);
+            slotManager.createConstantSlot(dataflowAM);
+            AnnotationBuilder ab = new AnnotationBuilder(realTypeFactory.getProcessingEnv(), VarAnnot.class);
+            ab.setValue("value", cs.getId());
+            atm.replaceAnnotation(ab.build());
         }
     }
 
@@ -163,13 +219,14 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         this.inferenceTypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
                 AnnotatedTypeMirror rhsATM =
                         this.inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+                
                 AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
                 AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
                 // grab slots for the component (only for lub slot)
-                VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
-                VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+                Slot lhs = slotManager.getVariableSlot(lhsATM);
+                Slot rhs = slotManager.getVariableSlot(rhsATM);
 
-                VariableSlot result;
+                Slot result;
                 switch (binaryTree.getKind()) {
                     case PLUS:
                         if (TreeUtils.isStringConcatenation(binaryTree)) {
@@ -460,98 +517,188 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
                 Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
                 resultSet.add(resultAM);
-                final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair =
+                final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair =
                         Pair.of(slotManager.getVariableSlot(atm), resultSet);
                 treeToVarAnnoPair.put(binaryTree, varATMPair);
             }
         }
+        
+        @Override
+        public void handleCompoundAssignmentTree(AnnotatedTypeMirror atm, CompoundAssignmentTree tree) {
+            if (treeToVarAnnoPair.containsKey(tree)) {
+            	atm.replaceAnnotations(
+                        (Iterable) ((Pair) this.treeToVarAnnoPair.get(tree)).second);
+            } else {
+            	AnnotatedTypeMirror exprATM =
+                        this.inferenceTypeFactory.getAnnotatedType(tree.getExpression());
+            	AnnotatedTypeMirror varATM =
+                        this.inferenceTypeFactory.getAnnotatedType(tree.getVariable());
+                AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
+                AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
+                // grab slots for the component (only for lub slot)
+                Slot lhs = slotManager.getVariableSlot(exprATM);
+                Slot rhs = slotManager.getVariableSlot(varATM);
+
+                Slot result;
+                switch (tree.getKind()) {
+                    case PLUS_ASSIGNMENT:
+                    	if (exprAM == null || varAM == null) {
+                        	result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, tree));
+                            break;
+                        }
+                    	if (AnnotationUtils.areSameByClass(exprAM, IntRange.class)) {
+                            Range range = getRange(exprAM).plus(getRange(varAM));
+                            result =
+                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                    case MINUS_ASSIGNMENT:
+                        if (exprAM == null || varAM == null) {
+                            result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, tree));
+                            break;
+                        }
+                        if (AnnotationUtils.areSameByClass(exprAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(varAM, IntRange.class)) {
+                            Range range = getRange(exprAM).minus(getRange(varAM));
+                            result =
+                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                        break;
+                    case MULTIPLY_ASSIGNMENT:
+                        if (exprAM == null || varAM == null) {
+                            result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, tree));
+                            break;
+                        }
+                        if (AnnotationUtils.areSameByClass(exprAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(varAM, IntRange.class)) {
+                            Range range = getRange(exprAM).times(getRange(varAM));
+                            result =
+                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                        break;
+                    case DIVIDE_ASSIGNMENT:
+                        if (exprAM == null || varAM == null) {
+                            result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, tree));
+                            break;
+                        }
+                        if (AnnotationUtils.areSameByClass(exprAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(varAM, IntRange.class)) {
+                            Range range = getRange(exprAM).divide(getRange(varAM));
+                            result =
+                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                        break;
+                    case REMAINDER_ASSIGNMENT:
+                        if (exprAM == null || varAM == null) {
+                            result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, tree));
+                            break;
+                        }
+                        if (AnnotationUtils.areSameByClass(exprAM, IntRange.class)
+                                && AnnotationUtils.areSameByClass(varAM, IntRange.class)) {
+                            Range range = getRange(exprAM).remainder(getRange(varAM));
+                            result =
+                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                        } else {
+                            result = slotManager.createLubVariableSlot(lhs, rhs);
+                        }
+                        break;
+                    default:
+                    	result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
+                }
+                
+                // insert varAnnot of the slot into the ATM
+                AnnotationMirror resultAM = slotManager.getAnnotation(result);
+                atm.clearAnnotations();
+                atm.replaceAnnotation(resultAM);
+
+                Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
+                resultSet.add(resultAM);
+                final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair =
+                        Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                treeToVarAnnoPair.put(tree, varATMPair);
+            }
+        }
+        
+        @Override
+        public void handleUnaryTree(AnnotatedTypeMirror atm, UnaryTree tree) {
+            if (this.treeToVarAnnoPair.containsKey(tree)) {
+                atm.replaceAnnotations(
+                        (Iterable) ((Pair) this.treeToVarAnnoPair.get(tree)).second);
+            } else {
+                AnnotatedTypeMirror exprATM =
+                        this.inferenceTypeFactory.getAnnotatedType(tree.getExpression());
+                AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
+
+                Slot result;
+                switch (tree.getKind()) {
+                    case UNARY_MINUS:
+                        if (exprAM == null) {
+                            result =
+                                    slotManager.createArithmeticVariableSlot(
+                                            VariableAnnotator.treeToLocation(
+                                                    inferenceTypeFactory, tree));
+                            // insert varAnnot of the slot into the ATM
+                            AnnotationMirror resultAM = slotManager.getAnnotation(result);
+                            atm.clearAnnotations();
+                            atm.replaceAnnotation(resultAM);
+
+                            Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
+                            resultSet.add(resultAM);
+                            final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair =
+                                    Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                            treeToVarAnnoPair.put(tree, varATMPair);
+                            break;
+                        }
+                        if (AnnotationUtils.areSameByClass(exprAM, IntRange.class)) {
+                            Range range = getRange(exprAM).unaryMinus();
+                            result =
+                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
+                            
+                            // insert varAnnot of the slot into the ATM
+                            AnnotationMirror resultAM = slotManager.getAnnotation(result);
+                            atm.clearAnnotations();
+                            atm.replaceAnnotation(resultAM);
+
+                            Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
+                            resultSet.add(resultAM);
+                            final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair =
+                                    Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                            treeToVarAnnoPair.put(tree, varATMPair);
+                        }
+                    default:
+                        break;
+                }
+            }
+        }
     }
-
-    private final class ValueInferencePropagationTreeAnnotator extends PropagationTreeAnnotator {
-        public ValueInferencePropagationTreeAnnotator(AnnotatedTypeFactory factory) {
-            super(factory);
-        }
-
-        @Override
-        public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
-            if (!handledByValueChecker(type)) {
-                return null;
-            }
-            Object value = tree.getValue();
-            switch (tree.getKind()) {
-                case BOOLEAN_LITERAL:
-                    AnnotationMirror boolAnno =
-                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
-                    type.replaceAnnotation(boolAnno);
-                    return null;
-
-                case CHAR_LITERAL:
-                    AnnotationMirror charAnno =
-                            createCharAnnotation(Collections.singletonList((Character) value));
-                    type.replaceAnnotation(charAnno);
-                    return null;
-
-                case DOUBLE_LITERAL:
-                case FLOAT_LITERAL:
-                case INT_LITERAL:
-                case LONG_LITERAL:
-                    AnnotationMirror numberAnno =
-                            createNumberAnnotationMirror(Collections.singletonList((Number) value));
-                    type.replaceAnnotation(numberAnno);
-                    return null;
-                case STRING_LITERAL:
-                    AnnotationMirror stringAnno =
-                            createStringAnnotation(Collections.singletonList((String) value));
-                    type.replaceAnnotation(stringAnno);
-                    return null;
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
-            if (handledByValueChecker(atm)) {
-                AnnotationMirror oldAnno =
-                        getAnnotatedType(tree.getExpression()).getAnnotationInHierarchy(UNKNOWNVAL);
-                if (oldAnno == null) {
-                    return null;
-                }
-                TypeMirror newType = atm.getUnderlyingType();
-                AnnotationMirror newAnno;
-
-                if (TypesUtils.isString(newType) || newType.getKind() == TypeKind.ARRAY) {
-                    // Strings and arrays do not allow conversions
-                    newAnno = oldAnno;
-                } else if (AnnotationUtils.areSameByClass(oldAnno, IntRange.class)) {
-                    Class<?> newClass = ValueCheckerUtils.getClassFromType(newType);
-                    Range range = getRange(oldAnno);
-                    if (newClass == String.class) {
-                        newAnno = UNKNOWNVAL;
-                    } else if (newClass == Boolean.class || newClass == boolean.class) {
-                        throw new UnsupportedOperationException(
-                                "ValueAnnotatedTypeFactory: can't convert int to boolean");
-                    } else {
-                        newAnno = createIntRangeAnnotation(NumberUtils.castRange(newType, range));
-                    }
-                } else {
-                    List<?> values = ValueCheckerUtils.getValuesCastedToType(oldAnno, newType);
-                    newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
-                }
-                atm.addMissingAnnotations(Collections.singleton(newAnno));
-            } else if (atm.getKind() == TypeKind.ARRAY) {
-                if (tree.getExpression().getKind() == Kind.NULL_LITERAL) {
-                    atm.addMissingAnnotations(Collections.singleton(BOTTOMVAL));
-                }
-            }
-            return null;
-        }
-
-        /** Returns true iff the given type is in the domain of the Constant Value Checker. */
-        private boolean handledByValueChecker(AnnotatedTypeMirror type) {
-            TypeMirror tm = type.getUnderlyingType();
-            return COVERED_CLASS_STRINGS.contains(tm.toString());
-        }
+    
+    /** Returns true iff the given type is in the domain of the Constant Value Checker. */
+    private boolean handledByValueChecker(AnnotatedTypeMirror type) {
+        TypeMirror tm = type.getUnderlyingType();
+        return COVERED_CLASS_STRINGS.contains(tm.toString());
     }
 
     /**
@@ -751,7 +898,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
      * Create an {@code @IntRange} annotation from the two (inclusive) bounds. Does not return
      * BOTTOMVAL or UNKNOWNVAL.
      */
-    private AnnotationMirror createIntRangeAnnotation(long from, long to) {
+    public AnnotationMirror createIntRangeAnnotation(long from, long to) {
         assert from <= to;
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, IntRange.class);
         builder.setValue("from", from);
