@@ -59,6 +59,9 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             AnnotationMirror rhsAMVal = rhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
             Slot lhs = slotManager.getSlot(lhsAM);
             Slot rhs = slotManager.getSlot(rhsAM);
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println(lhsAM);
+            System.out.println(binaryTree.getLeftOperand());
 
             Kind kind = binaryTree.getKind();
             switch (kind) {
@@ -103,9 +106,9 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL:
                     if (lhsAMVal == null || rhsAMVal == null) {
-                    	ComparableOperationKind opKindplus =
-                    			ComparableOperationKind.fromTreeKind(kind);
-                        constraintManager.addComparableConstraint(opKindplus, lhs, rhs);
+//                    	ComparableOperationKind opKindplus =
+//                    			ComparableOperationKind.fromTreeKind(kind);
+//                        constraintManager.addComparableConstraint(opKindplus, lhs, rhs);
                         break;
                     }
                     if (AnnotationUtils.areSameByClass(lhsAMVal, IntRange.class)
@@ -160,7 +163,10 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         ArithmeticVariableSlot avsResplus =
                                 slotManager.getArithmeticVariableSlot(
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
-                        constraintManager.addArithmeticConstraint(opKindplus, lhs, rhs, avsResplus);
+                    	System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    	System.out.println(tree);
+
+                        //constraintManager.addArithmeticConstraint(opKindplus, lhs, rhs, avsResplus);
                         break;
                     }
                     if (AnnotationUtils.areSameByClass(exprAMVal, IntRange.class)
@@ -175,6 +181,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     constraintManager.addSubtypeConstraint(rhs, lubSlot);
                     break;
             }
+            return null;
         }
 
         return super.visitCompoundAssignment(tree, p);

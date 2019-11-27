@@ -3,7 +3,7 @@ package value.solver.encoder;
 import checkers.inference.model.ComparableConstraint.ComparableOperationKind;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
-import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
 
@@ -23,18 +23,6 @@ public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEnc
             Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> formatTranslator) {
         super(lattice, ctx, formatTranslator);
     }
-
-    protected BoolExpr encode(Slot fst, Slot snd) {
-        Z3InferenceValue first = fst.serialize(z3SmtFormatTranslator);
-        Z3InferenceValue second = snd.serialize(z3SmtFormatTranslator);
-
-        return ctx.mkAnd(
-                ctx.mkEq(first.getBottomVal(), second.getBottomVal()),
-                ctx.mkEq(first.getUnknownVal(), second.getUnknownVal()),
-                ctx.mkEq(first.getBoolVal(), second.getBoolVal()),
-                ctx.mkEq(first.getStringVal(), second.getStringVal()),
-                ctx.mkEq(first.getIntRange(), second.getIntRange()));
-    }
     
     protected BoolExpr encode(ComparableOperationKind operation,
             Slot first,
@@ -50,6 +38,8 @@ public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEnc
                 ctx.mkEq(fst.getIntRange(), snd.getIntRange()));
         		
         switch (operation) {
+            case REFERENCE:
+        	    break;
 		    case EQUAL_TO:
 				break;
 		    case NOT_EQUAL_TO:
@@ -72,21 +62,6 @@ public class ValueComparableConstraintEncoder extends ValueAbstractConstraintEnc
                                 + second);
         }
         return encoding;
-    }
-
-    @Override
-    public BoolExpr encodeVariable_Variable(Slot fst, Slot snd) {
-        return encode(fst, snd);
-    }
-
-    @Override
-    public BoolExpr encodeVariable_Constant(Slot fst, ConstantSlot snd) {
-        return encode(fst, snd);
-    }
-
-    @Override
-    public BoolExpr encodeConstant_Variable(ConstantSlot fst, Slot snd) {
-        return encode(fst, snd);
     }
     
     @Override

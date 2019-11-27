@@ -1,7 +1,7 @@
 package value.solver.encoder;
 
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
-import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;

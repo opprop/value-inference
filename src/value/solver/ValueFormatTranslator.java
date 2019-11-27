@@ -5,6 +5,7 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
+import checkers.inference.solver.backend.z3smt.encoder.Z3SmtSoftConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import value.qual.StringVal;
 import value.qual.UnknownVal;
 import value.representation.TypeCheckValue;
 import value.solver.encoder.ValueConstraintEncoderFactory;
+import value.solver.encoder.ValueZ3SmtSoftConstraintEncoder;
 import value.solver.representation.Z3InferenceValue;
 
 public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> {
@@ -267,4 +269,9 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
     protected ConstraintEncoderFactory<BoolExpr> createConstraintEncoderFactory() {
         return new ValueConstraintEncoderFactory(lattice, ctx, this);
     }
+
+	@Override
+	protected Z3SmtSoftConstraintEncoder<Z3InferenceValue, TypeCheckValue> createSoftConstraintEncoder() {
+		return new ValueZ3SmtSoftConstraintEncoder(lattice, ctx, this);
+	}
 }

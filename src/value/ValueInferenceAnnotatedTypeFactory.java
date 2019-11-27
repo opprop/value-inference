@@ -525,6 +525,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         
         @Override
         public void handleCompoundAssignmentTree(AnnotatedTypeMirror atm, CompoundAssignmentTree tree) {
+
             if (treeToVarAnnoPair.containsKey(tree)) {
             	atm.replaceAnnotations(
                         (Iterable) ((Pair) this.treeToVarAnnoPair.get(tree)).second);
@@ -542,7 +543,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Slot result;
                 switch (tree.getKind()) {
                     case PLUS_ASSIGNMENT:
+                    	if (TreeUtils.isStringConcatenation(tree)) {
+                            result =
+                                    slotManager.createConstantSlot(
+                                            AnnotationBuilder.fromClass(elements, StringVal.class));
+                            break;
+                        }
                     	if (exprAM == null || varAM == null) {
+                    		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                    		System.out.println(tree);
                         	result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(

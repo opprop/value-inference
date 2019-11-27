@@ -4,6 +4,7 @@ import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
+import checkers.inference.solver.backend.z3smt.Z3SmtSolver;
 import checkers.inference.solver.backend.z3smt.Z3SmtSolverFactory;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
@@ -27,6 +28,6 @@ public class ValueSolverFactory extends Z3SmtSolverFactory<Z3InferenceValue, Typ
             Lattice lattice) {
         Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> formatTranslator =
                 createFormatTranslator(lattice);
-        return new ValueSolver(solverEnvironment, slots, constraints, formatTranslator, lattice);
+        return new Z3SmtSolver(solverEnvironment, slots, constraints, formatTranslator, lattice);
     }
 }
