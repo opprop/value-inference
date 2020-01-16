@@ -6,6 +6,12 @@ public class Test {
     boolean no = false;
     int two = 2;
 
+    public int add() {
+        int sum = 2;
+        sum = -6 * sum;
+        return sum;
+    }
+
     public int testing(int value) {
         if (two + 2 == 4){
         	return 0;
@@ -40,5 +46,25 @@ public class Test {
         x = 0;
         x = 1;
         y = x;
+    }
+
+    int forloop() {
+        int x;
+        int sum = 0;
+        int max = 5;
+        for (x = 0; sum < max; x++) {
+            sum++;
+        }
+        return sum;
+    }
+    
+    int whileloop(int max) {
+        int x = 0;
+        int sum = 0;
+        while ( x < max ) {
+            sum++;
+            x++;
+        }
+        return sum;
     }
 }

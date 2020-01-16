@@ -121,96 +121,82 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         if (slot instanceof VariableSlot) {
             VariableSlot vslot = (VariableSlot) slot;
             TypeMirror type = vslot.getUnderlyingType();
-
-            switch (type.getKind()) {
-                case BYTE:
-                    range =
-                            ctx.mkAnd(
-                                    value.getIntRange(),
-                                    ctx.mkNot(value.getUnknownVal()),
-                                    ctx.mkNot(value.getBoolVal()),
-                                    ctx.mkNot(value.getStringVal()),
-                                    ctx.mkNot(value.getBottomVal()),
-                                    ctx.mkOr(
-                                            ctx.mkAnd(
-                                                    ctx.mkGe(
-                                                            value.getIntRangeLower(),
-                                                            ctx.mkInt(Byte.MIN_VALUE)),
-                                                    ctx.mkLe(
-                                                            value.getIntRangeUpper(),
-                                                            ctx.mkInt(Byte.MAX_VALUE))),
-                                            ctx.mkAnd(
-                                                    ctx.mkGe(
-                                                            value.getIntRangeLower(), ctx.mkInt(0)),
-                                                    ctx.mkLe(
-                                                            value.getIntRangeUpper(),
-                                                            ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
-                    break;
-                case SHORT:
-                    range =
-                            ctx.mkAnd(
-                                    value.getIntRange(),
-                                    ctx.mkNot(value.getUnknownVal()),
-                                    ctx.mkNot(value.getBoolVal()),
-                                    ctx.mkNot(value.getStringVal()),
-                                    ctx.mkNot(value.getBottomVal()),
-                                    ctx.mkOr(
-                                            ctx.mkAnd(
-                                                    value.getIntRange(),
-                                                    ctx.mkGe(
-                                                            value.getIntRangeLower(),
-                                                            ctx.mkInt(Short.MIN_VALUE)),
-                                                    ctx.mkLe(
-                                                            value.getIntRangeUpper(),
-                                                            ctx.mkInt(Short.MAX_VALUE))),
-                                            ctx.mkAnd(
-                                                    value.getIntRange(),
-                                                    ctx.mkGe(
-                                                            value.getIntRangeLower(), ctx.mkInt(0)),
-                                                    ctx.mkLe(
-                                                            value.getIntRangeUpper(),
-                                                            ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
-                    break;
-                case CHAR:
-                    range =
-                            ctx.mkAnd(
-                                    value.getIntRange(),
-                                    ctx.mkNot(value.getUnknownVal()),
-                                    ctx.mkNot(value.getBoolVal()),
-                                    ctx.mkNot(value.getStringVal()),
-                                    ctx.mkNot(value.getBottomVal()),
-                                    ctx.mkGe(
-                                            value.getIntRangeLower(),
-                                            ctx.mkInt(Character.MIN_VALUE)),
-                                    ctx.mkLe(
-                                            value.getIntRangeUpper(),
-                                            ctx.mkInt(Character.MAX_VALUE)));
-                    break;
-                case INT:
-                    range =
-                            ctx.mkAnd(
-                                    ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-                                    ctx.mkNot(value.getBoolVal()),
-                                    ctx.mkNot(value.getStringVal()),
-                                    ctx.mkNot(value.getBottomVal()),
-                                    ctx.mkGe(
-                                            value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
-                                    ctx.mkLe(
-                                            value.getIntRangeUpper(),
-                                            ctx.mkInt(Integer.MAX_VALUE)));
-                    break;
-                case LONG:
-                    range =
-                            ctx.mkAnd(
-                                    ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-                                    ctx.mkNot(value.getBoolVal()),
-                                    ctx.mkNot(value.getStringVal()),
-                                    ctx.mkNot(value.getBottomVal()),
-                                    ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
-                                    ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
-                    break;
-                default:
-                    break;
+            if (type.toString().equals("byte") || type.toString().equals("java.lang.Byte")) {
+                range =
+                        ctx.mkAnd(
+                                value.getIntRange(),
+                                ctx.mkNot(value.getUnknownVal()),
+                                ctx.mkNot(value.getBoolVal()),
+                                ctx.mkNot(value.getStringVal()),
+                                ctx.mkNot(value.getBottomVal()),
+                                ctx.mkOr(
+                                        ctx.mkAnd(
+                                                ctx.mkGe(
+                                                        value.getIntRangeLower(),
+                                                        ctx.mkInt(Byte.MIN_VALUE)),
+                                                ctx.mkLe(
+                                                        value.getIntRangeUpper(),
+                                                        ctx.mkInt(Byte.MAX_VALUE))),
+                                        ctx.mkAnd(
+                                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+                                                ctx.mkLe(
+                                                        value.getIntRangeUpper(),
+                                                        ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
+            }
+            if (type.toString().equals("short") || type.toString().equals("java.lang.Short")) {
+                range =
+                        ctx.mkAnd(
+                                value.getIntRange(),
+                                ctx.mkNot(value.getUnknownVal()),
+                                ctx.mkNot(value.getBoolVal()),
+                                ctx.mkNot(value.getStringVal()),
+                                ctx.mkNot(value.getBottomVal()),
+                                ctx.mkOr(
+                                        ctx.mkAnd(
+                                                value.getIntRange(),
+                                                ctx.mkGe(
+                                                        value.getIntRangeLower(),
+                                                        ctx.mkInt(Short.MIN_VALUE)),
+                                                ctx.mkLe(
+                                                        value.getIntRangeUpper(),
+                                                        ctx.mkInt(Short.MAX_VALUE))),
+                                        ctx.mkAnd(
+                                                value.getIntRange(),
+                                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+                                                ctx.mkLe(
+                                                        value.getIntRangeUpper(),
+                                                        ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
+            }
+            if (type.toString().equals("char") || type.toString().equals("java.lang.Character")) {
+                range =
+                        ctx.mkAnd(
+                                value.getIntRange(),
+                                ctx.mkNot(value.getUnknownVal()),
+                                ctx.mkNot(value.getBoolVal()),
+                                ctx.mkNot(value.getStringVal()),
+                                ctx.mkNot(value.getBottomVal()),
+                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
+                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
+            }
+            if (type.toString().equals("int") || type.toString().equals("java.lang.Integer")) {
+                range =
+                        ctx.mkAnd(
+                                ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+                                ctx.mkNot(value.getBoolVal()),
+                                ctx.mkNot(value.getStringVal()),
+                                ctx.mkNot(value.getBottomVal()),
+                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
+                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
+            }
+            if (type.toString().equals("long") || type.toString().equals("java.lang.Long")) {
+                range =
+                        ctx.mkAnd(
+                                ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+                                ctx.mkNot(value.getBoolVal()),
+                                ctx.mkNot(value.getStringVal()),
+                                ctx.mkNot(value.getBottomVal()),
+                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
             }
         }
         return ctx.mkAnd(
@@ -234,6 +220,47 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
     @Override
     public BoolExpr encodeSlotPreferenceConstraint(Slot slot) {
         Z3InferenceValue value = slot.serialize(this);
+        if (slot instanceof VariableSlot) {
+            VariableSlot vslot = (VariableSlot) slot;
+            TypeMirror type = vslot.getUnderlyingType();
+            if (type.toString().equals("java.lang.String")) {
+                return value.getStringVal();
+            }
+            if (type.toString().equals("boolean") || type.toString().equals("java.lang.Boolean")) {
+                return value.getBoolVal();
+            }
+            if (type.toString().equals("byte") || type.toString().equals("java.lang.Byte")) {
+                return ctx.mkAnd(
+                        value.getIntRange(),
+                        ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Byte.MIN_VALUE)),
+                        ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Byte.MAX_VALUE)));
+            }
+            if (type.toString().equals("short") || type.toString().equals("java.lang.Short")) {
+                return ctx.mkAnd(
+                        value.getIntRange(),
+                        ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Short.MIN_VALUE)),
+                        ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Short.MAX_VALUE)));
+            }
+            if (type.toString().equals("char") || type.toString().equals("java.lang.Character")) {
+                return ctx.mkAnd(
+                        value.getIntRange(),
+                        ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
+                        ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
+            }
+            if (type.toString().equals("int") || type.toString().equals("java.lang.Integer")) {
+                return ctx.mkAnd(
+                        value.getIntRange(),
+                        ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
+                        ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
+            }
+            if (type.toString().equals("long") || type.toString().equals("java.lang.Long")) {
+                return ctx.mkAnd(
+                        value.getIntRange(),
+                        ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+                        ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
+            }
+        }
+
         return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
     }
 

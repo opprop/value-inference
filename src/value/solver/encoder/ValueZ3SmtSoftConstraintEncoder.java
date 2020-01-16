@@ -41,11 +41,11 @@ public class ValueZ3SmtSoftConstraintEncoder
 
         if (!simplifiedEQC.isTrue()) {
             if (stc.getSubtype().getKind() == Slot.Kind.CONSTANT) {
-                addSoftConstraint(simplifiedEQC, 3);
+                addSoftConstraint(simplifiedEQC, 4);
             } else if (stc.getSupertype().getKind() == Slot.Kind.CONSTANT) {
-                addSoftConstraint(simplifiedEQC, 2);
+                addSoftConstraint(simplifiedEQC, 3);
             } else {
-                addSoftConstraint(simplifiedEQC, 1);
+                addSoftConstraint(simplifiedEQC, 2);
             }
         }
     }
