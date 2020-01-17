@@ -4,7 +4,7 @@
 
 A type system that enforces [CERT-FIO08-J rule](https://www.securecoding.cert.org/confluence/display/java/FIO08-J.+Distinguish+between+characters+or+bytes+read+from+a+stream+and+-1) based on [Checker Framework](http://types.cs.washington.edu/checker-framework/)
 
-Constant Value Inference is a type inference for the [Constant Value Checker] (https://checkerframework.org/manual/#constant-value-checker). It supports a subtype of the annotations in the Checker. The annotations are @UnknownVal, @BottomVal, @BoolVal, @IntRange(from, to), and @StringVal. The main annotation is @IntRange. @IntRange takes two arguments — a lower bound and an upper bound. Its meaning is that at run time, the expression evaluates to a value between the bounds (inclusive). For example, an expression of type @IntRange(from=0, to=255) evaluates to 0, 1, 2, …, 254, or 255.
+Constant Value Inference is a type inference for the [Constant Value Checker](http://checkerframework.org/manual/#constant-value-checker/). It supports a subtype of the annotations in the Checker. The annotations are @UnknownVal, @BottomVal, @BoolVal, @IntRange(from, to), and @StringVal. The main annotation is @IntRange. @IntRange takes two arguments — a lower bound and an upper bound. Its meaning is that at run time, the expression evaluates to a value between the bounds (inclusive). For example, an expression of type @IntRange(from=0, to=255) evaluates to 0, 1, 2, …, 254, or 255.
 
 ## Dependencies
 
@@ -61,7 +61,7 @@ value-inference/../checker-framework/checker/bin-devel/javac -processor value.Va
 In your project, just run `run-dljc.sh` with the build cmd of your project:
 
 ```bash
-$JSR308/value-inference/run-dljc.sh <true/false> <your build cmd, e.g. `ant build` or `mvn install`>
+$JSR308/value-inference/run-dljc.sh true <your build cmd, e.g. `ant build` or `mvn install`>
 ```
 
 Note: 
