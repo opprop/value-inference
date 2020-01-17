@@ -1,18 +1,21 @@
-# Constant Value Checker Inference 
+# Constant Value Inference (Interval Inference)
 
 [![build-status](https://travis-ci.org/txiang61/cast_checker.svg?branch=master)](https://travis-ci.org/txiang61/cast_checker)
 
 A type system that enforces [CERT-FIO08-J rule](https://www.securecoding.cert.org/confluence/display/java/FIO08-J.+Distinguish+between+characters+or+bytes+read+from+a+stream+and+-1) based on [Checker Framework](http://types.cs.washington.edu/checker-framework/)
 
+Constant Value Inference is a type inference for the [Constant Value Checker] (https://checkerframework.org/manual/#constant-value-checker). It supports a subtype of the annotations in the Checker. The annotations are @UnknownVal, @BottomVal, @BoolVal, @IntRange(from, to), and @StringVal. The main annotation is @IntRange. @IntRange takes two arguments — a lower bound and an upper bound. Its meaning is that at run time, the expression evaluates to a value between the bounds (inclusive). For example, an expression of type @IntRange(from=0, to=255) evaluates to 0, 1, 2, …, 254, or 255.
+
 ## Dependencies
 
 This project is developed based on [Checker Framework](http://types.cs.washington.edu/checker-framework/). To use this checker, below dependencies are required:
 
-- opprop/checker framework
+- txiang61/checker-framework
+- txiang61/checke-framework-inference
 - jsr308-langtools
 - annotation-tools
 
-I have a `setup.sh` to build these dependencies and also the Cast Checker. This `setup.sh` needs following tools to be ready in your machine before running it:
+I have a `setup.sh` to build these dependencies and also the Value Inference. This `setup.sh` needs following tools to be ready in your machine before running it:
 
 - [ant](http://ant.apache.org/manual/install.html)
 - [mercurial](https://www.mercurial-scm.org/wiki/Download)
@@ -22,7 +25,7 @@ I have a `setup.sh` to build these dependencies and also the Cast Checker. This 
 
 First, to have a better file structure, you may want to create a root directory called `jsr308`.
 
-In `jsr308`, clone this project. In the clone, run `./setup.sh`. This script will download and build all neccessary dependencies, followed by building Cast Checker and running test suites of Cast Checker.
+In `jsr308`, clone this project. In the clone, run `./setup.sh`. This script will download and build all neccessary dependencies, followed by building Value Inference and running test suites of Value Inference.
 
 It is suggested to further configure `JSR308` environment variable for your convenience:
 
@@ -32,49 +35,25 @@ It is suggested to further configure `JSR308` environment variable for your conv
   export JSR308=<the absolute path of your jsr308 dir in your machine>
   ```
 
-This `JSR308` environment variable is required for using my version of [do-like-javac](https://github.com/CharlesZ-Chen/do-like-javac) to run Cast Checker on a project with project's build command, and it also allows running Cast Checker with a conciser command.
+This `JSR308` environment variable is required for using my version of [do-like-javac](https://github.com/CharlesZ-Chen/do-like-javac) to run Cast Checker on a project with project's build command, and it also allows running Value Inference with a conciser command.
 
-## How to run Cast Checker to check your Java code
+## How to run Value Inference to check your Java code
 
-### Foo Project demo
-
-in `cast_checker` clone, I've attached a `FooProject` as a demo of . You can run Cast Checker on this foo project in two ways:
-
- 1. running Cast Checker directly on source files of FooProject
-
-  e.g. In dir `FooProject/` :
-
-  ```bash
-  ../cast-check.sh src/Foo.java
-  ```
- 2. running Cast Checker on FooProject by FooProject's build command (needs configure `$JSR308` environment variable)
-
-  e.g. In dir `FooProject/` :
-
-  ```bash
-  ant clean
-  ../run-dljc.sh ant
-  ```
-
-The subsections below introduce the details of each way of running Cast Checker.
-
-### Running Cast Checker on Java file(s)
-
-I have written a simple script `cast-check.sh` to make this task easier. You could just passing java files to this script, and this script will check all the java files you passing through.
+I have written a simple script `value-inference.sh` to make this task easier. You could just passing java files to this script, and this script will check all the java files you passing through.
 
 e.g.
 
 ```bash
-$JSR308/cast_checker/cast-check.sh <your java files>
-$JSR308/cast_checker/cast-check.sh aSingleFile.java
-$JSR308/cast_checker/cast-check.sh **/*.java
-$JSR308/cast_checker/cast-check.sh FileA.java FileB.java ... FileN.java
+$JSR308/value-inference/value-inference.sh <true?> <your java files>
+$JSR308/value-inference/value-inference.sh true aSingleFile.java
+$JSR308/value-inference/value-inference.sh true **/*.java
+$JSR308/value-inference/value-inference.sh true FileA.java FileB.java ... FileN.java
 ```
 
 For the detailers, this script just a wrap-up of below command:
 
 ```bash
-cast_checker/../checker-framework/checker/bin-devel/javac -processor cast.cast_checker -cp cast_checker/bin:cast_checker/lib <your java files>
+value-inference/../checker-framework/checker/bin-devel/javac -processor value.ValueChecker -cp value-inference/bin:value-inference/lib <your java files>
 ```
 
 ### Running Cast Checker on a project by do-like-javac
@@ -82,7 +61,7 @@ cast_checker/../checker-framework/checker/bin-devel/javac -processor cast.cast_c
 In your project, just run `run-dljc.sh` with the build cmd of your project:
 
 ```bash
-$JSR308/cast_checker/run-dljc.sh <your build cmd, e.g. `ant build` or `mvn install`>
+$JSR308/value-inference/run-dljc.sh <true/false> <your build cmd, e.g. `ant build` or `mvn install`>
 ```
 
 Note: 
