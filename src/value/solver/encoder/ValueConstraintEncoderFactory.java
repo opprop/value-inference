@@ -1,7 +1,8 @@
 package value.solver.encoder;
 
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
-import checkers.inference.solver.backend.encoder.ComparableConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ComparisonConstraintEncoder;
+import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
@@ -41,11 +42,6 @@ public class ValueConstraintEncoderFactory
     }
 
     @Override
-    public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-        return new ValueComparableConstraintEncoder(lattice, ctx, formatTranslator);
-    }
-
-    @Override
     public PreferenceConstraintEncoder<BoolExpr> createPreferenceConstraintEncoder() {
         return null;
     }
@@ -69,4 +65,14 @@ public class ValueConstraintEncoderFactory
     public ArithmeticConstraintEncoder<BoolExpr> createArithmeticConstraintEncoder() {
         return new ValueArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
     }
+
+	@Override
+	public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
+		return new ValueComparableConstraintEncoder(lattice, ctx, formatTranslator);
+	}
+
+	@Override
+	public ComparisonConstraintEncoder<BoolExpr> createComparisonConstraintEncoder() {
+		return new ValueComparisonConstraintEncoder(lattice, ctx, formatTranslator);
+	}
 }

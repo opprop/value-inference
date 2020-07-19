@@ -791,7 +791,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         // Assume rangeAnno is well-formed, i.e., 'from' is less than or equal to 'to'.
         if (AnnotationUtils.areSameByClass(rangeAnno, IntRange.class)) {
-            return new Range(
+            return Range.create(
                     AnnotationUtils.getElementValue(rangeAnno, "from", Long.class, true),
                     AnnotationUtils.getElementValue(rangeAnno, "to", Long.class, true));
         }
