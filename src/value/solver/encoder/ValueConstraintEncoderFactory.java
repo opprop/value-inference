@@ -66,13 +66,13 @@ public class ValueConstraintEncoderFactory
         return new ValueArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
     }
 
-	@Override
-	public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-		return new ValueComparableConstraintEncoder(lattice, ctx, formatTranslator);
-	}
+    @Override
+    public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
+        return new ValueComparableConstraintEncoder(lattice, ctx, formatTranslator);
+    }
 
-	@Override
-	public ComparisonConstraintEncoder<BoolExpr> createComparisonConstraintEncoder() {
-		return new ValueComparisonConstraintEncoder(lattice, ctx, formatTranslator);
-	}
+    @Override
+    public ComparisonConstraintEncoder<BoolExpr> createComparisonConstraintEncoder() {
+        return new ValueComparisonConstraintEncoder(lattice, ctx, formatTranslator);
+    }
 }

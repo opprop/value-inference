@@ -5,7 +5,6 @@ import checkers.inference.InferenceChecker;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.dataflow.InferenceAnalysis;
-import checkers.inference.dataflow.InferenceTransfer;
 import checkers.inference.model.ConstraintManager;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.flow.CFTransfer;
@@ -29,7 +28,7 @@ public class ValueChecker extends BaseInferrableChecker {
 
     @Override
     public CFTransfer createInferenceTransferFunction(InferenceAnalysis analysis) {
-        return new InferenceTransfer(analysis);
+        return new ValueInferenceTransfer(analysis);
     }
 
     @Override

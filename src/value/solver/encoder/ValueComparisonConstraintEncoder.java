@@ -23,7 +23,8 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
         super(lattice, ctx, formatTranslator);
     }
 
-    protected BoolExpr encode(ComparisonOperationKind operation, Slot left, Slot right, Slot result) {
+    protected BoolExpr encode(
+            ComparisonOperationKind operation, Slot left, Slot right, Slot result) {
         Z3InferenceValue l = left.serialize(z3SmtFormatTranslator);
         Z3InferenceValue r = right.serialize(z3SmtFormatTranslator);
         Z3InferenceValue res = result.serialize(z3SmtFormatTranslator);
@@ -32,141 +33,387 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
 
         switch (operation) {
             case EQUAL_TO:
-            	encoding = ctx.mkOr(
-            		ctx.mkAnd(valueZ3SmtEncoderUtils.subtype(ctx, l, r), 
-            				valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-            		ctx.mkAnd(valueZ3SmtEncoderUtils.subtype(ctx, r, l), 
-            				valueZ3SmtEncoderUtils.equality(ctx, res, r)),
-            		ctx.mkAnd(l.getIntRange(), r.getIntRange(), 
-		            	ctx.mkAnd(
-			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(l.getIntRangeLower(), r.getIntRangeLower()), 
-			            			ctx.mkLe(l.getIntRangeLower(), r.getIntRangeUpper())), 
-			            			ctx.mkAnd(res.getIntRange(), 
-			            					ctx.mkEq(res.getIntRangeLower(), l.getIntRangeLower()))),
-			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(l.getIntRangeUpper(), r.getIntRangeLower()), 
-			            			ctx.mkLe(l.getIntRangeUpper(), r.getIntRangeUpper())), 
-			            			ctx.mkAnd(res.getIntRange(), 
-			            					ctx.mkEq(res.getIntRangeUpper(), l.getIntRangeUpper()))),
-			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(r.getIntRangeLower(), l.getIntRangeLower()), 
-			                        ctx.mkLe(r.getIntRangeLower(), l.getIntRangeUpper())), 
-			            			ctx.mkAnd(res.getIntRange(), 
-			            					ctx.mkEq(res.getIntRangeLower(), r.getIntRangeLower()))),
-			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(r.getIntRangeUpper(), l.getIntRangeLower()), 
-			                        ctx.mkLe(r.getIntRangeUpper(), l.getIntRangeUpper())), 
-			            			ctx.mkAnd(res.getIntRange(), 
-			            					ctx.mkEq(res.getIntRangeUpper(), r.getIntRangeUpper()))),
-			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(l.getIntRangeUpper(), r.getIntRangeLower()), 
-			                        ctx.mkLe(r.getIntRangeUpper(), l.getIntRangeLower())), 
-			            			res.getBottomVal())
-		            	)));
+                encoding =
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        valueZ3SmtEncoderUtils.subtype(ctx, l, r),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, l)),
+                                ctx.mkAnd(
+                                        valueZ3SmtEncoderUtils.subtype(ctx, r, l),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, r)),
+                                ctx.mkAnd(
+                                        l.getIntRange(),
+                                        r.getIntRange(),
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        l.getIntRangeLower(),
+                                                                        r.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        l.getIntRangeLower(),
+                                                                        r.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                res.getIntRange(),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()))),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        l.getIntRangeUpper(),
+                                                                        r.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        l.getIntRangeUpper(),
+                                                                        r.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                res.getIntRange(),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()))),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        r.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        r.getIntRangeLower(),
+                                                                        l.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                res.getIntRange(),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        r.getIntRangeLower()))),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                res.getIntRange(),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        r.getIntRangeUpper()))),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        l.getIntRangeUpper(),
+                                                                        r.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeLower())),
+                                                        res.getBottomVal()))));
                 break;
             case NOT_EQUAL_TO:
-            	encoding = ctx.mkOr(
-                		ctx.mkAnd(ctx.mkOr(ctx.mkNot(l.getIntRange()), ctx.mkNot(r.getIntRange())),
-                				valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-                		ctx.mkAnd(l.getIntRange(), r.getIntRange(), 
-    		            	ctx.mkAnd(
-    			            	ctx.mkImplies(ctx.mkNot(ctx.mkEq(r.getIntRangeLower(), r.getIntRangeUpper())), 
-    			            			valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkEq(l.getIntRangeLower(), l.getIntRangeUpper()), 
-    			            			ctx.mkEq(r.getIntRangeLower(), r.getIntRangeUpper()),
-    			            			ctx.mkNot(ctx.mkEq(l.getIntRangeLower(), r.getIntRangeLower()))), 
-    			            			valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkEq(l.getIntRangeLower(), l.getIntRangeUpper()), 
-    			                        ctx.mkEq(r.getIntRangeLower(), r.getIntRangeUpper()), 
-    			            			ctx.mkEq(l.getIntRangeLower(), r.getIntRangeLower())),
-    			            			res.getBottomVal()),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkEq(r.getIntRangeLower(), r.getIntRangeUpper()), 
-    			                        ctx.mkEq(l.getIntRangeLower(), r.getIntRangeLower()),
-    			                        ctx.mkNot(ctx.mkEq(l.getIntRangeLower(), l.getIntRangeUpper()))), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeLower(), ctx.mkAdd(ctx.mkInt(1), l.getIntRangeLower())),  
-    			            					ctx.mkEq(res.getIntRangeUpper(), l.getIntRangeUpper()), 
-    			            					res.getIntRange())),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkEq(r.getIntRangeLower(), r.getIntRangeUpper()), 
-    			                        ctx.mkEq(l.getIntRangeUpper(), r.getIntRangeLower()),
-    			                        ctx.mkNot(ctx.mkEq(l.getIntRangeLower(), l.getIntRangeUpper()))), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeUpper(), ctx.mkSub(l.getIntRangeUpper(), ctx.mkInt(1))),  
-    			            					ctx.mkEq(res.getIntRangeLower(), l.getIntRangeLower()), 
-    			            					res.getIntRange()))
-    		            )));
+                encoding =
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        ctx.mkOr(
+                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(r.getIntRange())),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, l)),
+                                ctx.mkAnd(
+                                        l.getIntRange(),
+                                        r.getIntRange(),
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                                        ctx.mkNot(
+                                                                ctx.mkEq(
+                                                                        r.getIntRangeLower(),
+                                                                        r.getIntRangeUpper())),
+                                                        valueZ3SmtEncoderUtils.equality(
+                                                                ctx, res, l)),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        l.getIntRangeLower(),
+                                                                        l.getIntRangeUpper()),
+                                                                ctx.mkEq(
+                                                                        r.getIntRangeLower(),
+                                                                        r.getIntRangeUpper()),
+                                                                ctx.mkNot(
+                                                                        ctx.mkEq(
+                                                                                l
+                                                                                        .getIntRangeLower(),
+                                                                                r
+                                                                                        .getIntRangeLower()))),
+                                                        valueZ3SmtEncoderUtils.equality(
+                                                                ctx, res, l)),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        l.getIntRangeLower(),
+                                                                        l.getIntRangeUpper()),
+                                                                ctx.mkEq(
+                                                                        r.getIntRangeLower(),
+                                                                        r.getIntRangeUpper()),
+                                                                ctx.mkEq(
+                                                                        l.getIntRangeLower(),
+                                                                        r.getIntRangeLower())),
+                                                        res.getBottomVal()),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        r.getIntRangeLower(),
+                                                                        r.getIntRangeUpper()),
+                                                                ctx.mkEq(
+                                                                        l.getIntRangeLower(),
+                                                                        r.getIntRangeLower()),
+                                                                ctx.mkNot(
+                                                                        ctx.mkEq(
+                                                                                l
+                                                                                        .getIntRangeLower(),
+                                                                                l
+                                                                                        .getIntRangeUpper()))),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        ctx.mkAdd(
+                                                                                ctx.mkInt(1),
+                                                                                l
+                                                                                        .getIntRangeLower())),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        r.getIntRangeLower(),
+                                                                        r.getIntRangeUpper()),
+                                                                ctx.mkEq(
+                                                                        l.getIntRangeUpper(),
+                                                                        r.getIntRangeLower()),
+                                                                ctx.mkNot(
+                                                                        ctx.mkEq(
+                                                                                l
+                                                                                        .getIntRangeLower(),
+                                                                                l
+                                                                                        .getIntRangeUpper()))),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        ctx.mkSub(
+                                                                                l
+                                                                                        .getIntRangeUpper(),
+                                                                                ctx.mkInt(1))),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                res.getIntRange())))));
                 break;
             case GREATER_THAN:
-            	encoding = ctx.mkOr(
-                		ctx.mkAnd(ctx.mkOr(ctx.mkNot(l.getIntRange()), ctx.mkNot(r.getIntRange())),
-                				valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-                		ctx.mkAnd(l.getIntRange(), r.getIntRange(), 
-    		            	ctx.mkAnd(
-    			            	ctx.mkImplies(ctx.mkGt(l.getIntRangeLower(), r.getIntRangeLower()), 
-    			            			valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkEq(r.getIntRangeLower(), r.getIntRangeUpper()), 
-    			                        ctx.mkNot(ctx.mkEq(l.getIntRangeLower(), l.getIntRangeUpper()))), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeLower(), ctx.mkAdd(ctx.mkInt(1), l.getIntRangeLower())),  
-    			            					ctx.mkEq(res.getIntRangeUpper(), l.getIntRangeUpper()), 
-    			            					res.getIntRange())),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGt(r.getIntRangeLower(), l.getIntRangeLower()), 
-    			                        ctx.mkLt(r.getIntRangeLower(), l.getIntRangeUpper())), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeUpper(), ctx.mkAdd(r.getIntRangeUpper(), ctx.mkInt(1))),  
-    			            					ctx.mkEq(res.getIntRangeUpper(), l.getIntRangeUpper()), 
-    			            					res.getIntRange())),
-		            			ctx.mkImplies(ctx.mkLe(l.getIntRangeUpper(), r.getIntRangeLower()), 
-		            					res.getBottomVal())
-    		            )));
+                encoding =
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        ctx.mkOr(
+                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(r.getIntRange())),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, l)),
+                                ctx.mkAnd(
+                                        l.getIntRange(),
+                                        r.getIntRange(),
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                                        ctx.mkGt(
+                                                                l.getIntRangeLower(),
+                                                                r.getIntRangeLower()),
+                                                        valueZ3SmtEncoderUtils.equality(
+                                                                ctx, res, l)),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        r.getIntRangeLower(),
+                                                                        r.getIntRangeUpper()),
+                                                                ctx.mkNot(
+                                                                        ctx.mkEq(
+                                                                                l
+                                                                                        .getIntRangeLower(),
+                                                                                l
+                                                                                        .getIntRangeUpper()))),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        ctx.mkAdd(
+                                                                                ctx.mkInt(1),
+                                                                                l
+                                                                                        .getIntRangeLower())),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGt(
+                                                                        r.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkLt(
+                                                                        r.getIntRangeLower(),
+                                                                        l.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        ctx.mkAdd(
+                                                                                r
+                                                                                        .getIntRangeUpper(),
+                                                                                ctx.mkInt(1))),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkLe(
+                                                                l.getIntRangeUpper(),
+                                                                r.getIntRangeLower()),
+                                                        res.getBottomVal()))));
                 break;
             case GREATER_THAN_EQUAL:
-            	encoding = ctx.mkOr(
-                		ctx.mkAnd(ctx.mkOr(ctx.mkNot(l.getIntRange()), ctx.mkNot(r.getIntRange())),
-                				valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-                		ctx.mkAnd(l.getIntRange(), r.getIntRange(), 
-    		            	ctx.mkAnd(
-    			            	ctx.mkImplies(ctx.mkGe(l.getIntRangeLower(), r.getIntRangeLower()), 
-    			            			valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(r.getIntRangeLower(), l.getIntRangeLower()), 
-    			                        ctx.mkLe(r.getIntRangeLower(), l.getIntRangeUpper())), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeLower(), r.getIntRangeLower()),  
-    			            					ctx.mkEq(res.getIntRangeUpper(), l.getIntRangeUpper()), 
-    			            					res.getIntRange())),
-		            			ctx.mkImplies(ctx.mkLt(l.getIntRangeUpper(), r.getIntRangeLower()), 
-		            					res.getBottomVal())
-    		            )));
+                encoding =
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        ctx.mkOr(
+                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(r.getIntRange())),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, l)),
+                                ctx.mkAnd(
+                                        l.getIntRange(),
+                                        r.getIntRange(),
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                                        ctx.mkGe(
+                                                                l.getIntRangeLower(),
+                                                                r.getIntRangeLower()),
+                                                        valueZ3SmtEncoderUtils.equality(
+                                                                ctx, res, l)),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        r.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        r.getIntRangeLower(),
+                                                                        l.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        r.getIntRangeLower()),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkLt(
+                                                                l.getIntRangeUpper(),
+                                                                r.getIntRangeLower()),
+                                                        res.getBottomVal()))));
                 break;
             case LESS_THAN:
-            	encoding = ctx.mkOr(
-                		ctx.mkAnd(ctx.mkOr(ctx.mkNot(l.getIntRange()), ctx.mkNot(r.getIntRange())),
-                				valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-                		ctx.mkAnd(l.getIntRange(), r.getIntRange(), 
-    		            	ctx.mkAnd(
-    			            	ctx.mkImplies(ctx.mkLt(l.getIntRangeUpper(), r.getIntRangeUpper()), 
-    			            			valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkEq(l.getIntRangeUpper(), r.getIntRangeUpper()), 
-    			                        ctx.mkNot(ctx.mkEq(l.getIntRangeLower(), l.getIntRangeUpper()))), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeUpper(), ctx.mkSub(l.getIntRangeUpper(), ctx.mkInt(1))),  
-    			            					ctx.mkEq(res.getIntRangeLower(), l.getIntRangeLower()), 
-    			            					res.getIntRange())),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGt(r.getIntRangeUpper(), l.getIntRangeLower()), 
-    			                        ctx.mkLt(r.getIntRangeUpper(), l.getIntRangeUpper())), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeUpper(), ctx.mkSub(r.getIntRangeUpper(), ctx.mkInt(1))),  
-    			            					ctx.mkEq(res.getIntRangeLower(), l.getIntRangeLower()), 
-    			            					res.getIntRange())),
-		            			ctx.mkImplies(ctx.mkGe(l.getIntRangeLower(), r.getIntRangeUpper()), 
-		            					res.getBottomVal())
-    		            )));
+                encoding =
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        ctx.mkOr(
+                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(r.getIntRange())),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, l)),
+                                ctx.mkAnd(
+                                        l.getIntRange(),
+                                        r.getIntRange(),
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                                        ctx.mkLt(
+                                                                l.getIntRangeUpper(),
+                                                                r.getIntRangeUpper()),
+                                                        valueZ3SmtEncoderUtils.equality(
+                                                                ctx, res, l)),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        l.getIntRangeUpper(),
+                                                                        r.getIntRangeUpper()),
+                                                                ctx.mkNot(
+                                                                        ctx.mkEq(
+                                                                                l
+                                                                                        .getIntRangeLower(),
+                                                                                l
+                                                                                        .getIntRangeUpper()))),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        ctx.mkSub(
+                                                                                l
+                                                                                        .getIntRangeUpper(),
+                                                                                ctx.mkInt(1))),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGt(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkLt(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        ctx.mkSub(
+                                                                                r
+                                                                                        .getIntRangeUpper(),
+                                                                                ctx.mkInt(1))),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkGe(
+                                                                l.getIntRangeLower(),
+                                                                r.getIntRangeUpper()),
+                                                        res.getBottomVal()))));
                 break;
             case LESS_THAN_EQUAL:
-            	encoding = ctx.mkOr(
-                		ctx.mkAnd(ctx.mkOr(ctx.mkNot(l.getIntRange()), ctx.mkNot(r.getIntRange())),
-                				valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-                		ctx.mkAnd(l.getIntRange(), r.getIntRange(), 
-    		            	ctx.mkAnd(
-    			            	ctx.mkImplies(ctx.mkLe(l.getIntRangeUpper(), r.getIntRangeUpper()), 
-    			            			valueZ3SmtEncoderUtils.equality(ctx, res, l)),
-    			            	ctx.mkImplies(ctx.mkAnd(ctx.mkGe(r.getIntRangeUpper(), l.getIntRangeLower()), 
-    			                        ctx.mkLe(r.getIntRangeUpper(), l.getIntRangeUpper())), 
-    			            			ctx.mkAnd(ctx.mkEq(res.getIntRangeLower(), l.getIntRangeLower()),  
-    			            					ctx.mkEq(res.getIntRangeUpper(), r.getIntRangeUpper()), 
-    			            					res.getIntRange())),
-		            			ctx.mkImplies(ctx.mkGt(l.getIntRangeLower(), r.getIntRangeUpper()), 
-		            					res.getBottomVal())
-    		            )));
+                encoding =
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        ctx.mkOr(
+                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(r.getIntRange())),
+                                        valueZ3SmtEncoderUtils.equality(ctx, res, l)),
+                                ctx.mkAnd(
+                                        l.getIntRange(),
+                                        r.getIntRange(),
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                                        ctx.mkLe(
+                                                                l.getIntRangeUpper(),
+                                                                r.getIntRangeUpper()),
+                                                        valueZ3SmtEncoderUtils.equality(
+                                                                ctx, res, l)),
+                                                ctx.mkImplies(
+                                                        ctx.mkAnd(
+                                                                ctx.mkGe(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkLe(
+                                                                        r.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper())),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        r.getIntRangeUpper()),
+                                                                res.getIntRange())),
+                                                ctx.mkImplies(
+                                                        ctx.mkGt(
+                                                                l.getIntRangeLower(),
+                                                                r.getIntRangeUpper()),
+                                                        res.getBottomVal()))));
                 break;
             default:
                 throw new BugInCF(
@@ -180,28 +427,39 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
         return encoding;
     }
 
+    @Override
+    public BoolExpr encodeVariable_Variable(
+            ComparisonOperationKind operation,
+            Slot left,
+            Slot right,
+            ComparisonVariableSlot result) {
+        return encode(operation, left, right, result);
+    }
 
-	@Override
-	public BoolExpr encodeVariable_Variable(ComparisonOperationKind operation, Slot left, Slot right,
-			ComparisonVariableSlot result) {
-		return encode(operation, left, right, result);
-	}
+    @Override
+    public BoolExpr encodeVariable_Constant(
+            ComparisonOperationKind operation,
+            Slot left,
+            ConstantSlot right,
+            ComparisonVariableSlot result) {
+        return encode(operation, left, right, result);
+    }
 
-	@Override
-	public BoolExpr encodeVariable_Constant(ComparisonOperationKind operation, Slot left, ConstantSlot right,
-			ComparisonVariableSlot result) {
-		return encode(operation, left, right, result);
-	}
+    @Override
+    public BoolExpr encodeConstant_Variable(
+            ComparisonOperationKind operation,
+            ConstantSlot left,
+            Slot right,
+            ComparisonVariableSlot result) {
+        return encode(operation, left, right, result);
+    }
 
-	@Override
-	public BoolExpr encodeConstant_Variable(ComparisonOperationKind operation, ConstantSlot left, Slot right,
-			ComparisonVariableSlot result) {
-		return encode(operation, left, right, result);
-	}
-
-	@Override
-	public BoolExpr encodeConstant_Constant(ComparisonOperationKind operation, ConstantSlot left, ConstantSlot right,
-			ComparisonVariableSlot result) {
-		return encode(operation, left, right, result);
-	}
+    @Override
+    public BoolExpr encodeConstant_Constant(
+            ComparisonOperationKind operation,
+            ConstantSlot left,
+            ConstantSlot right,
+            ComparisonVariableSlot result) {
+        return encode(operation, left, right, result);
+    }
 }

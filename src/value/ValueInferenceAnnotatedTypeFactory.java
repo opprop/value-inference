@@ -238,7 +238,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                             break;
                         }
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -257,7 +257,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case MINUS:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -276,7 +276,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case MULTIPLY:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -295,7 +295,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case DIVIDE:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -314,7 +314,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case REMAINDER:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -333,7 +333,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case LEFT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -390,7 +390,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case AND:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
@@ -409,11 +409,11 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case OR:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
-                        	ArithmeticOperationKind opKindplus =
+                            ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
                                     opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
@@ -428,11 +428,11 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         } // Create LUB slot by default;
                     case XOR:
                         if (lhsAM == null || rhsAM == null) {
-                        	result =
+                            result =
                                     slotManager.createArithmeticVariableSlot(
                                             VariableAnnotator.treeToLocation(
                                                     inferenceTypeFactory, binaryTree));
-                        	ArithmeticOperationKind opKindplus =
+                            ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
                                     opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
