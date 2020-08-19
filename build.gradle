@@ -13,7 +13,6 @@ import org.ajoberstar.grgit.Grgit
 apply plugin: 'java'
 
 ext {
-    assert JavaVersion.current() == JavaVersion.VERSION_1_8: "Set JAVA_HOME to JDK 8. Current version is ${JavaVersion.current()}"
     jsr308 = System.getenv('JSR308') ?: file(new File("..")).absolutePath
     cfPath = "${jsr308}/checker-framework"
     cfiPath = "${jsr308}/checker-framework-inference"
@@ -44,7 +43,9 @@ dependencies {
     // sat4j solver dependency
     compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
     compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
-
+    // z3 solver dependency
+    compile fileTree(dir: "${cfiPath}/lib", include: "com.microsoft.z3.jar")
+    
     // CF test lib dependency
     testCompile fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
     testCompile 'junit:junit:4.12'

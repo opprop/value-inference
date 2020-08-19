@@ -28,6 +28,7 @@ export external_checker_classpath=$SECURITYPATH
 CFI_LIB=$CFI/lib
 export DYLD_LIBRARY_PATH=$CFI_LIB
 export LD_LIBRARY_PATH=$CFI_LIB
+export JAVA_LIBRARY_PATH=$CFI_LIB
 
 # TYPE CHECKING
 # $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true,solver=z3" --hacks="$IS_HACK" -m TYPECHECK "$@"

@@ -12,11 +12,13 @@ public class Test {
         return sum;
     }
 
-    public int testing(int value) {
-        if (two + 2 == 4){
-        	return 0;
+    public int testing(int x) {
+        if (x == 4) {
+            return x;
+        } else {
+            x = 1;
+            return x;
         }
-        return 1;
     }
 
     public String testing2(int value) {
