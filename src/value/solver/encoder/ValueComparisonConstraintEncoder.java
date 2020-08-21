@@ -124,8 +124,14 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 ctx.mkEq(
                                                                         r.getIntRangeLower(),
                                                                         r.getIntRangeUpper())),
-                                                        valueZ3SmtEncoderUtils.equality(
-                                                                ctx, res, l)),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
@@ -136,12 +142,16 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                         r.getIntRangeUpper()),
                                                                 ctx.mkNot(
                                                                         ctx.mkEq(
-                                                                                l
-                                                                                        .getIntRangeLower(),
-                                                                                r
-                                                                                        .getIntRangeLower()))),
-                                                        valueZ3SmtEncoderUtils.equality(
-                                                                ctx, res, l)),
+                                                                                l.getIntRangeLower(),
+                                                                                r.getIntRangeLower()))),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
@@ -164,21 +174,18 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                         r.getIntRangeLower()),
                                                                 ctx.mkNot(
                                                                         ctx.mkEq(
-                                                                                l
-                                                                                        .getIntRangeLower(),
-                                                                                l
-                                                                                        .getIntRangeUpper()))),
+                                                                                l.getIntRangeLower(),
+                                                                                l.getIntRangeUpper()))),
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
                                                                         res.getIntRangeLower(),
                                                                         ctx.mkAdd(
                                                                                 ctx.mkInt(1),
-                                                                                l
-                                                                                        .getIntRangeLower())),
+                                                                                l.getIntRangeLower())),
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         l.getIntRangeUpper()),
-                                                                res.getIntRange())),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
@@ -189,21 +196,18 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                         r.getIntRangeLower()),
                                                                 ctx.mkNot(
                                                                         ctx.mkEq(
-                                                                                l
-                                                                                        .getIntRangeLower(),
-                                                                                l
-                                                                                        .getIntRangeUpper()))),
+                                                                                l.getIntRangeLower(),
+                                                                                l.getIntRangeUpper()))),
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         ctx.mkSub(
-                                                                                l
-                                                                                        .getIntRangeUpper(),
+                                                                                l.getIntRangeUpper(),
                                                                                 ctx.mkInt(1))),
                                                                 ctx.mkEq(
                                                                         res.getIntRangeLower(),
                                                                         l.getIntRangeLower()),
-                                                                res.getIntRange())))));
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))))));
                 break;
             case GREATER_THAN:
                 encoding =
@@ -221,33 +225,17 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkGt(
                                                                 l.getIntRangeLower(),
                                                                 r.getIntRangeLower()),
-                                                        valueZ3SmtEncoderUtils.equality(
-                                                                ctx, res, l)),
-                                                ctx.mkImplies(
-                                                        ctx.mkAnd(
-                                                                ctx.mkEq(
-                                                                        r.getIntRangeLower(),
-                                                                        r.getIntRangeUpper()),
-                                                                ctx.mkNot(
-                                                                        ctx.mkEq(
-                                                                                l
-                                                                                        .getIntRangeLower(),
-                                                                                l
-                                                                                        .getIntRangeUpper()))),
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
                                                                         res.getIntRangeLower(),
-                                                                        ctx.mkAdd(
-                                                                                ctx.mkInt(1),
-                                                                                l
-                                                                                        .getIntRangeLower())),
+                                                                        l.getIntRangeLower()),
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         l.getIntRangeUpper()),
-                                                                res.getIntRange())),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
-                                                                ctx.mkGt(
+                                                                ctx.mkGe(
                                                                         r.getIntRangeLower(),
                                                                         l.getIntRangeLower()),
                                                                 ctx.mkLt(
@@ -255,15 +243,14 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                         l.getIntRangeUpper())),
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
-                                                                        res.getIntRangeUpper(),
+                                                                        res.getIntRangeLower(),
                                                                         ctx.mkAdd(
-                                                                                r
-                                                                                        .getIntRangeUpper(),
+                                                                                r.getIntRangeLower(),
                                                                                 ctx.mkInt(1))),
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         l.getIntRangeUpper()),
-                                                                res.getIntRange())),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkLe(
                                                                 l.getIntRangeUpper(),
@@ -286,8 +273,14 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkGe(
                                                                 l.getIntRangeLower(),
                                                                 r.getIntRangeLower()),
-                                                        valueZ3SmtEncoderUtils.equality(
-                                                                ctx, res, l)),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
                                                                 ctx.mkGe(
@@ -303,7 +296,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         l.getIntRangeUpper()),
-                                                                res.getIntRange())),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkLt(
                                                                 l.getIntRangeUpper(),
@@ -326,49 +319,32 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkLt(
                                                                 l.getIntRangeUpper(),
                                                                 r.getIntRangeUpper()),
-                                                        valueZ3SmtEncoderUtils.equality(
-                                                                ctx, res, l)),
-                                                ctx.mkImplies(
                                                         ctx.mkAnd(
-                                                                ctx.mkEq(
-                                                                        l.getIntRangeUpper(),
-                                                                        r.getIntRangeUpper()),
-                                                                ctx.mkNot(
-                                                                        ctx.mkEq(
-                                                                                l
-                                                                                        .getIntRangeLower(),
-                                                                                l
-                                                                                        .getIntRangeUpper()))),
-                                                        ctx.mkAnd(
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeUpper(),
-                                                                        ctx.mkSub(
-                                                                                l
-                                                                                        .getIntRangeUpper(),
-                                                                                ctx.mkInt(1))),
                                                                 ctx.mkEq(
                                                                         res.getIntRangeLower(),
                                                                         l.getIntRangeLower()),
-                                                                res.getIntRange())),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
                                                                 ctx.mkGt(
                                                                         r.getIntRangeUpper(),
                                                                         l.getIntRangeLower()),
-                                                                ctx.mkLt(
+                                                                ctx.mkLe(
                                                                         r.getIntRangeUpper(),
                                                                         l.getIntRangeUpper())),
                                                         ctx.mkAnd(
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         ctx.mkSub(
-                                                                                r
-                                                                                        .getIntRangeUpper(),
+                                                                                r.getIntRangeUpper(),
                                                                                 ctx.mkInt(1))),
                                                                 ctx.mkEq(
                                                                         res.getIntRangeLower(),
                                                                         l.getIntRangeLower()),
-                                                                res.getIntRange())),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkGe(
                                                                 l.getIntRangeLower(),
@@ -391,8 +367,14 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                         ctx.mkLe(
                                                                 l.getIntRangeUpper(),
                                                                 r.getIntRangeUpper()),
-                                                        valueZ3SmtEncoderUtils.equality(
-                                                                ctx, res, l)),
+                                                        ctx.mkAnd(
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeLower(),
+                                                                        l.getIntRangeLower()),
+                                                                ctx.mkEq(
+                                                                        res.getIntRangeUpper(),
+                                                                        l.getIntRangeUpper()),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkAnd(
                                                                 ctx.mkGe(
@@ -408,7 +390,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 ctx.mkEq(
                                                                         res.getIntRangeUpper(),
                                                                         r.getIntRangeUpper()),
-                                                                res.getIntRange())),
+                                                                valueZ3SmtEncoderUtils.isIntRange(ctx, res))),
                                                 ctx.mkImplies(
                                                         ctx.mkGt(
                                                                 l.getIntRangeLower(),

@@ -15,8 +15,8 @@ public class Z3InferenceValue {
 
     private BoolExpr unknownval;
     private BoolExpr bottomval;
-    private BoolExpr boolval;
-    private BoolExpr stringval;
+//    private BoolExpr boolval;
+//    private BoolExpr stringval;
 
     private BoolExpr intrange;
     private IntExpr intrangelo;
@@ -30,11 +30,11 @@ public class Z3InferenceValue {
         // default BottomVal value is false
         slot.bottomval = ctx.mkBool(false);
         // default BottomVal value is false
-        slot.boolval = ctx.mkBool(false);
+//        slot.boolval = ctx.mkBool(false);
         // default BottomVal value is false
         slot.intrange = ctx.mkBool(false);
         // default BottomVal value is false
-        slot.stringval = ctx.mkBool(false);
+//        slot.stringval = ctx.mkBool(false);
 
         // default value is range everything
         slot.intrangelo = ctx.mkInt(Long.MIN_VALUE);
@@ -48,9 +48,9 @@ public class Z3InferenceValue {
 
         slot.unknownval = ctx.mkBoolConst(String.valueOf(slotID) + "-TOP");
         slot.bottomval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOTTOM");
-        slot.boolval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOOLVAL");
+//        slot.boolval = ctx.mkBoolConst(String.valueOf(slotID) + "-BOOLVAL");
         slot.intrange = ctx.mkBoolConst(String.valueOf(slotID) + "-INTRANGE");
-        slot.stringval = ctx.mkBoolConst(String.valueOf(slotID) + "-STRINGVAL");
+//        slot.stringval = ctx.mkBoolConst(String.valueOf(slotID) + "-STRINGVAL");
         slot.intrangelo = ctx.mkIntConst(String.valueOf(slotID) + "-from");
         slot.intrangehi = ctx.mkIntConst(String.valueOf(slotID) + "-to");
 
@@ -78,13 +78,13 @@ public class Z3InferenceValue {
         return bottomval;
     }
 
-    public void setBoolVal(boolean val) {
-        boolval = ctx.mkBool(val);
-    }
-
-    public BoolExpr getBoolVal() {
-        return boolval;
-    }
+//    public void setBoolVal(boolean val) {
+//        boolval = ctx.mkBool(val);
+//    }
+//
+//    public BoolExpr getBoolVal() {
+//        return boolval;
+//    }
 
     public void setIntRange(boolean val) {
         intrange = ctx.mkBool(val);
@@ -94,13 +94,13 @@ public class Z3InferenceValue {
         return intrange;
     }
 
-    public void setStringVal(boolean val) {
-        stringval = ctx.mkBool(val);
-    }
-
-    public BoolExpr getStringVal() {
-        return stringval;
-    }
+//    public void setStringVal(boolean val) {
+//        stringval = ctx.mkBool(val);
+//    }
+//
+//    public BoolExpr getStringVal() {
+//        return stringval;
+//    }
 
     public void setIntRangeLower(long val) {
         intrangelo = ctx.mkInt(val);

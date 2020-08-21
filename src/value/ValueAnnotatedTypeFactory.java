@@ -2,6 +2,7 @@ package value;
 
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import java.lang.annotation.Annotation;
@@ -13,8 +14,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.common.value.ValueCheckerUtils;
@@ -22,12 +27,18 @@ import org.checkerframework.common.value.qual.ArrayLenRange;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
+import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
@@ -70,13 +81,13 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                                     "java.lang.Double",
                                     "byte",
                                     "java.lang.Byte",
-                                    "java.lang.String",
+//                                    "java.lang.String",
                                     "char",
                                     "java.lang.Character",
                                     "float",
                                     "java.lang.Float",
-                                    "boolean",
-                                    "java.lang.Boolean",
+//                                    "boolean",
+//                                    "java.lang.Boolean",
                                     "long",
                                     "java.lang.Long",
                                     "short",
@@ -90,8 +101,8 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return new LinkedHashSet<>(
                 Arrays.asList(
                         IntRange.class,
-                        BoolVal.class,
-                        StringVal.class,
+//                        BoolVal.class,
+//                        StringVal.class,
                         BottomVal.class,
                         UnknownVal.class));
     }
@@ -253,6 +264,119 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
     }
+    
+    @Override
+    protected TypeAnnotator createTypeAnnotator() {
+        return new ListTypeAnnotator(new ValueTypeAnnotator(this), super.createTypeAnnotator());
+    }
+    
+    /**
+     * Performs pre-processing on annotations written by users, replacing illegal annotations by
+     * legal ones.
+     */
+    private class ValueTypeAnnotator extends TypeAnnotator {
+
+        private ValueTypeAnnotator(ValueAnnotatedTypeFactory atypeFactory) {
+            super(atypeFactory);
+        }
+
+        @Override
+        protected Void scan(AnnotatedTypeMirror type, Void aVoid) {
+            return super.scan(type, aVoid);
+        }
+
+        @Override
+        public Void visitExecutable(AnnotatedExecutableType t, Void p) {
+            List<AnnotatedTypeMirror> paramTypes = t.getParameterTypes();
+            for (AnnotatedTypeMirror paramType : paramTypes) {
+                AnnotationMirror anno = createIntRangeAnnotations(paramType);
+                if (anno != null) {
+                    paramType.addMissingAnnotations(Collections.singleton(anno));
+                }
+            }
+
+            AnnotatedTypeMirror retType = t.getReturnType();
+            AnnotationMirror anno = createIntRangeAnnotations(retType);
+            if (anno != null) {
+                retType.addMissingAnnotations(Collections.singleton(anno));
+            }
+            while (retType instanceof AnnotatedArrayType) {
+            	retType = ((AnnotatedArrayType) retType).getComponentType();
+                anno = createIntRangeAnnotations(retType);
+                if (anno != null) {
+                	retType.addMissingAnnotations(Collections.singleton(anno));
+                }
+            }
+
+            return super.visitExecutable(t, p);
+        }
+        
+        @Override
+        public Void visitArray(AnnotatedArrayType t, Void p) {
+            AnnotatedTypeMirror comp = t.getComponentType();
+            AnnotationMirror anno = createIntRangeAnnotations(comp);
+            if (anno != null) {
+                comp.addMissingAnnotations(Collections.singleton(anno));
+            }
+            return super.visitArray(t, p);
+        }
+        
+        @Override
+        public Void visitPrimitive(AnnotatedPrimitiveType t, Void p) {
+            AnnotationMirror anno = createIntRangeAnnotations(t);
+            if (anno != null) {
+                t.addMissingAnnotations(Collections.singleton(anno));
+            }
+            return super.visitPrimitive(t, p);
+        }
+    }
+    
+    @Override
+    public @Nullable AnnotatedTypeMirror getAnnotatedTypeVarargsArray(Tree tree) {
+    	AnnotatedTypeMirror atm = super.getAnnotatedTypeVarargsArray(tree);
+    	AnnotationMirror anno = createIntRangeAnnotations(atm);
+        if (anno != null) {
+        	atm.replaceAnnotation(anno);
+        }
+		return atm;
+    }
+
+	private AnnotationMirror createIntRangeAnnotations(AnnotatedTypeMirror atm) {
+        AnnotationMirror newAnno;
+        switch (atm.getKind()) {
+            case NULL:
+            	newAnno = BOTTOMVAL;
+	            break;
+//            case BOOLEAN:
+//            	newAnno = AnnotationBuilder.fromClass(elements, BoolVal.class);
+//	            break;
+  	        case BYTE:
+	            newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+	            break;
+            case SHORT:
+                newAnno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+                break;
+            case CHAR:
+                newAnno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+                break;
+            case INT:
+                newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+                break;
+            case DOUBLE:
+            case FLOAT:
+            case LONG:
+                newAnno = createIntRangeAnnotation(Range.EVERYTHING);
+                break;
+            default:
+//            	if (atm.getUnderlyingType().toString().equals("java.lang.String")) {
+//            		newAnno = AnnotationBuilder.fromClass(elements, StringVal.class);
+//                    break;
+//            	}
+                newAnno = null;
+                break;
+        }
+        return newAnno;
+    }
 
     /**
      * Returns a {@code Range} bounded by the values specified in the given {@code @Range}
@@ -381,11 +505,14 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
             Object value = tree.getValue();
             switch (tree.getKind()) {
-                case BOOLEAN_LITERAL:
-                    AnnotationMirror boolAnno =
-                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
-                    type.replaceAnnotation(boolAnno);
-                    return null;
+            	case NULL_LITERAL:
+            		type.replaceAnnotation(BOTTOMVAL);
+            		return null;
+//                case BOOLEAN_LITERAL:
+//                    AnnotationMirror boolAnno =
+//                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
+//                    type.replaceAnnotation(boolAnno);
+//                    return null;
 
                 case CHAR_LITERAL:
                     AnnotationMirror charAnno =
@@ -401,11 +528,11 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                             createNumberAnnotationMirror(Collections.singletonList((Number) value));
                     type.replaceAnnotation(numberAnno);
                     return null;
-                case STRING_LITERAL:
-                    AnnotationMirror stringAnno =
-                            createStringAnnotation(Collections.singletonList((String) value));
-                    type.replaceAnnotation(stringAnno);
-                    return null;
+//                case STRING_LITERAL:
+//                    AnnotationMirror stringAnno =
+//                            createStringAnnotation(Collections.singletonList((String) value));
+//                    type.replaceAnnotation(stringAnno);
+//                    return null;
                 default:
                     return null;
             }

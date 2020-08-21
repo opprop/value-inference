@@ -136,8 +136,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
 
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {
-        System.out.println(binaryTree);
-
         // infer mode, adds constraints for binary operations
         if (infer) {
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
@@ -400,6 +398,10 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         ArithmeticVariableSlot avsResplus =
                                 slotManager.getArithmeticVariableSlot(
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
+                        // TODO: slot is null because location is missing. Find out why location is missing.
+                        if (avsResplus == null) {
+                        	break;
+                        }
                         constraintManager.addEqualityConstraint(avsResplus, res);
                         break;
                     }
@@ -441,6 +443,10 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         ArithmeticVariableSlot avsResplus =
                                 slotManager.getArithmeticVariableSlot(
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
+                        // TODO: slot is null because location is missing.
+                        if (avsResplus == null) {
+                        	break;
+                        }
                         ConstantSlot cs =
                                 slotManager.createConstantSlot(
                                         iatf.createIntRangeAnnotation(-1, -1));
@@ -459,6 +465,10 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         ArithmeticVariableSlot avsResplus =
                                 slotManager.getArithmeticVariableSlot(
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
+                        // TODO: slot is null because location is missing.
+                        if (avsResplus == null) {
+                        	break;
+                        }
                         constraintManager.addEqualityConstraint(avsResplus, var);
                         if (var instanceof RefinementVariableSlot) {
                             constraintManager.addSubtypeConstraint(
@@ -497,7 +507,9 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             Slot cast = slotManager.getSlot(castAM);
             Slot expr = slotManager.getSlot(exprAM);
 
-            constraintManager.addSubtypeConstraint(expr, cast);
+            if (cast != null && expr != null) {
+            	constraintManager.addSubtypeConstraint(expr, cast);
+            }
         }
 
         return super.visitTypeCast(tree, p);

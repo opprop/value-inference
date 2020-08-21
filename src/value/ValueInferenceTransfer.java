@@ -62,21 +62,28 @@ public class ValueInferenceTransfer extends InferenceTransfer {
                 InferenceMain.getInstance().getConstraintManager();
         AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(tree);
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
+        if (slotToRefine == null) {
+        	return;
+        }
         while (slotToRefine instanceof RefinementVariableSlot) {
             slotToRefine = ((RefinementVariableSlot)slotToRefine).getRefined();
         }
         
-        AnnotationLocation lcoation =
+        AnnotationLocation location =
                 VariableAnnotator.treeToLocation(analysis.getTypeFactory(), tree);
+        // TODO: find out why there are missing location
+        if (location == AnnotationLocation.MISSING_LOCATION) {
+        	return;
+        }
         ComparisonVariableSlot thenSlot =
                 getInferenceAnalysis()
                         .getSlotManager()
-                        .createComparisonVariableSlot(lcoation, slotToRefine, true);
+                        .createComparisonVariableSlot(location, slotToRefine, true);
         constraintManager.addSubtypeConstraint(thenSlot, slotToRefine);
         ComparisonVariableSlot elseSlot =
                 getInferenceAnalysis()
                         .getSlotManager()
-                        .createComparisonVariableSlot(lcoation, slotToRefine, false);
+                        .createComparisonVariableSlot(location, slotToRefine, false);
         constraintManager.addSubtypeConstraint(elseSlot, slotToRefine);
         AnnotationMirror thenAm = getInferenceAnalysis().getSlotManager().getAnnotation(thenSlot);
         AnnotationMirror elseAm = getInferenceAnalysis().getSlotManager().getAnnotation(elseSlot);

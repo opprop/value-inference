@@ -7,5 +7,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
 
 @Documented
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@SubtypeOf({BoolVal.class, IntRange.class, StringVal.class})
+@SubtypeOf(IntRange.class)
+//@SubtypeOf({BoolVal.class, IntRange.class, StringVal.class})
 public @interface BottomVal {}

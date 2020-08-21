@@ -27,8 +27,8 @@ public class ValueEncoderUtils {
                                 ctx.mkNot(subT.getBottomVal()),
                                 ctx.mkNot(superT.getUnknownVal()),
                                 ctx.mkNot(superT.getBottomVal()),
-                                ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
-                                ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
+//                                ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
+//                                ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
                                 ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
                                 // int <: int
                                 ctx.mkOr(
@@ -51,8 +51,8 @@ public class ValueEncoderUtils {
                 ctx.mkAnd(
                         ctx.mkEq(left.getBottomVal(), right.getBottomVal()),
                         ctx.mkEq(left.getUnknownVal(), right.getUnknownVal()),
-                        ctx.mkEq(left.getBoolVal(), right.getBoolVal()),
-                        ctx.mkEq(left.getStringVal(), right.getStringVal()),
+//                        ctx.mkEq(left.getBoolVal(), right.getBoolVal()),
+//                        ctx.mkEq(left.getStringVal(), right.getStringVal()),
                         ctx.mkEq(left.getIntRange(), right.getIntRange()),
                         // int = int
                         ctx.mkOr(
@@ -64,5 +64,11 @@ public class ValueEncoderUtils {
                                 ctx.mkNot(left.getIntRange())));
 
         return equalityEncoding;
+    }
+    
+    public BoolExpr isIntRange(Context ctx, Z3InferenceValue val) {
+    	return ctx.mkAnd(val.getIntRange(), 
+//    			ctx.mkNot(val.getStringVal()), ctx.mkNot(val.getBoolVal()), 
+    			ctx.mkNot(val.getBottomVal()), ctx.mkNot(val.getUnknownVal()));
     }
 }

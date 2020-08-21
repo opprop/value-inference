@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -43,14 +44,14 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BottomVal.class);
             return builder.build();
         }
-        if (solution.isBoolVal()) {
-            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BoolVal.class);
-            return builder.build();
-        }
-        if (solution.isStringVal()) {
-            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, StringVal.class);
-            return builder.build();
-        }
+//        if (solution.isBoolVal()) {
+//            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BoolVal.class);
+//            return builder.build();
+//        }
+//        if (solution.isStringVal()) {
+//            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, StringVal.class);
+//            return builder.build();
+//        }
         if (solution.isIntRange()) {
             long from = solution.getIntRangeLower();
             long to = solution.getIntRangeUpper();
@@ -94,12 +95,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         if (AnnotationUtils.areSameByClass(anno, BottomVal.class)) {
             encodedSlot.setBottomVal(true);
         }
-        if (AnnotationUtils.areSameByClass(anno, BoolVal.class)) {
-            encodedSlot.setBoolVal(true);
-        }
-        if (AnnotationUtils.areSameByClass(anno, StringVal.class)) {
-            encodedSlot.setStringVal(true);
-        }
+//        if (AnnotationUtils.areSameByClass(anno, BoolVal.class)) {
+//            encodedSlot.setBoolVal(true);
+//        }
+//        if (AnnotationUtils.areSameByClass(anno, StringVal.class)) {
+//            encodedSlot.setStringVal(true);
+//        }
         if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
             encodedSlot.setIntRange(true);
             encodedSlot.setIntRangeLower(
@@ -121,13 +122,43 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         if (slot instanceof VariableSlot) {
             VariableSlot vslot = (VariableSlot) slot;
             TypeMirror type = vslot.getUnderlyingType();
-            if (type.toString().equals("byte") || type.toString().equals("java.lang.Byte")) {
+            if (type == null) {
+            	return ctx.mkAnd(
+                        // one hot
+                        ctx.mkAnd(
+                                ctx.mkXor(ctx.mkXor(value.getUnknownVal(), value.getBottomVal()), value.getIntRange()),
+                                ctx.mkNot(
+                              		  ctx.mkAnd(
+          		                          value.getUnknownVal(),
+          		                          value.getBottomVal(),
+          		                          value.getIntRange()))),
+                        // min <= from <= to <= max
+                        range,
+                        ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+//            	return ctx.mkAnd(
+//                        // one hot
+//                        ctx.mkXor(
+//                                ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+//                                ctx.mkAnd(
+//                                        ctx.mkXor(
+//                                                ctx.mkXor(value.getBoolVal(), value.getStringVal()),
+//                                                value.getIntRange()),
+//                                        ctx.mkNot(
+//                                                ctx.mkAnd(
+//                                                        value.getBoolVal(),
+//                                                        value.getStringVal(),
+//                                                        value.getIntRange())))),
+//                        // min <= from <= to <= max
+//                        range,
+//                        ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+            }
+            if (type.getKind() == TypeKind.BYTE) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-                                ctx.mkNot(value.getBoolVal()),
-                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBoolVal()),
+//                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkOr(
                                         ctx.mkAnd(
@@ -143,13 +174,13 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                         value.getIntRangeUpper(),
                                                         ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
             }
-            if (type.toString().equals("short") || type.toString().equals("java.lang.Short")) {
+            if (type.getKind() == TypeKind.SHORT) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-                                ctx.mkNot(value.getBoolVal()),
-                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBoolVal()),
+//                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkOr(
                                         ctx.mkAnd(
@@ -167,54 +198,66 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                         value.getIntRangeUpper(),
                                                         ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
             }
-            if (type.toString().equals("char") || type.toString().equals("java.lang.Character")) {
+            if (type.getKind() == TypeKind.CHAR) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-                                ctx.mkNot(value.getBoolVal()),
-                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBoolVal()),
+//                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
             }
-            if (type.toString().equals("int") || type.toString().equals("java.lang.Integer")) {
+            if (type.getKind() == TypeKind.INT) {
                 range =
                         ctx.mkAnd(
                                 ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-                                ctx.mkNot(value.getBoolVal()),
-                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBoolVal()),
+//                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
             }
-            if (type.toString().equals("long") || type.toString().equals("java.lang.Long")) {
+            if (type.getKind() == TypeKind.LONG) {
                 range =
                         ctx.mkAnd(
                                 ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-                                ctx.mkNot(value.getBoolVal()),
-                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBoolVal()),
+//                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
             }
         }
         return ctx.mkAnd(
-                // one hot
-                ctx.mkXor(
-                        ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
-                        ctx.mkAnd(
-                                ctx.mkXor(
-                                        ctx.mkXor(value.getBoolVal(), value.getStringVal()),
-                                        value.getIntRange()),
-                                ctx.mkNot(
-                                        ctx.mkAnd(
-                                                value.getBoolVal(),
-                                                value.getStringVal(),
-                                                value.getIntRange())))),
-                // min <= from <= to <= max
-                range,
-                ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+              // one hot
+              ctx.mkAnd(
+                      ctx.mkXor(ctx.mkXor(value.getUnknownVal(), value.getBottomVal()), value.getIntRange()),
+                      ctx.mkNot(
+                    		  ctx.mkAnd(
+		                          value.getUnknownVal(),
+		                          value.getBottomVal(),
+		                          value.getIntRange()))),
+              // min <= from <= to <= max
+              range,
+              ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+//        return ctx.mkAnd(
+//                // one hot
+//                ctx.mkXor(
+//                        ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+//                        ctx.mkAnd(
+//                                ctx.mkXor(
+//                                        ctx.mkXor(value.getBoolVal(), value.getStringVal()),
+//                                        value.getIntRange()),
+//                                ctx.mkNot(
+//                                        ctx.mkAnd(
+//                                                value.getBoolVal(),
+//                                                value.getStringVal(),
+//                                                value.getIntRange())))),
+//                // min <= from <= to <= max
+//                range,
+//                ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
     }
 
     @Override
@@ -223,37 +266,40 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         if (slot instanceof VariableSlot) {
             VariableSlot vslot = (VariableSlot) slot;
             TypeMirror type = vslot.getUnderlyingType();
-            if (type.toString().equals("java.lang.String")) {
-                return value.getStringVal();
+            if (type == null) {
+            	return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
             }
-            if (type.toString().equals("boolean") || type.toString().equals("java.lang.Boolean")) {
-                return value.getBoolVal();
-            }
-            if (type.toString().equals("byte") || type.toString().equals("java.lang.Byte")) {
+//            if (type.toString().equals("java.lang.String")) {
+//                return value.getStringVal();
+//            }
+//            if (type.getKind() == TypeKind.BOOLEAN || type.toString().equals("java.lang.Boolean")) {
+//                return value.getBoolVal();
+//            }
+            if (type.getKind() == TypeKind.BYTE || type.toString().equals("java.lang.Byte")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Byte.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Byte.MAX_VALUE)));
             }
-            if (type.toString().equals("short") || type.toString().equals("java.lang.Short")) {
+            if (type.getKind() == TypeKind.SHORT || type.toString().equals("java.lang.Short")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Short.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Short.MAX_VALUE)));
             }
-            if (type.toString().equals("char") || type.toString().equals("java.lang.Character")) {
+            if (type.getKind() == TypeKind.CHAR) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
             }
-            if (type.toString().equals("int") || type.toString().equals("java.lang.Integer")) {
+            if (type.getKind() == TypeKind.INT || type.toString().equals("java.lang.Integer")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
             }
-            if (type.toString().equals("long") || type.toString().equals("java.lang.Long")) {
+            if (type.getKind() == TypeKind.LONG || type.toString().equals("java.lang.Long")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
@@ -261,7 +307,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             }
         }
 
-        return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
+        return ctx.mkOr(value.getUnknownVal(), value.getBottomVal());
     }
 
     @Override
@@ -303,12 +349,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (component.contentEquals("INTRANGE")) {
                 z3Slot.setIntRange(Boolean.parseBoolean(value));
             }
-            if (component.contentEquals("STRINGVAL")) {
-                z3Slot.setStringVal(Boolean.parseBoolean(value));
-            }
-            if (component.contentEquals("BOOLVAL")) {
-                z3Slot.setBoolVal(Boolean.parseBoolean(value));
-            }
+//            if (component.contentEquals("STRINGVAL")) {
+//                z3Slot.setStringVal(Boolean.parseBoolean(value));
+//            }
+//            if (component.contentEquals("BOOLVAL")) {
+//                z3Slot.setBoolVal(Boolean.parseBoolean(value));
+//            }
             if (component.contentEquals("from")) {
                 z3Slot.setIntRangeLower(Long.parseLong(value));
             }
