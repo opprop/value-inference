@@ -1,0 +1,145 @@
+import value.qual.IntRange;
+import value.qual.PolyVal;
+
+import java.io.Serializable;
+import java.lang.Comparable;
+
+package java.lang;
+
+class Byte {
+    static @IntRange(from=-128, to=-128) byte MIN_VALUE;
+    static @IntRange(from=127, to=127) byte MAX_VALUE;
+
+    static @PolyVal Byte valueOf(@PolyVal byte arg0);
+    @PolyVal Byte(@PolyVal byte arg0);
+
+    @PolyVal byte byteValue(@PolyVal Byte this);
+    @PolyVal short shortValue(@PolyVal Byte this);
+    @PolyVal int intValue(@PolyVal Byte this);
+    @PolyVal long longValue(@PolyVal Byte this);
+    @PolyVal float floatValue(@PolyVal Byte this);
+    @PolyVal double doubleValue(@PolyVal Byte this);
+
+    String toString(@IntRange(from=-128, to=255) Byte this);
+    static String toString(@IntRange(from=-128, to=255) byte arg0);
+    int hashCode(@IntRange(from=-128, to=255) Byte this);
+    static int hashCode(@IntRange(from=-128, to=255) byte arg0);
+
+    boolean equals(@IntRange(from=-128, to=255) Byte this, @IntRange(from=-128, to=255) Object arg0);
+    int compareTo(@IntRange(from=-128, to=255) Byte this, @IntRange(from=-128, to=255) Byte arg0);
+    static int compare(@IntRange(from=-128, to=255) byte arg0, @IntRange(from=-128, to=255) byte arg1);
+
+    static @IntRange(from=0, to=255) int toUnsignedInt(@IntRange(from=-128, to=255) byte arg0);
+    static @IntRange(from=0, to=255) long toUnsignedLong(@IntRange(from=-128, to=255) byte arg0);
+}
+
+class Short {
+    static @IntRange(from=-32768, to=-32768) short MIN_VALUE;
+    static @IntRange(from=32767, to=32767) short MAX_VALUE;
+
+    static @PolyVal Short valueOf(@PolyVal short arg0);
+    @PolyVal Short(@PolyVal short arg0);
+
+    @PolyVal byte byteValue(@PolyVal Short this);
+    @PolyVal short shortValue(@PolyVal Short this);
+    @PolyVal int intValue(@PolyVal Short this);
+    @PolyVal long longValue(@PolyVal Short this);
+    @PolyVal float floatValue(@PolyVal Short this);
+    @PolyVal double doubleValue(@PolyVal Short this);
+
+    String toString(@IntRange(from=-32768, to=65535) Short this);
+    static String toString(@IntRange(from=-32768, to=65535) short arg0);
+    int hashCode(@IntRange(from=-32768, to=65535) Short this);
+    static int hashCode(@IntRange(from=-32768, to=65535) short arg0);
+
+    boolean equals(@IntRange(from=-32768, to=65535) Short this, @IntRange(from=-32768, to=65535) Object arg0);
+    int compareTo(@IntRange(from=-32768, to=65535) Short this, @IntRange(from=-32768, to=65535) hort arg0);
+    static int compare(@IntRange(from=-32768, to=65535) short arg0, @IntRange(from=-32768, to=65535) short arg1);
+
+    static @IntRange(from=0, to=65535) int toUnsignedInt(@IntRange(from=-32768, to=65535) short arg0);
+    static @IntRange(from=0, to=65535) long toUnsignedLong(@IntRange(from=-32768, to=65535) short arg0);
+}
+
+class Character {
+    static @IntRange(from=0, to=0) char MIN_VALUE;
+    static @IntRange(from=65535, to=65535) char MAX_VALUE;
+
+    static @PolyVal Short valueOf(@PolyVal char arg0);
+    @PolyVal Short(@PolyVal char arg0);
+    @PolyVal char charValue(@PolyVal Character this);
+}
+
+class Integer {
+    static @IntRange(from=-2147483648, to=-2147483648) int MIN_VALUE;
+    static @IntRange(from=2147483647, to=2147483647) int MAX_VALUE;
+
+    static @PolyVal Integer valueOf(@PolyVal int arg0);
+    @PolyVal Integer(@PolyVal int arg0);
+
+    @PolyVal byte byteValue(@PolyVal Integer this);
+    @PolyVal short shortValue(@PolyVal Integer this);
+    @PolyVal int intValue(@PolyVal Integer this);
+    @PolyVal long longValue(@PolyVal Integer this);
+    @PolyVal float floatValue(@PolyVal Integer this);
+    @PolyVal double doubleValue(@PolyVal Integer this);
+
+    // gets the integer value of system property name, if not possible it will return val instead
+    static @PolyVal Integer getInteger(String name, @PolyVal int val);
+    static @PolyVal Integer getInteger(String name, @PolyVal Integer val);
+
+    static @IntRange(from=0) long toUnsignedLong(int arg0);
+    static @PolyVal int max(@PolyVal int arg0, @PolyVal int arg1);
+    static @PolyVal int min(@PolyVal int arg0, @PolyVal int arg1);
+}
+
+class Long {
+    static @IntRange(from=-9223372036854775808L, to=-9223372036854775808L) byte MIN_VALUE;
+    static @IntRange(from=9223372036854775807L, to=9223372036854775807L) byte MAX_VALUE;
+
+    static @PolyVal Long valueOf(@PolyVal long arg0);
+    @PolyVal Long(@PolyVal long arg0);
+
+    @PolyVal byte byteValue(@PolyVal Long this);
+    @PolyVal short shortValue(@PolyVal Long this);
+    @PolyVal int intValue(@PolyVal Long this);
+    @PolyVal long longValue(@PolyVal Long this);
+    @PolyVal float floatValue(@PolyVal Long this);
+    @PolyVal double doubleValue(@PolyVal Long this);
+
+    static @PolyVal Long getLong(String arg0, @PolyVal long arg1);
+    static @PolyVal Long getLong(String arg0, @PolyVal Long arg1);
+
+    static @PolyVal long max(@PolyVal long arg0, @PolyVal long arg1);
+    static @PolyVal long min(@PolyVal long arg0, @PolyVal long arg1);
+}
+
+class Float {
+    static @PolyVal Float valueOf(@PolyVal float arg0);
+    @PolyVal Float(@PolyVal float arg0);
+    @PolyVal Float(@PolyVal double arg0);
+
+    @PolyVal byte byteValue(@PolyVal Float this);
+    @PolyVal short shortValue(@PolyVal Float this);
+    @PolyVal int intValue(@PolyVal Float this);
+    @PolyVal long longValue(@PolyVal Float this);
+    @PolyVal float floatValue(@PolyVal Float this);
+    @PolyVal double doubleValue(@PolyVal Float this);
+
+    static @PolyVal float max(@PolyVal float arg0, @PolyVal float arg1);
+    static @PolyVal float min(@PolyVal float arg0, @PolyVal float arg1);
+}
+
+class Double {
+    static @PolyVal Double valueOf(@PolyVal double arg0);
+    @PolyVal Double(@PolyVal double arg0);
+
+    @PolyVal byte byteValue(@PolyVal Double this);
+    @PolyVal short shortValue(@PolyVal Double this);
+    @PolyVal int intValue(@PolyVal Double this);
+    @PolyVal long longValue(@PolyVal Double this);
+    @PolyVal float floatValue(@PolyVal Double this);
+    @PolyVal double doubleValue(@PolyVal Double this);
+
+    static @PolyVal double max(@PolyVal double arg0, @PolyVal double arg1);
+    static @PolyVal double min(@PolyVal double arg0, @PolyVal double arg1);
+}

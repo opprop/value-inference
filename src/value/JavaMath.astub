@@ -1,0 +1,20 @@
+import value.qual.IntRange;
+import value.qual.PolyVal;
+
+package java.lang;
+
+class Math {
+	// min and max
+    // returns the LUB of the 2 value
+    static @PolyVal double max(@PolyVal double a, @PolyVal double b);
+    static @PolyVal float max(@PolyVal float a, @PolyVal float b);
+    static @PolyVal int max(@PolyVal int a, @PolyVal int b);
+    static @PolyVal long max(@PolyVal long a, @PolyVal long b);
+
+    static @PolyVal double min(@PolyVal double a, @PolyVal double b);
+    static @PolyVal float min(@PolyVal float a, @PolyVal float b);
+    static @PolyVal int min(@PolyVal int a, @PolyVal int b);
+    static @PolyVal long min(@PolyVal long a, @PolyVal long b);
+
+    static int toIntExact(@IntRange(from=-2147483648, to=2147483647) long value);
+}

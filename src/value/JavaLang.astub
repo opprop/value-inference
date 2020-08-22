@@ -1,0 +1,11 @@
+import value.qual.IntRange;
+
+package java.lang;
+
+final class DatagramPacket {
+	public DatagramPacket(@IntRange(from=-128, to=255) byte[] buf, int offset, int length);
+	public DatagramPacket(@IntRange(from=-128, to=255) byte[] buf, int length);
+	public void setData(@IntRange(from=-128, to=255) byte[] buf);
+	public void setData(@IntRange(from=-128, to=255) byte[] buf, int offset, int length);
+}
+

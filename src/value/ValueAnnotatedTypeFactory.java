@@ -48,6 +48,7 @@ import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
 import value.qual.StringVal;
+import value.qual.PolyVal;
 import value.qual.UnknownVal;
 
 public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
@@ -62,6 +63,10 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /** The bottom type for this hierarchy. */
     protected final AnnotationMirror BOTTOMVAL =
             AnnotationBuilder.fromClass(elements, BottomVal.class);
+    
+    /** The polymorphic type for this hierarchy. */
+    protected final AnnotationMirror POLYVAL =
+            AnnotationBuilder.fromClass(elements, PolyVal.class);
 
     public ValueAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
@@ -104,7 +109,8 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 //                        BoolVal.class,
 //                        StringVal.class,
                         BottomVal.class,
-                        UnknownVal.class));
+                        UnknownVal.class,
+                        PolyVal.class));
     }
 
     @Override
@@ -179,16 +185,23 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
          */
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
-            if (AnnotationUtils.areSameByClass(subAnno, UnknownVal.class)) {
+            if (AnnotationUtils.areSame(subAnno, UNKNOWNVAL)) {
                 superAnno = convertToUnknown(superAnno);
             }
 
-            if (AnnotationUtils.areSameByClass(superAnno, UnknownVal.class)
-                    || AnnotationUtils.areSameByClass(subAnno, BottomVal.class)) {
+            if (AnnotationUtils.areSame(superAnno, UNKNOWNVAL)
+                    || AnnotationUtils.areSame(subAnno, BOTTOMVAL)) {
                 return true;
-            } else if (AnnotationUtils.areSameByClass(subAnno, UnknownVal.class)
-                    || AnnotationUtils.areSameByClass(superAnno, BottomVal.class)) {
+            } else if (AnnotationUtils.areSame(subAnno, UNKNOWNVAL)
+                    || AnnotationUtils.areSame(superAnno, BOTTOMVAL)) {
                 return false;
+            } 
+            // Case: @PolyUnit are treated as @UnknownVal
+            else if (AnnotationUtils.areSame(subAnno, POLYVAL)) {
+                return isSubtype(UNKNOWNVAL, superAnno);
+            }
+            if (AnnotationUtils.areSame(superAnno, POLYVAL)) {
+                return true;
             } else if (AnnotationUtils.areSameByName(superAnno, subAnno)) {
                 // Same type, so might be subtype
                 if (AnnotationUtils.areSameByClass(subAnno, IntRange.class)) {

@@ -28,6 +28,6 @@ public class ValueSolverFactory extends Z3SmtSolverFactory<Z3InferenceValue, Typ
             Lattice lattice) {
         Z3SmtFormatTranslator<Z3InferenceValue, TypeCheckValue> formatTranslator =
                 createFormatTranslator(lattice);
-        return new Z3SmtSolver(solverEnvironment, slots, constraints, formatTranslator, lattice);
+        return new Z3SmtSolver<Z3InferenceValue, TypeCheckValue>(solverEnvironment, slots, constraints, formatTranslator, lattice);
     }
 }

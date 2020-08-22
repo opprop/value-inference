@@ -1,0 +1,7 @@
+import value.qual.IntRange;
+
+package java.nio;
+
+abstract class Buffer {
+	public final @IntRange(from=0, to=2147483647) int remaining();
+}

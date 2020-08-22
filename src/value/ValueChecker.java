@@ -8,7 +8,17 @@ import checkers.inference.dataflow.InferenceAnalysis;
 import checkers.inference.model.ConstraintManager;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.flow.CFTransfer;
+import org.checkerframework.framework.qual.StubFiles;
 
+@StubFiles({
+    "input.astub",
+    "output.astub",
+    "JavaUtil.astub",
+    "JavaLang.astub",
+    "JavaNIO.astub",
+    "JavaMath.astub",
+    "JavaBoxedPrimitives.astub",
+})
 public class ValueChecker extends BaseInferrableChecker {
     @Override
     public void initChecker() {

@@ -1,0 +1,172 @@
+import value.qual.IntRange;
+
+// OutputStream stubs
+package java.io;
+public abstract class OutputStream implements Closeable {
+    public abstract void write( @IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class FilterOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class SequenceOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class PipedOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class LineNumberOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class FileOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class PushbackOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class ByteArrayOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b);
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class StringBufferOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b);
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class BufferedOutputStream extends FilterOutputStream {
+    public @IntRange(from=-1, to=255) synchronized int read() throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class ObjectOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class ObjectOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class ObjectOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+
+package java.net;
+public class SocketOutputStream extends FileOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+package javax.swing;
+public class ProgressMonitorOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+package javax.sound.sampled;
+public class AudioOutputStream extends OutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+package javax.imageio;
+public interface ImageOutputStream extends DataOutput, Closeable {
+    @IntRange(from=-1, to=255) int read() throws IOException;
+}
+public class FileImageOutputStream extends ImageOutputStreamImpl {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class FileCacheImageOutputStream extends ImageOutputStreamImpl {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class MemoryCacheImageOutputStream extends ImageOutputStreamImpl {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+package org.omg.CORBA;
+public abstract class OutputStream extends java.io.OutputStream {
+    public @IntRange(from=-1, to=255) int read() throws java.io.IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+package java.util.zip;
+class CheckedOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+public class DeflaterOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+class InflaterOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+package java.security;
+public class DigestOutputStream extends FilterOutputStream {
+    public void write(@IntRange(from=-128, to=255) int b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b) throws IOException;
+    public void write(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+}
+
+// Writer stubs
+package java.io;
+public abstract class Writer implements Appendable, Closeable, Flushable {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public abstract class FilterWriter extends Writer {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class CharArrayWriter extends Writer {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class LineNumberWriter extends BufferedWriter {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class StringWriter extends Writer {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class OutputStreamWriter extends Writer {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class BufferedWriter extends Writer {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class PipedWriter extends Writer {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}
+public class PushbackWriter extends FilterWriter {
+    public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+}

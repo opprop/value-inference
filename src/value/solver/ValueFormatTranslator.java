@@ -1,5 +1,7 @@
 package value.solver;
 
+import checkers.inference.model.ArithmeticVariableSlot;
+import checkers.inference.model.ComparisonVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -20,6 +22,7 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
+import value.qual.PolyVal;
 import value.qual.StringVal;
 import value.qual.UnknownVal;
 import value.representation.TypeCheckValue;
@@ -89,6 +92,10 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 
         AnnotationMirror anno = slot.getValue();
         Z3InferenceValue encodedSlot = Z3InferenceValue.makeConstantSlot(ctx, slotID);
+        // TODO: temp hack: treat poly as unknownval
+        if (AnnotationUtils.areSameByClass(anno, PolyVal.class)) {
+        	encodedSlot.setUnknownVal(true);
+        }
         if (AnnotationUtils.areSameByClass(anno, UnknownVal.class)) {
             encodedSlot.setUnknownVal(true);
         }
@@ -114,6 +121,14 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 
     @Override
     public BoolExpr encodeSlotWellformnessConstraint(Slot slot) {
+    	if (slot instanceof ConstantSlot) {
+            ConstantSlot cs = (ConstantSlot) slot;
+            AnnotationMirror anno = cs.getValue();
+            // encode poly as constant trues
+            if (AnnotationUtils.areSameByClass(anno, PolyVal.class)) {
+                return ctx.mkTrue();
+            }
+        }
         Z3InferenceValue value = slot.serialize(this);
         BoolExpr range =
                 ctx.mkAnd(
@@ -212,7 +227,8 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (type.getKind() == TypeKind.INT) {
                 range =
                         ctx.mkAnd(
-                                ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+                        		value.getIntRange(),
+                                ctx.mkNot(value.getUnknownVal()),
 //                                ctx.mkNot(value.getBoolVal()),
 //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
@@ -262,6 +278,15 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 
     @Override
     public BoolExpr encodeSlotPreferenceConstraint(Slot slot) {
+    	if (slot instanceof ConstantSlot) {
+            ConstantSlot cs = (ConstantSlot) slot;
+            AnnotationMirror anno = cs.getValue();
+            // encode poly as constant trues
+            if (AnnotationUtils.areSameByClass(anno, PolyVal.class)) {
+                return ctx.mkTrue();
+            }
+        }
+    	
         Z3InferenceValue value = slot.serialize(this);
         if (slot instanceof VariableSlot) {
             VariableSlot vslot = (VariableSlot) slot;
@@ -305,6 +330,11 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
             }
+        }
+        
+        // Most likely numeric computation and comparisons
+        if (slot instanceof ArithmeticVariableSlot || slot instanceof ComparisonVariableSlot) {
+        	return value.getIntRange();
         }
 
         return ctx.mkOr(value.getUnknownVal(), value.getBottomVal());

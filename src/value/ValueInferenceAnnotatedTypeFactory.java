@@ -14,10 +14,16 @@ import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
+import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.UnaryTree;
 import java.util.ArrayList;
@@ -28,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
@@ -35,9 +42,11 @@ import org.checkerframework.common.value.ValueCheckerUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -154,6 +163,45 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     return super.visitLiteral(tree, type);
             }
         }
+        
+        @Override
+        public Void visitNewClass(NewClassTree newClassTree, AnnotatedTypeMirror atm) {
+            // Call super to replace polymorphic annotations with fresh variable slots
+            super.visitNewClass(newClassTree, atm);
+
+            if (isConstructorDeclaredWithPolymorphicReturn(newClassTree)) {
+                // 1) the variable slot generated for the polymorphic declared return type
+                Slot varSlotForPolyReturn =
+                        variableAnnotator.getOrCreatePolyVar(newClassTree);
+
+                // 2) the call site return type: "@m" in "new @m Clazz(...)"
+                Slot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
+
+                // Create a subtype constraint: callSiteReturnVarSlot <: varSlotForPolyReturn
+                // since after annotation insertion, the varSlotForPolyReturn is conceptually a
+                // cast of the newly created object:
+                // "(@varSlotForPolyReturn Clazz) new @m Clazz(...)"
+                constraintManager.addSubtypeConstraint(callSiteReturnVarSlot, varSlotForPolyReturn);
+
+                // Replace the slot/annotation in the atm (callSiteReturnVarSlot) with the
+                // varSlotForPolyReturn for upstream analysis
+                atm.replaceAnnotation(slotManager.getAnnotation(varSlotForPolyReturn));
+            }
+
+            return null;
+        }
+
+        @Override
+        public Void visitMethodInvocation(
+                MethodInvocationTree methodInvocationTree, AnnotatedTypeMirror atm) {
+            super.visitMethodInvocation(methodInvocationTree, atm);
+
+            if (isMethodDeclaredWithPolymorphicReturn(methodInvocationTree)) {
+                variableAnnotator.getOrCreatePolyVar(methodInvocationTree);
+            }
+
+            return null;
+        }
 
         private void replaceATM(AnnotatedTypeMirror atm, AnnotationMirror dataflowAM) {
             final ConstantSlot cs = slotManager.createConstantSlot(dataflowAM);
@@ -161,6 +209,72 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     new AnnotationBuilder(realTypeFactory.getProcessingEnv(), VarAnnot.class);
             ab.setValue("value", cs.getId());
             atm.replaceAnnotation(ab.build());
+        }
+        
+        // see if given annotation mirror is the VarAnnot versions of @PolyVal
+        private boolean isPolyAnnotation(AnnotationMirror annot) {
+            Slot slot = slotManager.getSlot(annot);
+            if (slot.isConstant()) {
+                AnnotationMirror constant = ((ConstantSlot) slot).getValue();
+                return InferenceQualifierHierarchy.isPolymorphic(constant);
+            }
+            return false;
+        }
+
+        // based on InferenceATF.constructorFromUse()
+        private boolean isConstructorDeclaredWithPolymorphicReturn(NewClassTree newClassTree) {
+            final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
+            final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
+            final AnnotatedExecutableType constructorType =
+                    AnnotatedTypes.asMemberOf(
+                            types,
+                            ValueInferenceAnnotatedTypeFactory.this,
+                            constructorReturnType,
+                            constructorElem);
+
+            // if any of the annotations on the return type of the constructor is a
+            // polymorphic annotation, return true
+            for (AnnotationMirror annot : constructorType.getReturnType().getAnnotations()) {
+                if (isPolyAnnotation(annot)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // based on InferenceATF.methodFromUse()
+        private boolean isMethodDeclaredWithPolymorphicReturn(
+                MethodInvocationTree methodInvocationTree) {
+            final ExecutableElement methodElem = TreeUtils.elementFromUse(methodInvocationTree);
+            // final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
+
+            final ExpressionTree methodSelectExpression = methodInvocationTree.getMethodSelect();
+            final AnnotatedTypeMirror receiverType;
+            if (methodSelectExpression.getKind() == Tree.Kind.MEMBER_SELECT) {
+                receiverType =
+                        getAnnotatedType(
+                                ((MemberSelectTree) methodSelectExpression).getExpression());
+            } else {
+                receiverType = getSelfType(methodInvocationTree);
+            }
+
+            final AnnotatedExecutableType methodOfReceiver =
+                    AnnotatedTypes.asMemberOf(
+                            types,
+                            ValueInferenceAnnotatedTypeFactory.this,
+                            receiverType,
+                            methodElem);
+
+            // if any of the annotations on the return type of the constructor is a
+            // polymorphic annotation, return true
+            for (AnnotationMirror annot : methodOfReceiver.getReturnType().getAnnotations()) {
+                if (isPolyAnnotation(annot)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

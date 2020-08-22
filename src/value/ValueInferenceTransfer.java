@@ -12,8 +12,8 @@ import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.qual.VarAnnot;
 
-import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
 
 import java.util.Set;
 
@@ -21,7 +21,6 @@ import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.dataflow.analysis.ConditionalTransferResult;
 import org.checkerframework.dataflow.analysis.FlowExpressions;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
-import org.checkerframework.dataflow.analysis.FlowExpressions.LocalVariable;
 import org.checkerframework.dataflow.analysis.FlowExpressions.Receiver;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
@@ -54,14 +53,15 @@ public class ValueInferenceTransfer extends InferenceTransfer {
 
     private void createComparisonVariableSlot(Node node, CFStore thenStore, CFStore elseStore) {
         Tree tree = node.getTree();
-        // Don't need to create variable slot for literal trees
-        if (tree instanceof LiteralTree) {
+        // Only create refinement comparison slot for variables
+        if (!(tree instanceof VariableTree)) {
             return;
         }
         ConstraintManager constraintManager =
                 InferenceMain.getInstance().getConstraintManager();
         AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(tree);
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
+        // TODO: Understand why there are null slots
         if (slotToRefine == null) {
         	return;
         }

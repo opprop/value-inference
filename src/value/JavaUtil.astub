@@ -1,0 +1,8 @@
+import value.qual.IntRange;
+
+package java.util;
+
+class Arrays {
+	public static boolean equals(@IntRange(from=-128, to=255) byte[] a, @IntRange(from=-128, to=255) byte[] a2);
+	public static int hashCode(@IntRange(from=-128, to=255) byte[] a);
+}

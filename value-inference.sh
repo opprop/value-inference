@@ -1,10 +1,14 @@
 #!/bin/bash
 
-ROOT=$(cd $(dirname "$0")/.. && pwd)
+JSR308=$(cd $(dirname "$0")/.. && pwd)
 
-CFI=$ROOT/checker-framework-inference
+echo "$JSR308"/value-inference
 
-AFU=$ROOT/annotation-tools/annotation-file-utilities
+CFI=$JSR308/checker-framework-inference
+VI=$JSR308/value-inference
+VIPATH=$VI/build/classes/java/main:$VI/build/resources/main:$VI/build/libs/value-inference.jar
+
+export AFU=$JSR308/annotation-tools/annotation-file-utilities
 export PATH=$AFU/scripts:$PATH
 
 CHECKER=value.ValueChecker
@@ -17,21 +21,22 @@ IS_HACK=true
 # IS_HACK=false
 # DEBUG_CLASSPATH=""
 
-if [ -n "$1" ] && [ $1 = "true" ]; then SOLVERARGS=solver=Z3smt,optimizingMode=true,collectStatistics=true,writeSolutions=true,noAppend=true
-else  SOLVERARGS=solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true
+if [ -n "$1" ] && [ $1 = "true" ]; then
+    SOLVERARGS=solver=Z3smt,optimizingMode=true,collectStatistics=true,writeSolutions=true,noAppend=true
+else
+    SOLVERARGS=solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true
 fi
 
-SECURITYPATH=$ROOT/value-inference/build/classes/java/main
-export CLASSPATH=$SECURITYPATH:$DEBUG_CLASSPATH:.
-export external_checker_classpath=$SECURITYPATH
+export CLASSPATH=$VIPATH:$DEBUG_CLASSPATH:.
+export external_checker_classpath=$VIPATH
 
 CFI_LIB=$CFI/lib
 export DYLD_LIBRARY_PATH=$CFI_LIB
 export LD_LIBRARY_PATH=$CFI_LIB
 export JAVA_LIBRARY_PATH=$CFI_LIB
 
-# TYPE CHECKING
-# $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true,solver=z3" --hacks="$IS_HACK" -m TYPECHECK "$@"
+# NOTE: ROUNDTRIP mode actually writes out files to annotated, INFER mode only
+# performs inference without writing to annotated
 
 # Inference
 if [ -n "$1" ] && [ $1 = "true" ]; then
