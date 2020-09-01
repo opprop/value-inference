@@ -287,6 +287,34 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         public ValueInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
             super(multiGraphFactory);
         }
+        
+        @Override
+        public Set<? extends AnnotationMirror> leastUpperBounds(
+                Collection<? extends AnnotationMirror> annos1,
+                Collection<? extends AnnotationMirror> annos2) {
+            if (InferenceMain.isHackMode(annos1.size() != annos2.size())) {
+                Set<AnnotationMirror> result = AnnotationUtils.createAnnotationSet();
+                for (AnnotationMirror a1 : annos1) {
+                    for (AnnotationMirror a2 : annos2) {
+                        AnnotationMirror lub = leastUpperBound(a1, a2);
+                        if (lub != null) {
+                            result.add(lub);
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+            return super.leastUpperBounds(annos1, annos2);
+        }
+    }
+    
+    @Override
+    protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
+        Set<AnnotationMirror> top = new HashSet<>();
+        top.add(UNKNOWNVAL);
+        return top;
     }
 
     /**

@@ -148,6 +148,9 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             AnnotatedTypeMirror rhsATM = iatf.getAnnotatedType(binaryTree.getRightOperand());
             AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
             AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            if (lhsAM == null || rhsAM == null) {
+            	super.visitBinary(binaryTree, p);
+            }
             Slot lhs = slotManager.getSlot(lhsAM);
             Slot rhs = slotManager.getSlot(rhsAM);
 
@@ -504,6 +507,9 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             AnnotatedTypeMirror exprATM = iatf.getAnnotatedType(tree.getExpression());
             AnnotationMirror castAM = castATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
             AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            if (castAM == null || exprAM == null) {
+            	return super.visitTypeCast(tree, p);
+            }
             Slot cast = slotManager.getSlot(castAM);
             Slot expr = slotManager.getSlot(exprAM);
 

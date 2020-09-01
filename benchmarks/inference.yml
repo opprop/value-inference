@@ -41,21 +41,6 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-codec:
-    giturl: https://github.com/opprop-benchmarks/commons-codec.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  commons-imaging:
-    giturl: https://github.com/opprop-benchmarks/commons-imaging.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  commons-ognl:
-    giturl: https://github.com/opprop-benchmarks/commons-ognl.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
 # Evaluates to SAT 
   # commons-dbcp:
   #   giturl: https://github.com/opprop-benchmarks/commons-dbcp.git
@@ -127,3 +112,19 @@ projects:
   #   giturl: https://github.com/opprop-benchmarks/commons-bsf.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
+
+  # commons-codec:
+  #   giturl: https://github.com/opprop-benchmarks/commons-codec.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
+
+  # commons-imaging:
+  #   giturl: https://github.com/opprop-benchmarks/commons-imaging.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
+
+  # commons-ognl:
+  #   giturl: https://github.com/opprop-benchmarks/commons-ognl.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn cleangit
+
