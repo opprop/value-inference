@@ -411,6 +411,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).plus(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -428,6 +431,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).minus(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -445,6 +451,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).times(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -462,6 +471,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).divide(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -479,6 +491,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).remainder(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -496,6 +511,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).shiftLeft(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -513,6 +531,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).signedShiftRight(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -530,6 +551,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).unsignedShiftRight(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -547,6 +571,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseAnd(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -564,6 +591,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseOr(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
@@ -581,6 +611,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseXor(getRange(rhsAM));
+                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            	range = Range.INT_EVERYTHING;
+                            }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
