@@ -187,6 +187,13 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
                                                 ctx.mkLe(
                                                         value.getIntRangeUpper(),
+                                                        ctx.mkInt(Byte.MAX_VALUE * 2 + 1))),
+                                        ctx.mkAnd(
+                                                ctx.mkGe(
+                                                        value.getIntRangeLower(),
+                                                        ctx.mkInt(Byte.MIN_VALUE)),
+                                                ctx.mkLe(
+                                                        value.getIntRangeUpper(),
                                                         ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
             }
             if (type.getKind() == TypeKind.SHORT) {
@@ -209,6 +216,14 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                         ctx.mkAnd(
                                                 value.getIntRange(),
                                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+                                                ctx.mkLe(
+                                                        value.getIntRangeUpper(),
+                                                        ctx.mkInt(Short.MAX_VALUE * 2 + 1))),
+                                        ctx.mkAnd(
+                                                value.getIntRange(),
+                                                ctx.mkGe(
+                                                        value.getIntRangeLower(),
+                                                        ctx.mkInt(Short.MIN_VALUE)),
                                                 ctx.mkLe(
                                                         value.getIntRangeUpper(),
                                                         ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));

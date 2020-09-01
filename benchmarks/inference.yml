@@ -1,45 +1,25 @@
 projects:
 
 # CFI Crashes
-  commons-collections:
-    giturl: https://github.com/opprop-benchmarks/commons-collections.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
   commons-dbutils:
     giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-compress:
-    giturl: https://github.com/opprop-benchmarks/commons-compress.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  commons-beanutils:
-    giturl: https://github.com/opprop-benchmarks/commons-beanutils.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  commons-logging:
-    giturl: https://github.com/opprop-benchmarks/commons-logging.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
+  # commons-compress:
+  #   giturl: https://github.com/opprop-benchmarks/commons-compress.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
 
   commons-configuration:
     giturl: https://github.com/opprop-benchmarks/commons-configuration.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-crypto:
-    giturl: https://github.com/opprop-benchmarks/commons-crypto.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  commons-jexl:
-    giturl: https://github.com/opprop-benchmarks/commons-jexl.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
+  # commons-jexl:
+  #   giturl: https://github.com/opprop-benchmarks/commons-jexl.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
 
 # Evaluates to SAT 
   # commons-dbcp:
@@ -57,9 +37,19 @@ projects:
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
+  # commons-logging:
+  #   giturl: https://github.com/opprop-benchmarks/commons-logging.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
+
 # Evalutes to UNSAT
   # commons-text:
   #   giturl: https://github.com/opprop-benchmarks/commons-text.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
+
+  # commons-email:
+  #   giturl: https://github.com/opprop-benchmarks/commons-email.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
@@ -68,13 +58,8 @@ projects:
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
-  # commons-fileupload:
-  #   giturl: https://github.com/opprop-benchmarks/commons-fileupload.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
-
-  # commons-email:
-  #   giturl: https://github.com/opprop-benchmarks/commons-email.git
+  # commons-crypto:
+  #   giturl: https://github.com/opprop-benchmarks/commons-crypto.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
@@ -103,28 +88,44 @@ projects:
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
-  # commons-jxpath:
-  #   giturl: https://github.com/opprop-benchmarks/commons-jxpath.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-fileupload:
+    giturl: https://github.com/opprop-benchmarks/commons-fileupload.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-bsf:
-  #   giturl: https://github.com/opprop-benchmarks/commons-bsf.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-jxpath:
+    giturl: https://github.com/opprop-benchmarks/commons-jxpath.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-codec:
-  #   giturl: https://github.com/opprop-benchmarks/commons-codec.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-bsf:
+    giturl: https://github.com/opprop-benchmarks/commons-bsf.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
+  commons-codec:
+    giturl: https://github.com/opprop-benchmarks/commons-codec.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
+  commons-daemon:
+    giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
   # commons-imaging:
   #   giturl: https://github.com/opprop-benchmarks/commons-imaging.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
-  # commons-ognl:
-  #   giturl: https://github.com/opprop-benchmarks/commons-ognl.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn cleangit
+  commons-ognl:
+    giturl: https://github.com/opprop-benchmarks/commons-ognl.git
+    build: mvn -B -DskipTests compile
+    clean: mvn cleangit
+
+  commons-beanutils:
+    giturl: https://github.com/opprop-benchmarks/commons-beanutils.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
 

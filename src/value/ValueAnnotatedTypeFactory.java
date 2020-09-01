@@ -28,6 +28,7 @@ import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.qual.LiteralKind;
+import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
@@ -41,6 +42,7 @@ import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
 import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
+import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TypesUtils;
@@ -111,6 +113,14 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         BottomVal.class,
                         UnknownVal.class,
                         PolyVal.class));
+    }
+    
+    @Override
+    public AnnotationMirror canonicalAnnotation(AnnotationMirror anno) {
+        if (anno == null) {
+        	return BOTTOMVAL;
+        }
+        return super.canonicalAnnotation(anno);
     }
 
     @Override
@@ -276,6 +286,14 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return Range.EVERYTHING;
             }
         }
+    }
+    
+    @Override
+    protected void addCheckedCodeDefaults(QualifierDefaults defs) {
+        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.OTHERWISE);
+        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.UPPER_BOUND);
+        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.LOWER_BOUND);
+        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.EXCEPTION_PARAMETER);
     }
     
     @Override
