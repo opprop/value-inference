@@ -120,6 +120,9 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         if (anno == null) {
         	return BOTTOMVAL;
         }
+        if (anno.getAnnotationType() == null) {
+        	return BOTTOMVAL;
+        }
         return super.canonicalAnnotation(anno);
     }
 

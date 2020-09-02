@@ -496,27 +496,27 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
     @Override
     public Void visitTypeCast(TypeCastTree tree, Void p) {
         // infer mode, adds constraints for cast operations
-        if (infer) {
-            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            ConstraintManager constraintManager =
-                    InferenceMain.getInstance().getConstraintManager();
-
-            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
-
-            AnnotatedTypeMirror castATM = iatf.getAnnotatedType(tree);
-            AnnotatedTypeMirror exprATM = iatf.getAnnotatedType(tree.getExpression());
-            AnnotationMirror castAM = castATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
-            AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
-            if (castAM == null || exprAM == null) {
-            	return super.visitTypeCast(tree, p);
-            }
-            Slot cast = slotManager.getSlot(castAM);
-            Slot expr = slotManager.getSlot(exprAM);
-
-            if (cast != null && expr != null) {
-            	constraintManager.addSubtypeConstraint(expr, cast);
-            }
-        }
+//        if (infer) {
+//            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+//            ConstraintManager constraintManager =
+//                    InferenceMain.getInstance().getConstraintManager();
+//
+//            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
+//
+//            AnnotatedTypeMirror castATM = iatf.getAnnotatedType(tree);
+//            AnnotatedTypeMirror exprATM = iatf.getAnnotatedType(tree.getExpression());
+//            AnnotationMirror castAM = castATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+//            AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+//            if (castAM == null || exprAM == null) {
+//            	return super.visitTypeCast(tree, p);
+//            }
+//            Slot cast = slotManager.getSlot(castAM);
+//            Slot expr = slotManager.getSlot(exprAM);
+//
+//            if (cast != null && expr != null) {
+//            	constraintManager.addSubtypeConstraint(expr, cast);
+//            }
+//        }
 
         return super.visitTypeCast(tree, p);
     }
