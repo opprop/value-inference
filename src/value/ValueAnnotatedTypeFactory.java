@@ -114,17 +114,6 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         UnknownVal.class,
                         PolyVal.class));
     }
-    
-    @Override
-    public AnnotationMirror canonicalAnnotation(AnnotationMirror anno) {
-        if (anno == null) {
-        	return BOTTOMVAL;
-        }
-        if (anno.getAnnotationType() == null) {
-        	return BOTTOMVAL;
-        }
-        return super.canonicalAnnotation(anno);
-    }
 
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {

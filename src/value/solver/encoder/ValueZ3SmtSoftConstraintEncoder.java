@@ -84,72 +84,16 @@ public class ValueZ3SmtSoftConstraintEncoder
 	}
 
     @Override
-    protected void encodeSoftComparableConstraint(ComparableConstraint constraint) {
-        //		Z3InferenceValue fst = cc.getFirst().serialize(formatTranslator);
-        //        Z3InferenceValue snd = cc.getSecond().serialize(formatTranslator);
-        //    	switch(cc.getOperation()) {
-        //    		case EQUAL_TO:
-        //	    		Constraint eqc =
-        //	                    InferenceMain.getInstance()
-        //	                            .getConstraintManager()
-        //	                            .createEqualityConstraint(cc.getFirst(), cc.getSecond());
-        //	            Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
-        //	            if (!simplifiedEQC.isTrue()) {
-        //	        		addSoftConstraint(simplifiedEQC, 1);
-        //	            }
-        //	            break;
-        //    		case GREATER_THAN:
-        //    			BoolExpr gt = ctx.mkOr(
-        //                        ctx.mkAnd(
-        //                        		fst.getIntRange(),
-        //                                ctx.mkGt(fst.getIntRangeLower(), snd.getIntRangeLower()),
-        //                                ctx.mkGt(
-        //                                		fst.getIntRangeUpper(), snd.getIntRangeUpper())),
-        //                        ctx.mkNot(fst.getIntRange()));
-        //		        if (!gt.isTrue()) {
-        //		    		addSoftConstraint(ctx.mkNot(gt), 1);
-        //		        }
-        //		        break;
-        //    		case LESS_THAN:
-        //    			BoolExpr lt = ctx.mkOr(
-        //                        ctx.mkAnd(
-        //                        		fst.getIntRange(),
-        //                                ctx.mkLt(fst.getIntRangeLower(), snd.getIntRangeLower()),
-        //                                ctx.mkLt(
-        //                                		fst.getIntRangeUpper(), snd.getIntRangeUpper())),
-        //                        ctx.mkNot(fst.getIntRange()));
-        //		        if (!lt.isTrue()) {
-        //		    		addSoftConstraint(ctx.mkNot(lt), 1);
-        //		        }
-        //		        break;
-        //    		case GREATER_THAN_EQUAL:
-        //    			BoolExpr gteq = ctx.mkOr(
-        //                        ctx.mkAnd(
-        //                        		fst.getIntRange(),
-        //                                ctx.mkGe(fst.getIntRangeLower(), snd.getIntRangeLower()),
-        //                                ctx.mkGe(
-        //                                		fst.getIntRangeUpper(), snd.getIntRangeUpper())),
-        //                        ctx.mkNot(fst.getIntRange()));
-        //		        if (!gteq.isTrue()) {
-        //		    		addSoftConstraint(ctx.mkNot(gteq), 1);
-        //		        }
-        //		        break;
-        //    		case LESS_THAN_EQUAL:
-        //    			BoolExpr lteq = ctx.mkOr(
-        //                        ctx.mkAnd(
-        //                        		fst.getIntRange(),
-        //                                ctx.mkLe(fst.getIntRangeLower(), snd.getIntRangeLower()),
-        //                                ctx.mkLe(
-        //                                		fst.getIntRangeUpper(), snd.getIntRangeUpper())),
-        //                        ctx.mkNot(fst.getIntRange()));
-        //		        if (!lteq.isTrue()) {
-        //		    		addSoftConstraint(ctx.mkNot(lteq), 1);
-        //		        }
-        //		        break;
-        //			default:
-        //				break;
-        //
-        //    	}
+    protected void encodeSoftComparableConstraint(ComparableConstraint cc) {
+    	Constraint eqc =
+                InferenceMain.getInstance()
+                        .getConstraintManager()
+                        .createEqualityConstraint(cc.getFirst(), cc.getSecond());
+
+        Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
+        if (!simplifiedEQC.isTrue()) {
+            addSoftConstraint(simplifiedEQC, 1);
+        }
     }
 
     @Override

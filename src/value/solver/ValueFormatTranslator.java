@@ -170,8 +170,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (type.getKind() == TypeKind.BYTE) {
                 range =
                         ctx.mkAnd(
-                                value.getIntRange(),
-                                ctx.mkNot(value.getUnknownVal()),
+                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
 //                                ctx.mkNot(value.getBoolVal()),
 //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
@@ -187,20 +186,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
                                                 ctx.mkLe(
                                                         value.getIntRangeUpper(),
-                                                        ctx.mkInt(Byte.MAX_VALUE * 2 + 1))),
-                                        ctx.mkAnd(
-                                                ctx.mkGe(
-                                                        value.getIntRangeLower(),
-                                                        ctx.mkInt(Byte.MIN_VALUE)),
-                                                ctx.mkLe(
-                                                        value.getIntRangeUpper(),
                                                         ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
             }
             if (type.getKind() == TypeKind.SHORT) {
                 range =
                         ctx.mkAnd(
-                                value.getIntRange(),
-                                ctx.mkNot(value.getUnknownVal()),
+                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
 //                                ctx.mkNot(value.getBoolVal()),
 //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
@@ -218,21 +209,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
                                                 ctx.mkLe(
                                                         value.getIntRangeUpper(),
-                                                        ctx.mkInt(Short.MAX_VALUE * 2 + 1))),
-                                        ctx.mkAnd(
-                                                value.getIntRange(),
-                                                ctx.mkGe(
-                                                        value.getIntRangeLower(),
-                                                        ctx.mkInt(Short.MIN_VALUE)),
-                                                ctx.mkLe(
-                                                        value.getIntRangeUpper(),
                                                         ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
             }
             if (type.getKind() == TypeKind.CHAR) {
                 range =
                         ctx.mkAnd(
-                                value.getIntRange(),
-                                ctx.mkNot(value.getUnknownVal()),
+                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
 //                                ctx.mkNot(value.getBoolVal()),
 //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
@@ -242,8 +224,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (type.getKind() == TypeKind.INT) {
                 range =
                         ctx.mkAnd(
-                        		value.getIntRange(),
-                                ctx.mkNot(value.getUnknownVal()),
+                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
 //                                ctx.mkNot(value.getBoolVal()),
 //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
@@ -327,7 +308,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Short.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Short.MAX_VALUE)));
             }
-            if (type.getKind() == TypeKind.CHAR) {
+            if (type.getKind() == TypeKind.CHAR || type.toString().equals("java.lang.Character")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
