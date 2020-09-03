@@ -20,6 +20,8 @@ import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
+import com.sun.source.tree.VariableTree;
+
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -157,7 +159,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             Kind kind = binaryTree.getKind();
             switch (kind) {
                 case EQUAL_TO: // ==
-                    if (!(binaryTree.getLeftOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -173,7 +175,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compElseRes);
                     }
-                    if (!(binaryTree.getRightOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getRightOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -191,7 +193,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     }
                     break;
                 case NOT_EQUAL_TO: // !=
-                    if (!(binaryTree.getLeftOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -207,7 +209,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.EQUAL_TO, lhs, rhs, compElseRes);
                     }
-                    if (!(binaryTree.getRightOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getRightOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -225,7 +227,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     }
                     break;
                 case GREATER_THAN: // >
-                    if (!(binaryTree.getLeftOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -241,7 +243,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
-                    if (!(binaryTree.getRightOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getRightOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -259,7 +261,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     }
                     break;
                 case GREATER_THAN_EQUAL: // >=
-                    if (!(binaryTree.getLeftOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -275,7 +277,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN, lhs, rhs, compElseRes);
                     }
-                    if (!(binaryTree.getRightOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getRightOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -293,7 +295,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     }
                     break;
                 case LESS_THAN: // <
-                    if (!(binaryTree.getLeftOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -309,7 +311,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
-                    if (!(binaryTree.getRightOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getRightOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -327,7 +329,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                     }
                     break;
                 case LESS_THAN_EQUAL: // <=
-                    if (!(binaryTree.getLeftOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
@@ -343,7 +345,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN, lhs, rhs, compElseRes);
                     }
-                    if (!(binaryTree.getRightOperand() instanceof LiteralTree)) {
+                    if (binaryTree.getRightOperand() instanceof VariableTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(

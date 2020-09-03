@@ -1,20 +1,10 @@
 projects:
 
 # CFI Crashes
-  commons-dbutils:
-    giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  # commons-compress:
-  #   giturl: https://github.com/opprop-benchmarks/commons-compress.git
+  # commons-configuration:
+  #   giturl: https://github.com/opprop-benchmarks/commons-configuration.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
-
-  commons-configuration:
-    giturl: https://github.com/opprop-benchmarks/commons-configuration.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
 
   # commons-jexl:
   #   giturl: https://github.com/opprop-benchmarks/commons-jexl.git
@@ -22,71 +12,86 @@ projects:
   #   clean: mvn clean
 
 # Evaluates to SAT 
-  # commons-dbcp:
-  #   giturl: https://github.com/opprop-benchmarks/commons-dbcp.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-dbcp:
+    giturl: https://github.com/opprop-benchmarks/commons-dbcp.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-cli:
-  #   giturl: https://github.com/opprop-benchmarks/commons-cli.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-cli:
+    giturl: https://github.com/opprop-benchmarks/commons-cli.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-scxml:
-  #   giturl: https://github.com/opprop-benchmarks/commons-scxml.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-scxml:
+    giturl: https://github.com/opprop-benchmarks/commons-scxml.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-logging:
-  #   giturl: https://github.com/opprop-benchmarks/commons-logging.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-logging:
+    giturl: https://github.com/opprop-benchmarks/commons-logging.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
+  commons-daemon:
+    giturl: https://github.com/opprop-benchmarks/commons-daemon.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
 # Evalutes to UNSAT
-  # commons-text:
-  #   giturl: https://github.com/opprop-benchmarks/commons-text.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-text:
+    giturl: https://github.com/opprop-benchmarks/commons-text.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-email:
-  #   giturl: https://github.com/opprop-benchmarks/commons-email.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-email:
+    giturl: https://github.com/opprop-benchmarks/commons-email.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-csv:
-  #   giturl: https://github.com/opprop-benchmarks/commons-csv.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-csv:
+    giturl: https://github.com/opprop-benchmarks/commons-csv.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-crypto:
-  #   giturl: https://github.com/opprop-benchmarks/commons-crypto.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-crypto:
+    giturl: https://github.com/opprop-benchmarks/commons-crypto.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-io:
-  #   giturl: https://github.com/opprop-benchmarks/commons-io.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-io:
+    giturl: https://github.com/opprop-benchmarks/commons-io.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-net:
-  #   giturl: https://github.com/opprop-benchmarks/commons-net.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-net:
+    giturl: https://github.com/opprop-benchmarks/commons-net.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-validator:
-  #   giturl: https://github.com/opprop-benchmarks/commons-validator.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-validator:
+    giturl: https://github.com/opprop-benchmarks/commons-validator.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-bcel:
-  #   giturl: https://github.com/opprop-benchmarks/commons-bcel.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-bcel:
+    giturl: https://github.com/opprop-benchmarks/commons-bcel.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
-  # commons-exec:
-  #   giturl: https://github.com/opprop-benchmarks/commons-exec.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
+  commons-exec:
+    giturl: https://github.com/opprop-benchmarks/commons-exec.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
+  commons-compress:
+    giturl: https://github.com/opprop-benchmarks/commons-compress.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
+  commons-imaging:
+    giturl: https://github.com/opprop-benchmarks/commons-imaging.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
 
   commons-fileupload:
     giturl: https://github.com/opprop-benchmarks/commons-fileupload.git
@@ -108,24 +113,20 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-daemon:
-    giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  # commons-imaging:
-  #   giturl: https://github.com/opprop-benchmarks/commons-imaging.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
-
   commons-ognl:
     giturl: https://github.com/opprop-benchmarks/commons-ognl.git
     build: mvn -B -DskipTests compile
     clean: mvn cleangit
 
+# Prefer to get SAT
   commons-beanutils:
     giturl: https://github.com/opprop-benchmarks/commons-beanutils.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
+
+  # commons-dbutils:
+  #   giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
 
 

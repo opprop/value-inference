@@ -29,18 +29,18 @@ public class ValueEncoderUtils {
                                 ctx.mkNot(superT.getBottomVal()),
 //                                ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
 //                                ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
-                                ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
+//                                ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
+                                subT.getIntRange(),
+                                superT.getIntRange(),
                                 // int <: int
-                                ctx.mkOr(
-                                        ctx.mkAnd(
-                                                subT.getIntRange(),
-                                                ctx.mkGe(
-                                                        subT.getIntRangeLower(),
-                                                        superT.getIntRangeLower()),
-                                                ctx.mkLe(
-                                                        subT.getIntRangeUpper(),
-                                                        superT.getIntRangeUpper())),
-                                        ctx.mkNot(subT.getIntRange()))));
+                                ctx.mkGe(
+                                        subT.getIntRangeLower(),
+                                        superT.getIntRangeLower()),
+                                ctx.mkLe(
+                                        subT.getIntRangeUpper(),
+                                        superT.getIntRangeUpper())
+                                )
+                        );
 
         return subtypeEncoding;
     }
@@ -55,13 +55,15 @@ public class ValueEncoderUtils {
 //                        ctx.mkEq(left.getStringVal(), right.getStringVal()),
                         ctx.mkEq(left.getIntRange(), right.getIntRange()),
                         // int = int
-                        ctx.mkOr(
-                                ctx.mkAnd(
-                                        left.getIntRange(),
-                                        ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
-                                        ctx.mkEq(
-                                                left.getIntRangeUpper(), right.getIntRangeUpper())),
-                                ctx.mkNot(left.getIntRange())));
+                        ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
+                        ctx.mkEq(left.getIntRangeUpper(), right.getIntRangeUpper()));
+//                        ctx.mkOr(
+//                                ctx.mkAnd(
+//                                        left.getIntRange(),
+//                                        ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
+//                                        ctx.mkEq(
+//                                                left.getIntRangeUpper(), right.getIntRangeUpper())),
+//                                ctx.mkNot(left.getIntRange())));
 
         return equalityEncoding;
     }

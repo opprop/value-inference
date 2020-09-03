@@ -108,22 +108,19 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     slotManager);
         }
 
-        @Override
-        public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
-            if (node.getKind() == Kind.UNARY_MINUS) {
-                variableAnnotator.visit(type, node);
-                return null;
-            }
-            return super.visitUnary(node, type);
-        }
+//        @Override
+//        public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
+//            if (node.getKind() == Kind.UNARY_MINUS) {
+//                variableAnnotator.visit(type, node);
+//                return null;
+//            }
+//            return super.visitUnary(node, type);
+//        }
         
 //        @Override
 //        public Void visitCompoundAssignment(CompoundAssignmentTree node, AnnotatedTypeMirror type) {
-//            //if (node.getKind() == Kind.UNARY_MINUS) {
-//                variableAnnotator.visit(type, node);
-//                return null;
-//            //}
-//            //return super.visitUnary(node, type);
+//            variableAnnotator.visit(type, node);
+//            return super.visitCompoundAssignment(node, type);
 //        }
 
         @Override
@@ -309,7 +306,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
         Set<AnnotationMirror> top = new HashSet<>();
-        top.add(BOTTOMVAL);
+        top.add(UNKNOWNVAL);
         return top;
     }
 
@@ -384,7 +381,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Slot lhs = slotManager.getVariableSlot(lhsATM);
                 Slot rhs = slotManager.getVariableSlot(rhsATM);
 
-                Slot result = null;
+                Slot result;
                 Kind kind = binaryTree.getKind();
                 switch (kind) {
                     case PLUS:
@@ -407,13 +404,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).plus(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case MINUS:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -427,13 +426,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).minus(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case MULTIPLY:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -447,13 +448,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).times(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case DIVIDE:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -467,13 +470,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).divide(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case REMAINDER:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -487,13 +492,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).remainder(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case LEFT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -507,13 +514,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).shiftLeft(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -527,13 +536,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).signedShiftRight(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case UNSIGNED_RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -547,13 +558,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).unsignedShiftRight(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case AND:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -567,13 +580,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseAnd(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case OR:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -587,13 +602,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseOr(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
                     case XOR:
                         if (lhsAM == null || rhsAM == null) {
                             result =
@@ -607,87 +624,23 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseXor(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getUnderlyingType().getKind() == TypeKind.INT) {
+                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
                             	range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
-                        } // Create LUB slot by default;;
-//                    case GREATER_THAN:
-//                        if (lhsAM == null || rhsAM == null) {
-//                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            break;
-//                        }
-//                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-//                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-//                            Range range = getRange(lhsAM).refineGreaterThan(getRange(rhsAM));
-//                            result =
-//                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-//                            break;
-//                        } // Create LUB slot by default;
-//                    case GREATER_THAN_EQUAL:
-//                        if (lhsAM == null || rhsAM == null) {
-//                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            break;
-//                        }
-//                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-//                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-//                            Range range = getRange(lhsAM).refineGreaterThanEq(getRange(rhsAM));
-//                            result =
-//                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-//                            break;
-//                        } // Create LUB slot by default;
-//                    case LESS_THAN:
-//                        if (lhsAM == null || rhsAM == null) {
-//                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            break;
-//                        }
-//                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-//                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-//                            Range range = getRange(lhsAM).refineLessThan(getRange(rhsAM));
-//                            result =
-//                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-//                            break;
-//                        } // Create LUB slot by default;
-//                    case LESS_THAN_EQUAL:
-//                        if (lhsAM == null || rhsAM == null) {
-//                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            break;
-//                        }
-//                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-//                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-//                            Range range = getRange(lhsAM).refineLessThanEq(getRange(rhsAM));
-//                            result =
-//                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-//                            break;
-//                        } // Create LUB slot by default;
-//                        break;
-//                    case EQUAL_TO:
-//                        if (lhsAM == null || rhsAM == null) {
-//                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            break;
-//                        }
-//                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-//                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-//                            Range range = getRange(lhsAM).refineEqualTo(getRange(rhsAM));
-//                            result =
-//                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-//                            break;
-//                        } // Create LUB slot by default;
-//                        break;
-//                    case NOT_EQUAL_TO:
-//                        if (lhsAM == null || rhsAM == null) {
-//                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            break;
-//                        }
-//                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-//                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-//                            Range range = getRange(lhsAM).refineNotEqualTo(getRange(rhsAM));
-//                            result =
-//                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-//                            break;
-//                        } // Create LUB slot by default;
+                        }
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
+                    case GREATER_THAN:
+                    case GREATER_THAN_EQUAL:
+                    case LESS_THAN:
+                    case LESS_THAN_EQUAL:
+                    case EQUAL_TO:
+                    case NOT_EQUAL_TO:
+                        result = slotManager.createConstantSlot(UNKNOWNVAL);
+                        break;
                     default:
                         result = slotManager.createLubVariableSlot(lhs, rhs);
                         break;

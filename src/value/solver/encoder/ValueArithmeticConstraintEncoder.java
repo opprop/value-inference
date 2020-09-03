@@ -41,7 +41,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
         BoolExpr encoding =
                 ctx.mkAnd(
 //                        ctx.mkNot(res.getBoolVal()),
-                        ctx.mkNot(res.getBottomVal()),
 //                        ctx.mkImplies(
 //                                ctx.mkAnd(left.getIntRange(), right.getStringVal()),
 //                                res.getStringVal()),
@@ -52,6 +51,9 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
 //                                ctx.mkAnd(left.getStringVal(), right.getStringVal()),
 //                                res.getStringVal()),
                         ctx.mkImplies(
+                                ctx.mkAnd(left.getBottomVal(), right.getBottomVal()),
+                                res.getBottomVal()),
+                        ctx.mkImplies(
                                 ctx.mkAnd(left.getUnknownVal(), right.getUnknownVal()),
                                 res.getUnknownVal()),
                         ctx.mkImplies(
@@ -59,10 +61,11 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                 res.getUnknownVal()),
                         ctx.mkImplies(
                                 ctx.mkAnd(left.getIntRange(), right.getUnknownVal()),
-                                res.getUnknownVal()),
-                        ctx.mkEq(
-                                ctx.mkAnd(left.getIntRange(), right.getIntRange()),
-                                res.getIntRange()));
+                                res.getUnknownVal())
+//                        ctx.mkEq(
+//                                ctx.mkAnd(left.getIntRange(), right.getIntRange()),
+//                                res.getIntRange())
+                        );
 
         // Unless variable type is long, all arithmetic operations in Java are widened to int first, 
         IntNum maxRange = ctx.mkInt(Integer.MAX_VALUE);
@@ -74,8 +77,7 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
             	maxRange = ctx.mkInt(Long.MAX_VALUE);
             	minRange = ctx.mkInt(Long.MIN_VALUE);
             }
-        }
-        if (rightOperand instanceof VariableSlot) {
+        } else if (rightOperand instanceof VariableSlot) {
         	VariableSlot vslot = (VariableSlot) rightOperand;
             TypeMirror type = vslot.getUnderlyingType();
             if (type.getKind() == TypeKind.LONG) {

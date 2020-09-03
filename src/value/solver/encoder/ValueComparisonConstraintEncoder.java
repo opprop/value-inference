@@ -433,7 +433,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             ConstantSlot left,
             Slot right,
             ComparisonVariableSlot result) {
-        return encode(operation, left, right, result);
+        return ctx.mkTrue();
     }
 
     @Override
@@ -442,6 +442,6 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             ConstantSlot left,
             ConstantSlot right,
             ComparisonVariableSlot result) {
-        return encode(operation, left, right, result);
+        return ctx.mkTrue();
     }
 }

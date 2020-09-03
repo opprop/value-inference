@@ -327,7 +327,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Short.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Short.MAX_VALUE)));
             }
-            if (type.getKind() == TypeKind.CHAR) {
+            if (type.getKind() == TypeKind.CHAR || type.toString().equals("java.lang.Character")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),

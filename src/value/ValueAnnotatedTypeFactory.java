@@ -399,10 +399,10 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 newAnno = createIntRangeAnnotation(Range.EVERYTHING);
                 break;
             default:
-//            	if (atm.getUnderlyingType().toString().equals("java.lang.String")) {
-//            		newAnno = AnnotationBuilder.fromClass(elements, StringVal.class);
-//                    break;
-//            	}
+            	if (atm.getUnderlyingType().toString().equals("java.lang.Byte")) {
+            		newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+                    break;
+            	}
                 newAnno = null;
                 break;
         }
