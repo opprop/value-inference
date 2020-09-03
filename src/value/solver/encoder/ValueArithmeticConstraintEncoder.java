@@ -59,10 +59,11 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                 res.getUnknownVal()),
                         ctx.mkImplies(
                                 ctx.mkAnd(left.getIntRange(), right.getUnknownVal()),
-                                res.getUnknownVal()),
-                        ctx.mkEq(
-                                ctx.mkAnd(left.getIntRange(), right.getIntRange()),
-                                res.getIntRange()));
+                                res.getUnknownVal())
+//                        ctx.mkEq(
+//                                ctx.mkAnd(left.getIntRange(), right.getIntRange()),
+//                                res.getIntRange())
+                        );
 
         // Unless variable type is long, all arithmetic operations in Java are widened to int first, 
         IntNum maxRange = ctx.mkInt(Integer.MAX_VALUE);

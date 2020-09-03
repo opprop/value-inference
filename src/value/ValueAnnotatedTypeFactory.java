@@ -310,13 +310,13 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public Void visitExecutable(AnnotatedExecutableType t, Void p) {
-            List<AnnotatedTypeMirror> paramTypes = t.getParameterTypes();
-            for (AnnotatedTypeMirror paramType : paramTypes) {
-                AnnotationMirror anno = createIntRangeAnnotations(paramType);
-                if (anno != null) {
-                    paramType.addMissingAnnotations(Collections.singleton(anno));
-                }
-            }
+//            List<AnnotatedTypeMirror> paramTypes = t.getParameterTypes();
+//            for (AnnotatedTypeMirror paramType : paramTypes) {
+//                AnnotationMirror anno = createIntRangeAnnotations(paramType);
+//                if (anno != null) {
+//                    paramType.addMissingAnnotations(Collections.singleton(anno));
+//                }
+//            }
 
             AnnotatedTypeMirror retType = t.getReturnType();
             AnnotationMirror anno = createIntRangeAnnotations(retType);
@@ -334,24 +334,24 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return super.visitExecutable(t, p);
         }
         
-        @Override
-        public Void visitArray(AnnotatedArrayType t, Void p) {
-            AnnotatedTypeMirror comp = t.getComponentType();
-            AnnotationMirror anno = createIntRangeAnnotations(comp);
-            if (anno != null) {
-                comp.addMissingAnnotations(Collections.singleton(anno));
-            }
-            return super.visitArray(t, p);
-        }
-        
-        @Override
-        public Void visitPrimitive(AnnotatedPrimitiveType t, Void p) {
-            AnnotationMirror anno = createIntRangeAnnotations(t);
-            if (anno != null) {
-                t.addMissingAnnotations(Collections.singleton(anno));
-            }
-            return super.visitPrimitive(t, p);
-        }
+//        @Override
+//        public Void visitArray(AnnotatedArrayType t, Void p) {
+//            AnnotatedTypeMirror comp = t.getComponentType();
+//            AnnotationMirror anno = createIntRangeAnnotations(comp);
+//            if (anno != null) {
+//                comp.addMissingAnnotations(Collections.singleton(anno));
+//            }
+//            return super.visitArray(t, p);
+//        }
+//        
+//        @Override
+//        public Void visitPrimitive(AnnotatedPrimitiveType t, Void p) {
+//            AnnotationMirror anno = createIntRangeAnnotations(t);
+//            if (anno != null) {
+//                t.addMissingAnnotations(Collections.singleton(anno));
+//            }
+//            return super.visitPrimitive(t, p);
+//        }
     }
     
     @Override

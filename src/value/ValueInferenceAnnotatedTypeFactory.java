@@ -24,6 +24,7 @@ import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.UnaryTree;
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.value.ValueCheckerUtils;
+import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -163,7 +165,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     return super.visitLiteral(tree, type);
             }
         }
-        
+
         @Override
         public Void visitNewClass(NewClassTree newClassTree, AnnotatedTypeMirror atm) {
             // Call super to replace polymorphic annotations with fresh variable slots

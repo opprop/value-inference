@@ -134,114 +134,114 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                 ctx.mkAnd(
                         ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
                         ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
-        if (slot instanceof VariableSlot) {
-            VariableSlot vslot = (VariableSlot) slot;
-            TypeMirror type = vslot.getUnderlyingType();
-            if (type == null) {
-            	return ctx.mkAnd(
-                        // one hot
-                        ctx.mkAnd(
-                                ctx.mkXor(ctx.mkXor(value.getUnknownVal(), value.getBottomVal()), value.getIntRange()),
-                                ctx.mkNot(
-                              		  ctx.mkAnd(
-          		                          value.getUnknownVal(),
-          		                          value.getBottomVal(),
-          		                          value.getIntRange()))),
-                        // min <= from <= to <= max
-                        range,
-                        ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+//        if (slot instanceof VariableSlot) {
+//            VariableSlot vslot = (VariableSlot) slot;
+//            TypeMirror type = vslot.getUnderlyingType();
+//            if (type == null) {
 //            	return ctx.mkAnd(
 //                        // one hot
-//                        ctx.mkXor(
-//                                ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
-//                                ctx.mkAnd(
-//                                        ctx.mkXor(
-//                                                ctx.mkXor(value.getBoolVal(), value.getStringVal()),
-//                                                value.getIntRange()),
-//                                        ctx.mkNot(
-//                                                ctx.mkAnd(
-//                                                        value.getBoolVal(),
-//                                                        value.getStringVal(),
-//                                                        value.getIntRange())))),
+//                        ctx.mkAnd(
+//                                ctx.mkXor(ctx.mkXor(value.getUnknownVal(), value.getBottomVal()), value.getIntRange()),
+//                                ctx.mkNot(
+//                              		  ctx.mkAnd(
+//          		                          value.getUnknownVal(),
+//          		                          value.getBottomVal(),
+//          		                          value.getIntRange()))),
 //                        // min <= from <= to <= max
 //                        range,
 //                        ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
-            }
-            if (type.getKind() == TypeKind.BYTE) {
-                range =
-                        ctx.mkAnd(
-                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
-                                ctx.mkNot(value.getBottomVal()),
-                                ctx.mkOr(
-                                        ctx.mkAnd(
-                                                ctx.mkGe(
-                                                        value.getIntRangeLower(),
-                                                        ctx.mkInt(Byte.MIN_VALUE)),
-                                                ctx.mkLe(
-                                                        value.getIntRangeUpper(),
-                                                        ctx.mkInt(Byte.MAX_VALUE))),
-                                        ctx.mkAnd(
-                                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
-                                                ctx.mkLe(
-                                                        value.getIntRangeUpper(),
-                                                        ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
-            }
-            if (type.getKind() == TypeKind.SHORT) {
-                range =
-                        ctx.mkAnd(
-                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
-                                ctx.mkNot(value.getBottomVal()),
-                                ctx.mkOr(
-                                        ctx.mkAnd(
-                                                value.getIntRange(),
-                                                ctx.mkGe(
-                                                        value.getIntRangeLower(),
-                                                        ctx.mkInt(Short.MIN_VALUE)),
-                                                ctx.mkLe(
-                                                        value.getIntRangeUpper(),
-                                                        ctx.mkInt(Short.MAX_VALUE))),
-                                        ctx.mkAnd(
-                                                value.getIntRange(),
-                                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
-                                                ctx.mkLe(
-                                                        value.getIntRangeUpper(),
-                                                        ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
-            }
-            if (type.getKind() == TypeKind.CHAR) {
-                range =
-                        ctx.mkAnd(
-                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
-                                ctx.mkNot(value.getBottomVal()),
-                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
-                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
-            }
-            if (type.getKind() == TypeKind.INT) {
-                range =
-                        ctx.mkAnd(
-                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
-                                ctx.mkNot(value.getBottomVal()),
-                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
-                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
-            }
-            if (type.getKind() == TypeKind.LONG) {
-                range =
-                        ctx.mkAnd(
-                                ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
-                                ctx.mkNot(value.getBottomVal()),
-                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
-                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
-            }
-        }
+////            	return ctx.mkAnd(
+////                        // one hot
+////                        ctx.mkXor(
+////                                ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+////                                ctx.mkAnd(
+////                                        ctx.mkXor(
+////                                                ctx.mkXor(value.getBoolVal(), value.getStringVal()),
+////                                                value.getIntRange()),
+////                                        ctx.mkNot(
+////                                                ctx.mkAnd(
+////                                                        value.getBoolVal(),
+////                                                        value.getStringVal(),
+////                                                        value.getIntRange())))),
+////                        // min <= from <= to <= max
+////                        range,
+////                        ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+//            }
+//            if (type.getKind() == TypeKind.BYTE) {
+//                range =
+//                        ctx.mkAnd(
+//                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+////                                ctx.mkNot(value.getBoolVal()),
+////                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBottomVal()),
+//                                ctx.mkOr(
+//                                        ctx.mkAnd(
+//                                                ctx.mkGe(
+//                                                        value.getIntRangeLower(),
+//                                                        ctx.mkInt(Byte.MIN_VALUE)),
+//                                                ctx.mkLe(
+//                                                        value.getIntRangeUpper(),
+//                                                        ctx.mkInt(Byte.MAX_VALUE))),
+//                                        ctx.mkAnd(
+//                                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+//                                                ctx.mkLe(
+//                                                        value.getIntRangeUpper(),
+//                                                        ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
+//            }
+//            if (type.getKind() == TypeKind.SHORT) {
+//                range =
+//                        ctx.mkAnd(
+//                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+////                                ctx.mkNot(value.getBoolVal()),
+////                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBottomVal()),
+//                                ctx.mkOr(
+//                                        ctx.mkAnd(
+//                                                value.getIntRange(),
+//                                                ctx.mkGe(
+//                                                        value.getIntRangeLower(),
+//                                                        ctx.mkInt(Short.MIN_VALUE)),
+//                                                ctx.mkLe(
+//                                                        value.getIntRangeUpper(),
+//                                                        ctx.mkInt(Short.MAX_VALUE))),
+//                                        ctx.mkAnd(
+//                                                value.getIntRange(),
+//                                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(0)),
+//                                                ctx.mkLe(
+//                                                        value.getIntRangeUpper(),
+//                                                        ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
+//            }
+//            if (type.getKind() == TypeKind.CHAR) {
+//                range =
+//                        ctx.mkAnd(
+//                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+////                                ctx.mkNot(value.getBoolVal()),
+////                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBottomVal()),
+//                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
+//                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
+//            }
+//            if (type.getKind() == TypeKind.INT) {
+//                range =
+//                        ctx.mkAnd(
+//                        		ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+////                                ctx.mkNot(value.getBoolVal()),
+////                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBottomVal()),
+//                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
+//                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
+//            }
+//            if (type.getKind() == TypeKind.LONG) {
+//                range =
+//                        ctx.mkAnd(
+//                                ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
+////                                ctx.mkNot(value.getBoolVal()),
+////                                ctx.mkNot(value.getStringVal()),
+//                                ctx.mkNot(value.getBottomVal()),
+//                                ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+//                                ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
+//            }
+//        }
         return ctx.mkAnd(
               // one hot
               ctx.mkAnd(

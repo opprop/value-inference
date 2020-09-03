@@ -7,6 +7,7 @@ import checkers.inference.dataflow.InferenceAnalysis;
 import checkers.inference.dataflow.InferenceTransfer;
 import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ComparisonVariableSlot;
+import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
@@ -63,6 +64,9 @@ public class ValueInferenceTransfer extends InferenceTransfer {
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
         // TODO: Understand why there are null slots
         if (slotToRefine == null) {
+        	return;
+        }
+        if (slotToRefine instanceof ConstantSlot) {
         	return;
         }
         while (slotToRefine instanceof RefinementVariableSlot) {

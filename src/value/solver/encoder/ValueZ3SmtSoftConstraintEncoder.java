@@ -97,7 +97,15 @@ public class ValueZ3SmtSoftConstraintEncoder
     }
 
     @Override
-    protected void encodeSoftArithmeticConstraint(ArithmeticConstraint constraint) {}
+    protected void encodeSoftArithmeticConstraint(ArithmeticConstraint ac) {
+    	Z3InferenceValue left = ac.getLeftOperand().serialize(formatTranslator);
+        Z3InferenceValue right = ac.getRightOperand().serialize(formatTranslator);
+        Z3InferenceValue res = ac.getResult().serialize(formatTranslator);
+        BoolExpr constraint = ctx.mkImplies(ctx.mkAnd(left.getIntRange(), right.getIntRange()), res.getIntRange());
+        if (!constraint.isTrue()) {
+        	addSoftConstraint(constraint, 1);
+        }
+    }
 
     @Override
     protected void encodeSoftEqualityConstraint(EqualityConstraint constraint) {}
