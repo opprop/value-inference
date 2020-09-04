@@ -32,7 +32,9 @@ import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedNullType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
@@ -292,9 +294,17 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.OTHERWISE);
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.UPPER_BOUND);
-        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.LOWER_BOUND);
-        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.EXCEPTION_PARAMETER);
+        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.LOWER_BOUND);
+        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.EXCEPTION_PARAMETER);
     }
+    
+    @Override
+    protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
+        Set<AnnotationMirror> top = new HashSet<>();
+        top.add(UNKNOWNVAL);
+        return top;
+    }
+
     
     @Override
     protected TypeAnnotator createTypeAnnotator() {
@@ -360,6 +370,15 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
             return super.visitPrimitive(t, p);
         }
+        
+        @Override
+        public Void visitDeclared(AnnotatedDeclaredType t, Void p) {
+            AnnotationMirror anno = createIntRangeAnnotations(t);
+            if (anno != null) {
+                t.addMissingAnnotations(Collections.singleton(anno));
+            }
+            return super.visitDeclared(t, p);
+        }
     }
     
     @Override
@@ -393,16 +412,31 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             case INT:
                 newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
                 break;
-            case DOUBLE:
-            case FLOAT:
             case LONG:
                 newAnno = createIntRangeAnnotation(Range.EVERYTHING);
                 break;
-            default:
+            case DOUBLE:
+            case FLOAT:
+            	newAnno = UNKNOWNVAL;
+            	break;
+            case DECLARED:
             	if (atm.getUnderlyingType().toString().equals("java.lang.Byte")) {
             		newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
                     break;
+            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Short")) {
+            		newAnno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+                    break;
+            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Character")) {
+            		newAnno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+                    break;
+            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Integer")) {
+            		newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+                    break;
+            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Long")) {
+            		newAnno = createIntRangeAnnotation(Range.EVERYTHING);
+                    break;
             	}
+            default:
                 newAnno = null;
                 break;
         }
@@ -531,9 +565,6 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
-            if (!handledByValueChecker(type)) {
-                return null;
-            }
             Object value = tree.getValue();
             switch (tree.getKind()) {
             	case NULL_LITERAL:
@@ -550,14 +581,15 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                             createCharAnnotation(Collections.singletonList((Character) value));
                     type.replaceAnnotation(charAnno);
                     return null;
-
-                case DOUBLE_LITERAL:
-                case FLOAT_LITERAL:
                 case INT_LITERAL:
                 case LONG_LITERAL:
                     AnnotationMirror numberAnno =
                             createNumberAnnotationMirror(Collections.singletonList((Number) value));
                     type.replaceAnnotation(numberAnno);
+                    return null;
+                case DOUBLE_LITERAL:
+                case FLOAT_LITERAL:
+                	type.replaceAnnotation(UNKNOWNVAL);
                     return null;
 //                case STRING_LITERAL:
 //                    AnnotationMirror stringAnno =
