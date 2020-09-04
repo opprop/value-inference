@@ -108,14 +108,14 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     slotManager);
         }
 
-//        @Override
-//        public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
-//            if (node.getKind() == Kind.UNARY_MINUS) {
-//                variableAnnotator.visit(type, node);
-//                return null;
-//            }
-//            return super.visitUnary(node, type);
-//        }
+        @Override
+        public Void visitUnary(UnaryTree node, AnnotatedTypeMirror type) {
+            if (node.getKind() == Kind.UNARY_MINUS) {
+                variableAnnotator.visit(type, node);
+                return null;
+            }
+            return super.visitUnary(node, type);
+        }
         
 //        @Override
 //        public Void visitCompoundAssignment(CompoundAssignmentTree node, AnnotatedTypeMirror type) {
@@ -125,9 +125,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         @Override
         public Void visitLiteral(final LiteralTree tree, AnnotatedTypeMirror type) {
-            if (!handledByValueChecker(type)) {
-                return null;
-            }
             Object value = tree.getValue();
             switch (tree.getKind()) {
                 case NULL_LITERAL:
@@ -143,21 +140,23 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                             createCharAnnotation(Collections.singletonList((Character) value));
                     replaceATM(type, charAnno);
                     return null;
-                case DOUBLE_LITERAL:
-                case FLOAT_LITERAL:
                 case INT_LITERAL:
                 case LONG_LITERAL:
                     AnnotationMirror numberAnno =
                             createNumberAnnotationMirror(Collections.singletonList((Number) value));
                     replaceATM(type, numberAnno);
                     return null;
+                case DOUBLE_LITERAL:
+                case FLOAT_LITERAL:
+                	replaceATM(type, UNKNOWNVAL);
+		            return null;
 //                case STRING_LITERAL:
 //                    AnnotationMirror stringAnno =
 //                            createStringAnnotation(Collections.singletonList((String) value));
 //                    replaceATM(type, stringAnno);
 //                    return null;
                 default:
-                    return super.visitLiteral(tree, type);
+                    return null;
             }
         }
         
@@ -200,8 +199,8 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             return null;
         }
 
-        private void replaceATM(AnnotatedTypeMirror atm, AnnotationMirror dataflowAM) {
-            final ConstantSlot cs = slotManager.createConstantSlot(dataflowAM);
+        private void replaceATM(AnnotatedTypeMirror atm, AnnotationMirror am) {
+            final ConstantSlot cs = slotManager.createConstantSlot(am);
             AnnotationBuilder ab =
                     new AnnotationBuilder(realTypeFactory.getProcessingEnv(), VarAnnot.class);
             ab.setValue("value", cs.getId());
@@ -719,8 +718,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     boolVals.add((Boolean) o);
                 }
                 return createBooleanAnnotation(boolVals);
-            case DOUBLE:
-            case FLOAT:
             case INT:
             case LONG:
             case SHORT:
@@ -785,9 +782,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         if (first instanceof Integer
                 || first instanceof Short
                 || first instanceof Long
-                || first instanceof Byte
-                || first instanceof Float
-                || first instanceof Double) {
+                || first instanceof Byte) {
             List<Long> intValues = new ArrayList<>();
             for (Number number : values) {
                 intValues.add(number.longValue());
