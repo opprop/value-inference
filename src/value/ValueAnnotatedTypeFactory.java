@@ -294,9 +294,17 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.OTHERWISE);
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.UPPER_BOUND);
-        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.LOWER_BOUND);
-        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.EXCEPTION_PARAMETER);
+        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.LOWER_BOUND);
+        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.EXCEPTION_PARAMETER);
     }
+    
+    @Override
+    protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
+        Set<AnnotationMirror> top = new HashSet<>();
+        top.add(UNKNOWNVAL);
+        return top;
+    }
+
     
     @Override
     protected TypeAnnotator createTypeAnnotator() {
