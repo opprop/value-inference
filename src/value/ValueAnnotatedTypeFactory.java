@@ -294,8 +294,8 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.OTHERWISE);
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.UPPER_BOUND);
-        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.LOWER_BOUND);
-        defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.EXCEPTION_PARAMETER);
+        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.LOWER_BOUND);
+        defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.EXCEPTION_PARAMETER);
     }
     
     @Override

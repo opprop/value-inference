@@ -4,8 +4,23 @@ package java.lang;
 
 final class DatagramPacket {
 	public DatagramPacket(@IntRange(from=-128, to=255) byte[] buf, int offset, int length);
-	public DatagramPacket(@IntRange(from=-128, to=255) byte[] buf, int length);
+	public DatagramPacket(@IntRange(from=-128, to=255) byte[] buf, @IntRange(from=-128) int length);
+	public @IntRange(from=-128, to=255) byte[] getData();
 	public void setData(@IntRange(from=-128, to=255) byte[] buf);
 	public void setData(@IntRange(from=-128, to=255) byte[] buf, int offset, int length);
 }
 
+final @IntRange(from=0, to=65535) class Character implements Serializable, Comparable<Character> {
+	static @PolyValue Short valueOf(@PolyValue char arg0);
+    @PolyValue Short(@PolyValue char arg0);
+    @PolyValue char charValue(@PolyValue Character this);
+}
+
+interface Appendable {
+	Appendable append(CharSequence csq, int start, int end) throws IOException;
+}
+
+interface CharSequence {
+	char charAt(int index);
+	CharSequence subSequence(int start, int end);
+}
