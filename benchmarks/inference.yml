@@ -1,29 +1,34 @@
 projects:
 
 # CFI Crashes
-  # commons-configuration:
-  #   giturl: https://github.com/opprop-benchmarks/commons-configuration.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
-
-  # commons-jexl:
-  #   giturl: https://github.com/opprop-benchmarks/commons-jexl.git
+  # commons-dbutils:
+  #   giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn clean
 
 # Evaluates to SAT 
-  commons-dbcp:
-    giturl: https://github.com/opprop-benchmarks/commons-dbcp.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
+  # commons-dbcp:
+  #   giturl: https://github.com/opprop-benchmarks/commons-dbcp.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
 
-  commons-cli:
-    giturl: https://github.com/opprop-benchmarks/commons-cli.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
+  # commons-cli:
+  #   giturl: https://github.com/opprop-benchmarks/commons-cli.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
 
-  commons-scxml:
-    giturl: https://github.com/opprop-benchmarks/commons-scxml.git
+  # commons-scxml:
+  #   giturl: https://github.com/opprop-benchmarks/commons-scxml.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
+
+  # commons-daemon:
+  #   giturl: https://github.com/opprop-benchmarks/commons-daemon.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn clean
+
+  commons-beanutils:
+    giturl: https://github.com/opprop-benchmarks/commons-beanutils.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
@@ -32,19 +37,24 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-daemon:
-    giturl: https://github.com/opprop-benchmarks/commons-daemon.git
+  commons-email:
+    giturl: https://github.com/opprop-benchmarks/commons-email.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
+
+  commons-exec:
+    giturl: https://github.com/opprop-benchmarks/commons-exec.git
+    build: mvn -B -DskipTests compile
+    clean: mvn clean
+
+  commons-ognl:
+    giturl: https://github.com/opprop-benchmarks/commons-ognl.git
+    build: mvn -B -DskipTests compile
+    clean: mvn cleangit
 
 # Evalutes to UNSAT
   commons-text:
     giturl: https://github.com/opprop-benchmarks/commons-text.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
-  commons-email:
-    giturl: https://github.com/opprop-benchmarks/commons-email.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
@@ -78,11 +88,6 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-exec:
-    giturl: https://github.com/opprop-benchmarks/commons-exec.git
-    build: mvn -B -DskipTests compile
-    clean: mvn clean
-
   commons-compress:
     giturl: https://github.com/opprop-benchmarks/commons-compress.git
     build: mvn -B -DskipTests compile
@@ -113,20 +118,10 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  commons-ognl:
-    giturl: https://github.com/opprop-benchmarks/commons-ognl.git
-    build: mvn -B -DskipTests compile
-    clean: mvn cleangit
-
-# Prefer to get SAT
-  commons-beanutils:
-    giturl: https://github.com/opprop-benchmarks/commons-beanutils.git
+  commons-jexl:
+    giturl: https://github.com/opprop-benchmarks/commons-jexl.git
     build: mvn -B -DskipTests compile
     clean: mvn clean
 
-  # commons-dbutils:
-  #   giturl: https://github.com/opprop-benchmarks/commons-dbutils.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn clean
-
+  
 

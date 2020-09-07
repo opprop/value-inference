@@ -6,6 +6,15 @@ import java.lang.Comparable;
 
 package java.lang;
 
+class Number { // implements Serializable
+    @IntRange(from=-128, to=127) byte byteValue(@PolyValue Number this);
+    @IntRange(from=-32768, to=32767) short shortValue(@PolyValue Number this);
+    @IntRange(from=-2147483648, to=2147483647) int intValue(@PolyValue Number this);
+    @PolyValue long longValue(@PolyValue Number this);
+    @PolyValue float floatValue(@PolyValue Number this);
+    @PolyValue double doubleValue(@PolyValue Number this);
+}
+
 class Byte {
     static @IntRange(from=-128, to=-128) byte MIN_VALUE;
     static @IntRange(from=127, to=127) byte MAX_VALUE;

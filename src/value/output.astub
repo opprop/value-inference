@@ -145,28 +145,55 @@ public class DigestOutputStream extends FilterOutputStream {
 package java.io;
 public abstract class Writer implements Appendable, Closeable, Flushable {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public abstract void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public abstract class FilterWriter extends Writer {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class CharArrayWriter extends Writer {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class LineNumberWriter extends BufferedWriter {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class StringWriter extends Writer {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class OutputStreamWriter extends Writer {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class BufferedWriter extends Writer {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class PipedWriter extends Writer {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
 public class PushbackWriter extends FilterWriter {
     public void write(@IntRange(from=0, to=65535) int c) throws IOException;
+    public void write(char[] cbuf, int off, int len) throws IOException;
+    public void write(String str, int off, int len) throws IOException;
+    public Writer append(CharSequence csq, int start, int end) throws IOException;
 }
