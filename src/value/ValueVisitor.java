@@ -14,20 +14,16 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
-
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
-<<<<<<< Updated upstream
-=======
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.Tree;
->>>>>>> Stashed changes
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
-import com.sun.source.tree.VariableTree;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;

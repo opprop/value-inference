@@ -35,6 +35,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case EQUAL_TO:
                 encoding =
                         ctx.mkOr(
+                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         valueZ3SmtEncoderUtils.subtype(ctx, l, r),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
@@ -110,6 +111,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case NOT_EQUAL_TO:
                 encoding =
                         ctx.mkOr(
+                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
                                                 ctx.mkNot(l.getIntRange()),
@@ -224,6 +226,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case GREATER_THAN:
                 encoding =
                         ctx.mkOr(
+                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
                                                 ctx.mkNot(l.getIntRange()),
@@ -275,6 +278,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case GREATER_THAN_EQUAL:
                 encoding =
                         ctx.mkOr(
+                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
                                                 ctx.mkNot(l.getIntRange()),
@@ -323,6 +327,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case LESS_THAN:
                 encoding =
                         ctx.mkOr(
+                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
                                                 ctx.mkNot(l.getIntRange()),
@@ -374,6 +379,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case LESS_THAN_EQUAL:
                 encoding =
                         ctx.mkOr(
+                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
                                                 ctx.mkNot(l.getIntRange()),
