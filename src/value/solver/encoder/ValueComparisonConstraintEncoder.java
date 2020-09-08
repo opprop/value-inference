@@ -35,7 +35,6 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case EQUAL_TO:
                 encoding =
                         ctx.mkOr(
-                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         valueZ3SmtEncoderUtils.subtype(ctx, l, r),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
@@ -43,7 +42,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                                         valueZ3SmtEncoderUtils.subtype(ctx, r, l),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, r)),
                                 ctx.mkAnd(
-                                        l.getIntRange(),
+                                		ctx.mkOr(l.getIntRange(), l.getUnknownVal()),
                                         r.getIntRange(),
                                         ctx.mkAnd(
                                                 ctx.mkImplies(
@@ -111,14 +110,13 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case NOT_EQUAL_TO:
                 encoding =
                         ctx.mkOr(
-                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
-                                ctx.mkAnd(
+                        		ctx.mkAnd(
                                         ctx.mkOr(
-                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(l.getBottomVal()),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
-                                        l.getIntRange(),
+                                		ctx.mkOr(l.getIntRange(), l.getUnknownVal()),
                                         r.getIntRange(),
                                         ctx.mkAnd(
                                                 ctx.mkImplies(
@@ -226,14 +224,13 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case GREATER_THAN:
                 encoding =
                         ctx.mkOr(
-                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
-                                ctx.mkAnd(
+                        		ctx.mkAnd(
                                         ctx.mkOr(
-                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(l.getBottomVal()),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
-                                        l.getIntRange(),
+                                		ctx.mkOr(l.getIntRange(), l.getUnknownVal()),
                                         r.getIntRange(),
                                         ctx.mkAnd(
                                                 ctx.mkImplies(
@@ -278,14 +275,13 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case GREATER_THAN_EQUAL:
                 encoding =
                         ctx.mkOr(
-                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
-                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(l.getBottomVal()),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
-                                        l.getIntRange(),
+                                		ctx.mkOr(l.getIntRange(), l.getUnknownVal()),
                                         r.getIntRange(),
                                         ctx.mkAnd(
                                                 ctx.mkImplies(
@@ -327,14 +323,13 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case LESS_THAN:
                 encoding =
                         ctx.mkOr(
-                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
-                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(l.getBottomVal()),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
-                                        l.getIntRange(),
+                                		ctx.mkOr(l.getIntRange(), l.getUnknownVal()),
                                         r.getIntRange(),
                                         ctx.mkAnd(
                                                 ctx.mkImplies(
@@ -379,14 +374,13 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
             case LESS_THAN_EQUAL:
                 encoding =
                         ctx.mkOr(
-                        		valueZ3SmtEncoderUtils.equality(ctx, res, l),
                                 ctx.mkAnd(
                                         ctx.mkOr(
-                                                ctx.mkNot(l.getIntRange()),
+                                                ctx.mkNot(l.getBottomVal()),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
-                                        l.getIntRange(),
+                                		ctx.mkOr(l.getIntRange(), l.getUnknownVal()),
                                         r.getIntRange(),
                                         ctx.mkAnd(
                                                 ctx.mkImplies(

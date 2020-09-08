@@ -98,6 +98,8 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         }
         if (AnnotationUtils.areSameByClass(anno, UnknownVal.class)) {
             encodedSlot.setUnknownVal(true);
+            encodedSlot.setIntRangeUpper(Long.MAX_VALUE);
+            encodedSlot.setIntRangeLower(Long.MIN_VALUE);
         }
         if (AnnotationUtils.areSameByClass(anno, BottomVal.class)) {
             encodedSlot.setBottomVal(true);
@@ -266,15 +268,20 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
             }
         }
+        BoolExpr unknownVal =
+                ctx.mkAnd(
+                		value.getUnknownVal(),
+                        ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
+                        ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
         return ctx.mkAnd(
                 // one hot
                 ctx.mkAnd(
                         ctx.mkXor(
-                                ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+                                ctx.mkXor(unknownVal, value.getBottomVal()),
                                 value.getIntRange()),
                         ctx.mkNot(
                                 ctx.mkAnd(
-                                        value.getUnknownVal(),
+                                		unknownVal,
                                         value.getBottomVal(),
                                         value.getIntRange()))),
                 // min <= from <= to <= max
