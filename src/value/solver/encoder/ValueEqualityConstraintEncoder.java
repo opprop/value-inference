@@ -1,5 +1,6 @@
 package value.solver.encoder;
 
+import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
@@ -34,11 +35,17 @@ public class ValueEqualityConstraintEncoder extends ValueAbstractConstraintEncod
 
     @Override
     public BoolExpr encodeVariable_Constant(Slot fst, ConstantSlot snd) {
+        if (fst.getLocation() == AnnotationLocation.MISSING_LOCATION) {
+            return ctx.mkTrue();
+        }
         return encode(fst, snd);
     }
 
     @Override
     public BoolExpr encodeConstant_Variable(ConstantSlot fst, Slot snd) {
+        if (snd.getLocation() == AnnotationLocation.MISSING_LOCATION) {
+            return ctx.mkTrue();
+        }
         return encode(fst, snd);
     }
 }
