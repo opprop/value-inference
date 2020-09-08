@@ -14,8 +14,16 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
+
+import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
+<<<<<<< Updated upstream
+=======
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.Tree;
+>>>>>>> Stashed changes
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
@@ -153,208 +161,219 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             }
             Slot lhs = slotManager.getSlot(lhsAM);
             Slot rhs = slotManager.getSlot(rhsAM);
+            
+            Tree leftTree = binaryTree.getLeftOperand();
+            Tree rightTree = binaryTree.getLeftOperand();
+            if (leftTree instanceof AssignmentTree ) {
+        		AssignmentTree t = (AssignmentTree) leftTree;
+        		leftTree = t.getVariable();
+            }
+            if (rightTree instanceof AssignmentTree ) {
+        		AssignmentTree t = (AssignmentTree) rightTree;
+        		rightTree = t.getVariable();
+            }
 
             Kind kind = binaryTree.getKind();
             switch (kind) {
                 case EQUAL_TO: // ==
-                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
+                    if (leftTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.EQUAL_TO, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compElseRes);
                     }
-                    if (binaryTree.getRightOperand() instanceof VariableTree) {
+                    if (rightTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.EQUAL_TO, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compElseRes);
                     }
                     break;
                 case NOT_EQUAL_TO: // !=
-                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
+                    if (leftTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.EQUAL_TO, lhs, rhs, compElseRes);
                     }
-                    if (binaryTree.getRightOperand() instanceof VariableTree) {
+                    if (rightTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.EQUAL_TO, lhs, rhs, compElseRes);
                     }
                     break;
                 case GREATER_THAN: // >
-                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
+                    if (leftTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
-                    if (binaryTree.getRightOperand() instanceof VariableTree) {
+                    if (rightTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
                     break;
                 case GREATER_THAN_EQUAL: // >=
-                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
+                    if (leftTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN, lhs, rhs, compElseRes);
                     }
-                    if (binaryTree.getRightOperand() instanceof VariableTree) {
+                    if (rightTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN, lhs, rhs, compElseRes);
                     }
                     break;
                 case LESS_THAN: // <
-                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
+                    if (leftTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
-                    if (binaryTree.getRightOperand() instanceof VariableTree) {
+                    if (rightTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
                     break;
                 case LESS_THAN_EQUAL: // <=
-                    if (binaryTree.getLeftOperand() instanceof VariableTree) {
+                    if (leftTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getLeftOperand()),
+                                                atypeFactory, leftTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN, lhs, rhs, compElseRes);
                     }
-                    if (binaryTree.getRightOperand() instanceof VariableTree) {
+                    if (rightTree instanceof IdentifierTree) {
                         ComparisonVariableSlot compThenRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         true);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compThenRes);
                         ComparisonVariableSlot compElseRes =
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
-                                                atypeFactory, binaryTree.getRightOperand()),
+                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN, lhs, rhs, compElseRes);

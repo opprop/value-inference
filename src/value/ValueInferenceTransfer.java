@@ -12,6 +12,7 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.qual.VarAnnot;
+import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.checkerframework.dataflow.cfg.node.LessThanOrEqualNode;
 import org.checkerframework.dataflow.cfg.node.LocalVariableNode;
 import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NotEqualNode;
+import org.checkerframework.dataflow.cfg.node.FieldAccessNode;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -50,12 +52,18 @@ public class ValueInferenceTransfer extends InferenceTransfer {
     }
 
     private void createComparisonVariableSlot(Node node, CFStore thenStore, CFStore elseStore) {
-        Tree tree = node.getTree();
         // Only create refinement comparison slot for variables
-        if (!(tree instanceof VariableTree)) {
+        Node var = node;
+        if (node instanceof AssignmentNode) {
+        	AssignmentNode a = (AssignmentNode) node;
+        	var = a.getTarget();
+        } 
+        if (!(var instanceof LocalVariableNode) && !(var instanceof FieldAccessNode)) {
             return;
         }
-        ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
+        Tree tree = var.getTree();
+        ConstraintManager constraintManager =
+                InferenceMain.getInstance().getConstraintManager();
         AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(tree);
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
         // TODO: Understand why there are null slots
@@ -90,14 +98,7 @@ public class ValueInferenceTransfer extends InferenceTransfer {
 
         // If node is assignment, iterate over lhs; otherwise, just node.
         Receiver rec;
-        if (node instanceof AssignmentNode) {
-            AssignmentNode a = (AssignmentNode) node;
-            rec =
-                    FlowExpressions.internalReprOf(
-                            getInferenceAnalysis().getTypeFactory(), a.getTarget());
-        } else {
-            rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), node);
-        }
+        rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), var);
         thenStore.clearValue(rec);
         thenStore.insertValue(rec, thenAm);
         elseStore.clearValue(rec);
