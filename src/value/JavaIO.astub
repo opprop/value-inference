@@ -4,7 +4,19 @@ package java.io;
 
 class DataInputStream implements DataInput {
 	public @IntRange(from=-1, to=2147483647) int read(@IntRange(from=-128, to=255) byte[] b) throws IOException;
-    public @IntRange(from=-1, to=2147483647) int read(@IntRange(from=-128, to=255) byte[] b, int off, int len) throws IOException;
+    public @IntRange(from=-1, to=2147483647) int read(@IntRange(from=-128, to=255) byte[] b, @IntRange(from=0) int off, @IntRange(from=0) int len) throws IOException;
 	final @IntRange(from=0, to=255) int readUnsignedByte() throws IOException;
 	final @IntRange(from=0, to=65535) int readUnsignedShort() throws IOException;
+}
+
+class DataOutputStream implements DataOutput {
+	public void write(byte[] b, int off, int len) throws IOException;
+	
+}
+
+interface DataInput {
+	final @IntRange(from=0, to=255) int readUnsignedByte() throws IOException;
+	final @IntRange(from=0, to=65535) int readUnsignedShort() throws IOException;
+	void readFully(byte[] b, int off, int len) throws IOException;
+	int skipBytes(int n) throws IOException;
 }

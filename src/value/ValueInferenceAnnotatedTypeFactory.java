@@ -8,16 +8,14 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
-import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.AnnotationLocation;
+import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.qual.VarAnnot;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.MemberSelectTree;
@@ -116,25 +114,27 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             }
             return super.visitUnary(node, type);
         }
-        
-//        @Override
-//        public Void visitCompoundAssignment(CompoundAssignmentTree node, AnnotatedTypeMirror type) {
-//            variableAnnotator.visit(type, node);
-//            return super.visitCompoundAssignment(node, type);
-//        }
+
+        //        @Override
+        //        public Void visitCompoundAssignment(CompoundAssignmentTree node,
+        // AnnotatedTypeMirror type) {
+        //            variableAnnotator.visit(type, node);
+        //            return super.visitCompoundAssignment(node, type);
+        //        }
 
         @Override
         public Void visitLiteral(final LiteralTree tree, AnnotatedTypeMirror type) {
             Object value = tree.getValue();
             switch (tree.getKind()) {
                 case NULL_LITERAL:
-		            replaceATM(type, BOTTOMVAL);
-		            return null;
-//                case BOOLEAN_LITERAL:
-//                    AnnotationMirror boolAnno =
-//                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
-//                    replaceATM(type, boolAnno);
-//                    return null;
+                    replaceATM(type, BOTTOMVAL);
+                    return null;
+                    //                case BOOLEAN_LITERAL:
+                    //                    AnnotationMirror boolAnno =
+                    //
+                    // createBooleanAnnotation(Collections.singletonList((Boolean) value));
+                    //                    replaceATM(type, boolAnno);
+                    //                    return null;
                 case CHAR_LITERAL:
                     AnnotationMirror charAnno =
                             createCharAnnotation(Collections.singletonList((Character) value));
@@ -148,18 +148,19 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     return null;
                 case DOUBLE_LITERAL:
                 case FLOAT_LITERAL:
-                	replaceATM(type, UNKNOWNVAL);
-		            return null;
-//                case STRING_LITERAL:
-//                    AnnotationMirror stringAnno =
-//                            createStringAnnotation(Collections.singletonList((String) value));
-//                    replaceATM(type, stringAnno);
-//                    return null;
+                    replaceATM(type, UNKNOWNVAL);
+                    return null;
+                    //                case STRING_LITERAL:
+                    //                    AnnotationMirror stringAnno =
+                    //
+                    // createStringAnnotation(Collections.singletonList((String) value));
+                    //                    replaceATM(type, stringAnno);
+                    //                    return null;
                 default:
                     return null;
             }
         }
-        
+
         @Override
         public Void visitNewClass(NewClassTree newClassTree, AnnotatedTypeMirror atm) {
             // Call super to replace polymorphic annotations with fresh variable slots
@@ -167,8 +168,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             if (isConstructorDeclaredWithPolymorphicReturn(newClassTree)) {
                 // 1) the variable slot generated for the polymorphic declared return type
-                Slot varSlotForPolyReturn =
-                        variableAnnotator.getOrCreatePolyVar(newClassTree);
+                Slot varSlotForPolyReturn = variableAnnotator.getOrCreatePolyVar(newClassTree);
 
                 // 2) the call site return type: "@m" in "new @m Clazz(...)"
                 Slot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
@@ -206,7 +206,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             ab.setValue("value", cs.getId());
             atm.replaceAnnotation(ab.build());
         }
-        
+
         // see if given annotation mirror is the VarAnnot versions of @PolyVal
         private boolean isPolyAnnotation(AnnotationMirror annot) {
             Slot slot = slotManager.getSlot(annot);
@@ -283,13 +283,13 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         public ValueInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
             super(multiGraphFactory);
         }
-        
+
         @Override
         public Set<? extends AnnotationMirror> leastUpperBounds(
                 Collection<? extends AnnotationMirror> annos1,
                 Collection<? extends AnnotationMirror> annos2) {
-        	// TODO: remove hack
-        	Set<AnnotationMirror> result = AnnotationUtils.createAnnotationSet();
+            // TODO: remove hack
+            Set<AnnotationMirror> result = AnnotationUtils.createAnnotationSet();
             for (AnnotationMirror a1 : annos1) {
                 for (AnnotationMirror a2 : annos2) {
                     AnnotationMirror lub = leastUpperBound(a1, a2);
@@ -301,7 +301,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             return result;
         }
     }
-    
+
     @Override
     protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
         Set<AnnotationMirror> top = new HashSet<>();
@@ -322,13 +322,13 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     "java.lang.Double",
                                     "byte",
                                     "java.lang.Byte",
-//                                    "java.lang.String",
+                                    //                                    "java.lang.String",
                                     "char",
                                     "java.lang.Character",
                                     "float",
                                     "java.lang.Float",
-//                                    "boolean",
-//                                    "java.lang.Boolean",
+                                    //                                    "boolean",
+                                    //                                    "java.lang.Boolean",
                                     "long",
                                     "java.lang.Long",
                                     "short",
@@ -362,10 +362,11 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 atm.replaceAnnotations(
                         (Iterable) ((Pair) this.treeToVarAnnoPair.get(binaryTree)).second);
             } else {
-            	// TODO: find out why there are missing location
-            	AnnotationLocation location = VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree);
+                // TODO: find out why there are missing location
+                AnnotationLocation location =
+                        VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree);
                 if (location == AnnotationLocation.MISSING_LOCATION) {
-                	return;
+                    return;
                 }
                 ConstraintManager constraintManager =
                         InferenceMain.getInstance().getConstraintManager();
@@ -385,15 +386,15 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 switch (kind) {
                     case PLUS:
                         if (TreeUtils.isStringConcatenation(binaryTree)) {
-                        	result = slotManager.createConstantSlot(UNKNOWNVAL);
-//                            result =
-//                                    slotManager.createConstantSlot(
-//                                            AnnotationBuilder.fromClass(elements, StringVal.class));
+                            result = slotManager.createConstantSlot(UNKNOWNVAL);
+                            //                            result =
+                            //                                    slotManager.createConstantSlot(
+                            //
+                            // AnnotationBuilder.fromClass(elements, StringVal.class));
                             break;
                         }
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -404,7 +405,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).plus(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -414,8 +415,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case MINUS:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -426,7 +426,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).minus(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -436,8 +436,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case MULTIPLY:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -448,7 +447,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).times(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -458,8 +457,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case DIVIDE:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -470,7 +468,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).divide(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -480,8 +478,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case REMAINDER:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -492,7 +489,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).remainder(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -502,8 +499,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LEFT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -514,7 +510,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).shiftLeft(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -524,8 +520,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -536,7 +531,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).signedShiftRight(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -546,8 +541,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case UNSIGNED_RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -558,7 +552,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).unsignedShiftRight(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -568,8 +562,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case AND:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -580,7 +573,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseAnd(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -590,8 +583,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case OR:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -602,7 +594,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseOr(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
@@ -612,8 +604,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case XOR:
                         if (lhsAM == null || rhsAM == null) {
-                            result =
-                                    slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -624,7 +615,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
                             Range range = getRange(lhsAM).bitwiseXor(getRange(rhsAM));
                             if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                            	range = Range.INT_EVERYTHING;
+                                range = Range.INT_EVERYTHING;
                             }
                             result =
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));

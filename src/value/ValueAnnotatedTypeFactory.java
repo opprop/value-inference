@@ -14,11 +14,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
@@ -27,15 +24,13 @@ import org.checkerframework.common.value.qual.ArrayLenRange;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
-import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedNullType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
+import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.LiteralTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
@@ -51,8 +46,8 @@ import org.checkerframework.javacutil.TypesUtils;
 import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
-import value.qual.StringVal;
 import value.qual.PolyVal;
+import value.qual.StringVal;
 import value.qual.UnknownVal;
 
 public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
@@ -67,10 +62,9 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /** The bottom type for this hierarchy. */
     protected final AnnotationMirror BOTTOMVAL =
             AnnotationBuilder.fromClass(elements, BottomVal.class);
-    
+
     /** The polymorphic type for this hierarchy. */
-    protected final AnnotationMirror POLYVAL =
-            AnnotationBuilder.fromClass(elements, PolyVal.class);
+    protected final AnnotationMirror POLYVAL = AnnotationBuilder.fromClass(elements, PolyVal.class);
 
     public ValueAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
@@ -90,13 +84,13 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                                     "java.lang.Double",
                                     "byte",
                                     "java.lang.Byte",
-//                                    "java.lang.String",
+                                    //                                    "java.lang.String",
                                     "char",
                                     "java.lang.Character",
                                     "float",
                                     "java.lang.Float",
-//                                    "boolean",
-//                                    "java.lang.Boolean",
+                                    //                                    "boolean",
+                                    //                                    "java.lang.Boolean",
                                     "long",
                                     "java.lang.Long",
                                     "short",
@@ -110,17 +104,17 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return new LinkedHashSet<>(
                 Arrays.asList(
                         IntRange.class,
-//                        BoolVal.class,
-//                        StringVal.class,
+                        //                        BoolVal.class,
+                        //                        StringVal.class,
                         BottomVal.class,
                         UnknownVal.class,
                         PolyVal.class));
     }
-    
+
     @Override
     public AnnotationMirror canonicalAnnotation(AnnotationMirror anno) {
         if (anno == null) {
-        	return BOTTOMVAL;
+            return BOTTOMVAL;
         }
         return super.canonicalAnnotation(anno);
     }
@@ -207,7 +201,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             } else if (AnnotationUtils.areSame(subAnno, UNKNOWNVAL)
                     || AnnotationUtils.areSame(superAnno, BOTTOMVAL)) {
                 return false;
-            } 
+            }
             // Case: @PolyUnit are treated as @UnknownVal
             else if (AnnotationUtils.areSame(subAnno, POLYVAL)) {
                 return isSubtype(UNKNOWNVAL, superAnno);
@@ -289,7 +283,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
     }
-    
+
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         defs.addCheckedCodeDefault(UNKNOWNVAL, TypeUseLocation.OTHERWISE);
@@ -297,7 +291,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.LOWER_BOUND);
         defs.addCheckedCodeDefault(BOTTOMVAL, TypeUseLocation.EXCEPTION_PARAMETER);
     }
-    
+
     @Override
     protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
         Set<AnnotationMirror> top = new HashSet<>();
@@ -305,12 +299,11 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return top;
     }
 
-    
     @Override
     protected TypeAnnotator createTypeAnnotator() {
         return new ListTypeAnnotator(new ValueTypeAnnotator(this), super.createTypeAnnotator());
     }
-    
+
     /**
      * Performs pre-processing on annotations written by users, replacing illegal annotations by
      * legal ones.
@@ -342,16 +335,16 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 retType.addMissingAnnotations(Collections.singleton(anno));
             }
             while (retType instanceof AnnotatedArrayType) {
-            	retType = ((AnnotatedArrayType) retType).getComponentType();
+                retType = ((AnnotatedArrayType) retType).getComponentType();
                 anno = createIntRangeAnnotations(retType);
                 if (anno != null) {
-                	retType.addMissingAnnotations(Collections.singleton(anno));
+                    retType.addMissingAnnotations(Collections.singleton(anno));
                 }
             }
 
             return super.visitExecutable(t, p);
         }
-        
+
         @Override
         public Void visitArray(AnnotatedArrayType t, Void p) {
             AnnotatedTypeMirror comp = t.getComponentType();
@@ -361,7 +354,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
             return super.visitArray(t, p);
         }
-        
+
         @Override
         public Void visitPrimitive(AnnotatedPrimitiveType t, Void p) {
             AnnotationMirror anno = createIntRangeAnnotations(t);
@@ -370,7 +363,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
             return super.visitPrimitive(t, p);
         }
-        
+
         @Override
         public Void visitDeclared(AnnotatedDeclaredType t, Void p) {
             AnnotationMirror anno = createIntRangeAnnotations(t);
@@ -380,29 +373,29 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return super.visitDeclared(t, p);
         }
     }
-    
+
     @Override
     public @Nullable AnnotatedTypeMirror getAnnotatedTypeVarargsArray(Tree tree) {
-    	AnnotatedTypeMirror atm = super.getAnnotatedTypeVarargsArray(tree);
-    	AnnotationMirror anno = createIntRangeAnnotations(atm);
+        AnnotatedTypeMirror atm = super.getAnnotatedTypeVarargsArray(tree);
+        AnnotationMirror anno = createIntRangeAnnotations(atm);
         if (anno != null) {
-        	atm.replaceAnnotation(anno);
+            atm.replaceAnnotation(anno);
         }
-		return atm;
+        return atm;
     }
 
-	private AnnotationMirror createIntRangeAnnotations(AnnotatedTypeMirror atm) {
+    private AnnotationMirror createIntRangeAnnotations(AnnotatedTypeMirror atm) {
         AnnotationMirror newAnno;
         switch (atm.getKind()) {
             case NULL:
-            	newAnno = BOTTOMVAL;
-	            break;
-//            case BOOLEAN:
-//            	newAnno = AnnotationBuilder.fromClass(elements, BoolVal.class);
-//	            break;
-  	        case BYTE:
-	            newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
-	            break;
+                newAnno = BOTTOMVAL;
+                break;
+                //            case BOOLEAN:
+                //            	newAnno = AnnotationBuilder.fromClass(elements, BoolVal.class);
+                //	            break;
+            case BYTE:
+                newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+                break;
             case SHORT:
                 newAnno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
                 break;
@@ -417,25 +410,25 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 break;
             case DOUBLE:
             case FLOAT:
-            	newAnno = UNKNOWNVAL;
-            	break;
+                newAnno = UNKNOWNVAL;
+                break;
             case DECLARED:
-            	if (atm.getUnderlyingType().toString().equals("java.lang.Byte")) {
-            		newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
+                if (atm.getUnderlyingType().toString().equals("java.lang.Byte")) {
+                    newAnno = createIntRangeAnnotation(Range.BYTE_EVERYTHING);
                     break;
-            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Short")) {
-            		newAnno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
+                } else if (atm.getUnderlyingType().toString().equals("java.lang.Short")) {
+                    newAnno = createIntRangeAnnotation(Range.SHORT_EVERYTHING);
                     break;
-            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Character")) {
-            		newAnno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
+                } else if (atm.getUnderlyingType().toString().equals("java.lang.Character")) {
+                    newAnno = createIntRangeAnnotation(Range.CHAR_EVERYTHING);
                     break;
-            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Integer")) {
-            		newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
+                } else if (atm.getUnderlyingType().toString().equals("java.lang.Integer")) {
+                    newAnno = createIntRangeAnnotation(Range.INT_EVERYTHING);
                     break;
-            	} else if (atm.getUnderlyingType().toString().equals("java.lang.Long")) {
-            		newAnno = createIntRangeAnnotation(Range.EVERYTHING);
+                } else if (atm.getUnderlyingType().toString().equals("java.lang.Long")) {
+                    newAnno = createIntRangeAnnotation(Range.EVERYTHING);
                     break;
-            	}
+                }
             default:
                 newAnno = null;
                 break;
@@ -567,14 +560,15 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
             Object value = tree.getValue();
             switch (tree.getKind()) {
-            	case NULL_LITERAL:
-            		type.replaceAnnotation(BOTTOMVAL);
-            		return null;
-//                case BOOLEAN_LITERAL:
-//                    AnnotationMirror boolAnno =
-//                            createBooleanAnnotation(Collections.singletonList((Boolean) value));
-//                    type.replaceAnnotation(boolAnno);
-//                    return null;
+                case NULL_LITERAL:
+                    type.replaceAnnotation(BOTTOMVAL);
+                    return null;
+                    //                case BOOLEAN_LITERAL:
+                    //                    AnnotationMirror boolAnno =
+                    //
+                    // createBooleanAnnotation(Collections.singletonList((Boolean) value));
+                    //                    type.replaceAnnotation(boolAnno);
+                    //                    return null;
 
                 case CHAR_LITERAL:
                     AnnotationMirror charAnno =
@@ -589,13 +583,14 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     return null;
                 case DOUBLE_LITERAL:
                 case FLOAT_LITERAL:
-                	type.replaceAnnotation(UNKNOWNVAL);
+                    type.replaceAnnotation(UNKNOWNVAL);
                     return null;
-//                case STRING_LITERAL:
-//                    AnnotationMirror stringAnno =
-//                            createStringAnnotation(Collections.singletonList((String) value));
-//                    type.replaceAnnotation(stringAnno);
-//                    return null;
+                    //                case STRING_LITERAL:
+                    //                    AnnotationMirror stringAnno =
+                    //
+                    // createStringAnnotation(Collections.singletonList((String) value));
+                    //                    type.replaceAnnotation(stringAnno);
+                    //                    return null;
                 default:
                     return null;
             }

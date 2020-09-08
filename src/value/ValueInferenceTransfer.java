@@ -12,17 +12,14 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.qual.VarAnnot;
-
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
-
 import java.util.Set;
-
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.dataflow.analysis.ConditionalTransferResult;
 import org.checkerframework.dataflow.analysis.FlowExpressions;
-import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.FlowExpressions.Receiver;
+import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
 import org.checkerframework.dataflow.cfg.node.AssignmentNode;
@@ -58,26 +55,25 @@ public class ValueInferenceTransfer extends InferenceTransfer {
         if (!(tree instanceof VariableTree)) {
             return;
         }
-        ConstraintManager constraintManager =
-                InferenceMain.getInstance().getConstraintManager();
+        ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
         AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(tree);
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
         // TODO: Understand why there are null slots
         if (slotToRefine == null) {
-        	return;
+            return;
         }
         if (slotToRefine instanceof ConstantSlot) {
-        	return;
+            return;
         }
         while (slotToRefine instanceof RefinementVariableSlot) {
-            slotToRefine = ((RefinementVariableSlot)slotToRefine).getRefined();
+            slotToRefine = ((RefinementVariableSlot) slotToRefine).getRefined();
         }
-        
+
         AnnotationLocation location =
                 VariableAnnotator.treeToLocation(analysis.getTypeFactory(), tree);
         // TODO: find out why there are missing location
         if (location == AnnotationLocation.MISSING_LOCATION) {
-        	return;
+            return;
         }
         ComparisonVariableSlot thenSlot =
                 getInferenceAnalysis()
@@ -96,7 +92,9 @@ public class ValueInferenceTransfer extends InferenceTransfer {
         Receiver rec;
         if (node instanceof AssignmentNode) {
             AssignmentNode a = (AssignmentNode) node;
-            rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), a.getTarget());
+            rec =
+                    FlowExpressions.internalReprOf(
+                            getInferenceAnalysis().getTypeFactory(), a.getTarget());
         } else {
             rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), node);
         }
@@ -115,9 +113,10 @@ public class ValueInferenceTransfer extends InferenceTransfer {
 
         createComparisonVariableSlot(n.getLeftOperand(), thenStore, elseStore);
         createComparisonVariableSlot(n.getRightOperand(), thenStore, elseStore);
-        
+
         CFValue newResultValue =
-        		getInferenceAnalysis().createAbstractValue(typeFactory.getAnnotatedType(n.getTree()));
+                getInferenceAnalysis()
+                        .createAbstractValue(typeFactory.getAnnotatedType(n.getTree()));
         return new ConditionalTransferResult<>(newResultValue, thenStore, elseStore);
     }
 
@@ -195,39 +194,42 @@ public class ValueInferenceTransfer extends InferenceTransfer {
                 analysis.createAbstractValue(typeFactory.getAnnotatedType(n.getTree()));
         return new ConditionalTransferResult<>(newResultValue, thenStore, elseStore);
     }
-    
+
     @Override
     public TransferResult<CFValue, CFStore> visitLocalVariable(
             LocalVariableNode n, TransferInput<CFValue, CFStore> in) {
-    	TransferResult<CFValue, CFStore> result = super.visitLocalVariable(n, in);
-    	CFStore store = result.getRegularStore();
-    	Receiver rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), n);
-    	
-    	CFValue value = store.getValue(rec);
-    	if (value == null) {
-    		return result;
-    	}
-    	
-    	Set<AnnotationMirror> ams = value.getAnnotations();
-    	
-    	for (AnnotationMirror am : ams) {
-    		if (AnnotationUtils.areSameByClass(am, VarAnnot.class)) {
-    			InferenceAnnotatedTypeFactory typeFactory = (InferenceAnnotatedTypeFactory) analysis.getTypeFactory();
-    			AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(n.getTree());
-    			atm.replaceAnnotation(am);
+        TransferResult<CFValue, CFStore> result = super.visitLocalVariable(n, in);
+        CFStore store = result.getRegularStore();
+        Receiver rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), n);
 
-    	        // add refinement variable value to output
-    	        CFValue newValue = analysis.createAbstractValue(atm);
+        CFValue value = store.getValue(rec);
+        if (value == null) {
+            return result;
+        }
 
-    	        // This is a bit of a hack, but we want the LHS to now get the refinement annotation.
-    	        // So change the value for LHS that is already in the store.
-    	        getInferenceAnalysis().getNodeValues().put(n, newValue);
+        Set<AnnotationMirror> ams = value.getAnnotations();
 
-    	        store.updateForAssignment(n, newValue);
-    	        return new RegularTransferResult<CFValue, CFStore>(finishValue(newValue, store), store);
-    		}
-    	}
-    	
-    	return result;
+        for (AnnotationMirror am : ams) {
+            if (AnnotationUtils.areSameByClass(am, VarAnnot.class)) {
+                InferenceAnnotatedTypeFactory typeFactory =
+                        (InferenceAnnotatedTypeFactory) analysis.getTypeFactory();
+                AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(n.getTree());
+                atm.replaceAnnotation(am);
+
+                // add refinement variable value to output
+                CFValue newValue = analysis.createAbstractValue(atm);
+
+                // This is a bit of a hack, but we want the LHS to now get the refinement
+                // annotation.
+                // So change the value for LHS that is already in the store.
+                getInferenceAnalysis().getNodeValues().put(n, newValue);
+
+                store.updateForAssignment(n, newValue);
+                return new RegularTransferResult<CFValue, CFStore>(
+                        finishValue(newValue, store), store);
+            }
+        }
+
+        return result;
     }
 }
