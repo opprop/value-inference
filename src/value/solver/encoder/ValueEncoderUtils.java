@@ -27,20 +27,17 @@ public class ValueEncoderUtils {
                                 ctx.mkNot(subT.getBottomVal()),
                                 ctx.mkNot(superT.getUnknownVal()),
                                 ctx.mkNot(superT.getBottomVal()),
-//                                ctx.mkEq(subT.getBoolVal(), superT.getBoolVal()),
-//                                ctx.mkEq(subT.getStringVal(), superT.getStringVal()),
-//                                ctx.mkEq(subT.getIntRange(), superT.getIntRange()),
+                                //                                ctx.mkEq(subT.getBoolVal(),
+                                // superT.getBoolVal()),
+                                //                                ctx.mkEq(subT.getStringVal(),
+                                // superT.getStringVal()),
+                                //                                ctx.mkEq(subT.getIntRange(),
+                                // superT.getIntRange()),
                                 subT.getIntRange(),
                                 superT.getIntRange(),
                                 // int <: int
-                                ctx.mkGe(
-                                        subT.getIntRangeLower(),
-                                        superT.getIntRangeLower()),
-                                ctx.mkLe(
-                                        subT.getIntRangeUpper(),
-                                        superT.getIntRangeUpper())
-                                )
-                        );
+                                ctx.mkGe(subT.getIntRangeLower(), superT.getIntRangeLower()),
+                                ctx.mkLe(subT.getIntRangeUpper(), superT.getIntRangeUpper())));
 
         return subtypeEncoding;
     }
@@ -51,26 +48,31 @@ public class ValueEncoderUtils {
                 ctx.mkAnd(
                         ctx.mkEq(left.getBottomVal(), right.getBottomVal()),
                         ctx.mkEq(left.getUnknownVal(), right.getUnknownVal()),
-//                        ctx.mkEq(left.getBoolVal(), right.getBoolVal()),
-//                        ctx.mkEq(left.getStringVal(), right.getStringVal()),
+                        //                        ctx.mkEq(left.getBoolVal(), right.getBoolVal()),
+                        //                        ctx.mkEq(left.getStringVal(),
+                        // right.getStringVal()),
                         ctx.mkEq(left.getIntRange(), right.getIntRange()),
                         // int = int
                         ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
                         ctx.mkEq(left.getIntRangeUpper(), right.getIntRangeUpper()));
-//                        ctx.mkOr(
-//                                ctx.mkAnd(
-//                                        left.getIntRange(),
-//                                        ctx.mkEq(left.getIntRangeLower(), right.getIntRangeLower()),
-//                                        ctx.mkEq(
-//                                                left.getIntRangeUpper(), right.getIntRangeUpper())),
-//                                ctx.mkNot(left.getIntRange())));
+        //                        ctx.mkOr(
+        //                                ctx.mkAnd(
+        //                                        left.getIntRange(),
+        //                                        ctx.mkEq(left.getIntRangeLower(),
+        // right.getIntRangeLower()),
+        //                                        ctx.mkEq(
+        //                                                left.getIntRangeUpper(),
+        // right.getIntRangeUpper())),
+        //                                ctx.mkNot(left.getIntRange())));
 
         return equalityEncoding;
     }
-    
+
     public BoolExpr isIntRange(Context ctx, Z3InferenceValue val) {
-    	return ctx.mkAnd(val.getIntRange(), 
-//    			ctx.mkNot(val.getStringVal()), ctx.mkNot(val.getBoolVal()), 
-    			ctx.mkNot(val.getBottomVal()), ctx.mkNot(val.getUnknownVal()));
+        return ctx.mkAnd(
+                val.getIntRange(),
+                //    			ctx.mkNot(val.getStringVal()), ctx.mkNot(val.getBoolVal()),
+                ctx.mkNot(val.getBottomVal()),
+                ctx.mkNot(val.getUnknownVal()));
     }
 }

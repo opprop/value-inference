@@ -19,11 +19,9 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
-import value.qual.BoolVal;
 import value.qual.BottomVal;
 import value.qual.IntRange;
 import value.qual.PolyVal;
-import value.qual.StringVal;
 import value.qual.UnknownVal;
 import value.representation.TypeCheckValue;
 import value.solver.encoder.ValueConstraintEncoderFactory;
@@ -47,14 +45,16 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BottomVal.class);
             return builder.build();
         }
-//        if (solution.isBoolVal()) {
-//            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, BoolVal.class);
-//            return builder.build();
-//        }
-//        if (solution.isStringVal()) {
-//            AnnotationBuilder builder = new AnnotationBuilder(processingEnv, StringVal.class);
-//            return builder.build();
-//        }
+        //        if (solution.isBoolVal()) {
+        //            AnnotationBuilder builder = new AnnotationBuilder(processingEnv,
+        // BoolVal.class);
+        //            return builder.build();
+        //        }
+        //        if (solution.isStringVal()) {
+        //            AnnotationBuilder builder = new AnnotationBuilder(processingEnv,
+        // StringVal.class);
+        //            return builder.build();
+        //        }
         if (solution.isIntRange()) {
             long from = solution.getIntRangeLower();
             long to = solution.getIntRangeUpper();
@@ -94,7 +94,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         Z3InferenceValue encodedSlot = Z3InferenceValue.makeConstantSlot(ctx, slotID);
         // TODO: temp hack: treat poly as unknownval
         if (AnnotationUtils.areSameByClass(anno, PolyVal.class)) {
-        	encodedSlot.setUnknownVal(true);
+            encodedSlot.setUnknownVal(true);
         }
         if (AnnotationUtils.areSameByClass(anno, UnknownVal.class)) {
             encodedSlot.setUnknownVal(true);
@@ -102,12 +102,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         if (AnnotationUtils.areSameByClass(anno, BottomVal.class)) {
             encodedSlot.setBottomVal(true);
         }
-//        if (AnnotationUtils.areSameByClass(anno, BoolVal.class)) {
-//            encodedSlot.setBoolVal(true);
-//        }
-//        if (AnnotationUtils.areSameByClass(anno, StringVal.class)) {
-//            encodedSlot.setStringVal(true);
-//        }
+        //        if (AnnotationUtils.areSameByClass(anno, BoolVal.class)) {
+        //            encodedSlot.setBoolVal(true);
+        //        }
+        //        if (AnnotationUtils.areSameByClass(anno, StringVal.class)) {
+        //            encodedSlot.setStringVal(true);
+        //        }
         if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
             encodedSlot.setIntRange(true);
             encodedSlot.setIntRangeLower(
@@ -121,7 +121,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 
     @Override
     public BoolExpr encodeSlotWellformnessConstraint(Slot slot) {
-    	if (slot instanceof ConstantSlot) {
+        if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode poly as constant trues
@@ -138,42 +138,47 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             VariableSlot vslot = (VariableSlot) slot;
             TypeMirror type = vslot.getUnderlyingType();
             if (type == null) {
-            	return ctx.mkAnd(
+                return ctx.mkAnd(
                         // one hot
                         ctx.mkAnd(
-                                ctx.mkXor(ctx.mkXor(value.getUnknownVal(), value.getBottomVal()), value.getIntRange()),
+                                ctx.mkXor(
+                                        ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+                                        value.getIntRange()),
                                 ctx.mkNot(
-                              		  ctx.mkAnd(
-          		                          value.getUnknownVal(),
-          		                          value.getBottomVal(),
-          		                          value.getIntRange()))),
+                                        ctx.mkAnd(
+                                                value.getUnknownVal(),
+                                                value.getBottomVal(),
+                                                value.getIntRange()))),
                         // min <= from <= to <= max
                         range,
                         ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
-//            	return ctx.mkAnd(
-//                        // one hot
-//                        ctx.mkXor(
-//                                ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
-//                                ctx.mkAnd(
-//                                        ctx.mkXor(
-//                                                ctx.mkXor(value.getBoolVal(), value.getStringVal()),
-//                                                value.getIntRange()),
-//                                        ctx.mkNot(
-//                                                ctx.mkAnd(
-//                                                        value.getBoolVal(),
-//                                                        value.getStringVal(),
-//                                                        value.getIntRange())))),
-//                        // min <= from <= to <= max
-//                        range,
-//                        ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+                //            	return ctx.mkAnd(
+                //                        // one hot
+                //                        ctx.mkXor(
+                //                                ctx.mkXor(value.getUnknownVal(),
+                // value.getBottomVal()),
+                //                                ctx.mkAnd(
+                //                                        ctx.mkXor(
+                //                                                ctx.mkXor(value.getBoolVal(),
+                // value.getStringVal()),
+                //                                                value.getIntRange()),
+                //                                        ctx.mkNot(
+                //                                                ctx.mkAnd(
+                //                                                        value.getBoolVal(),
+                //                                                        value.getStringVal(),
+                //                                                        value.getIntRange())))),
+                //                        // min <= from <= to <= max
+                //                        range,
+                //                        ctx.mkLe(value.getIntRangeLower(),
+                // value.getIntRangeUpper()));
             }
             if (type.getKind() == TypeKind.BYTE) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
+                                //                                ctx.mkNot(value.getBoolVal()),
+                                //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkOr(
                                         ctx.mkAnd(
@@ -201,8 +206,8 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                         ctx.mkAnd(
                                 value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
+                                //                                ctx.mkNot(value.getBoolVal()),
+                                //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkOr(
                                         ctx.mkAnd(
@@ -233,8 +238,8 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                         ctx.mkAnd(
                                 value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
+                                //                                ctx.mkNot(value.getBoolVal()),
+                                //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
@@ -242,10 +247,10 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (type.getKind() == TypeKind.INT) {
                 range =
                         ctx.mkAnd(
-                        		value.getIntRange(),
+                                value.getIntRange(),
                                 ctx.mkNot(value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
+                                //                                ctx.mkNot(value.getBoolVal()),
+                                //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
@@ -254,46 +259,49 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                 range =
                         ctx.mkAnd(
                                 ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
-//                                ctx.mkNot(value.getBoolVal()),
-//                                ctx.mkNot(value.getStringVal()),
+                                //                                ctx.mkNot(value.getBoolVal()),
+                                //                                ctx.mkNot(value.getStringVal()),
                                 ctx.mkNot(value.getBottomVal()),
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
             }
         }
         return ctx.mkAnd(
-              // one hot
-              ctx.mkAnd(
-                      ctx.mkXor(ctx.mkXor(value.getUnknownVal(), value.getBottomVal()), value.getIntRange()),
-                      ctx.mkNot(
-                    		  ctx.mkAnd(
-		                          value.getUnknownVal(),
-		                          value.getBottomVal(),
-		                          value.getIntRange()))),
-              // min <= from <= to <= max
-              range,
-              ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
-//        return ctx.mkAnd(
-//                // one hot
-//                ctx.mkXor(
-//                        ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
-//                        ctx.mkAnd(
-//                                ctx.mkXor(
-//                                        ctx.mkXor(value.getBoolVal(), value.getStringVal()),
-//                                        value.getIntRange()),
-//                                ctx.mkNot(
-//                                        ctx.mkAnd(
-//                                                value.getBoolVal(),
-//                                                value.getStringVal(),
-//                                                value.getIntRange())))),
-//                // min <= from <= to <= max
-//                range,
-//                ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+                // one hot
+                ctx.mkAnd(
+                        ctx.mkXor(
+                                ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+                                value.getIntRange()),
+                        ctx.mkNot(
+                                ctx.mkAnd(
+                                        value.getUnknownVal(),
+                                        value.getBottomVal(),
+                                        value.getIntRange()))),
+                // min <= from <= to <= max
+                range,
+                ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
+        //        return ctx.mkAnd(
+        //                // one hot
+        //                ctx.mkXor(
+        //                        ctx.mkXor(value.getUnknownVal(), value.getBottomVal()),
+        //                        ctx.mkAnd(
+        //                                ctx.mkXor(
+        //                                        ctx.mkXor(value.getBoolVal(),
+        // value.getStringVal()),
+        //                                        value.getIntRange()),
+        //                                ctx.mkNot(
+        //                                        ctx.mkAnd(
+        //                                                value.getBoolVal(),
+        //                                                value.getStringVal(),
+        //                                                value.getIntRange())))),
+        //                // min <= from <= to <= max
+        //                range,
+        //                ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));
     }
 
     @Override
     public BoolExpr encodeSlotPreferenceConstraint(Slot slot) {
-    	if (slot instanceof ConstantSlot) {
+        if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode poly as constant trues
@@ -301,20 +309,21 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                 return ctx.mkTrue();
             }
         }
-    	
+
         Z3InferenceValue value = slot.serialize(this);
         if (slot instanceof VariableSlot) {
             VariableSlot vslot = (VariableSlot) slot;
             TypeMirror type = vslot.getUnderlyingType();
             if (type == null) {
-            	return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
+                return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
             }
-//            if (type.toString().equals("java.lang.String")) {
-//                return value.getStringVal();
-//            }
-//            if (type.getKind() == TypeKind.BOOLEAN || type.toString().equals("java.lang.Boolean")) {
-//                return value.getBoolVal();
-//            }
+            //            if (type.toString().equals("java.lang.String")) {
+            //                return value.getStringVal();
+            //            }
+            //            if (type.getKind() == TypeKind.BOOLEAN ||
+            // type.toString().equals("java.lang.Boolean")) {
+            //                return value.getBoolVal();
+            //            }
             if (type.getKind() == TypeKind.BYTE || type.toString().equals("java.lang.Byte")) {
                 return ctx.mkAnd(
                         value.getIntRange(),
@@ -346,10 +355,10 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
             }
         }
-        
+
         // Most likely numeric computation and comparisons
         if (slot instanceof ArithmeticVariableSlot || slot instanceof ComparisonVariableSlot) {
-        	return value.getIntRange();
+            return value.getIntRange();
         }
 
         return ctx.mkOr(value.getUnknownVal(), value.getBottomVal());
@@ -394,12 +403,12 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             if (component.contentEquals("INTRANGE")) {
                 z3Slot.setIntRange(Boolean.parseBoolean(value));
             }
-//            if (component.contentEquals("STRINGVAL")) {
-//                z3Slot.setStringVal(Boolean.parseBoolean(value));
-//            }
-//            if (component.contentEquals("BOOLVAL")) {
-//                z3Slot.setBoolVal(Boolean.parseBoolean(value));
-//            }
+            //            if (component.contentEquals("STRINGVAL")) {
+            //                z3Slot.setStringVal(Boolean.parseBoolean(value));
+            //            }
+            //            if (component.contentEquals("BOOLVAL")) {
+            //                z3Slot.setBoolVal(Boolean.parseBoolean(value));
+            //            }
             if (component.contentEquals("from")) {
                 z3Slot.setIntRangeLower(Long.parseLong(value));
             }

@@ -16,7 +16,6 @@ import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.backend.z3smt.encoder.Z3SmtSoftConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
@@ -51,37 +50,46 @@ public class ValueZ3SmtSoftConstraintEncoder
                 addSoftConstraint(simplifiedEQC, 1);
             }
         }
-        
+
         Z3InferenceValue sub = stc.getFirst().serialize(formatTranslator);
         Z3InferenceValue sup = stc.getSecond().serialize(formatTranslator);
-        
+
         // Prefer same upper bound
-        BoolExpr lowerBoundEq = ctx.mkAnd(sub.getIntRange(), sup.getIntRange(), ctx.mkEq(sub.getIntRangeLower(), sup.getIntRangeLower()));
+        BoolExpr lowerBoundEq =
+                ctx.mkAnd(
+                        sub.getIntRange(),
+                        sup.getIntRange(),
+                        ctx.mkEq(sub.getIntRangeLower(), sup.getIntRangeLower()));
         if (!lowerBoundEq.isTrue()) {
-	        addSoftConstraint(lowerBoundEq, 1);
-	    }
+            addSoftConstraint(lowerBoundEq, 1);
+        }
         // Prefer same lower bound
-        BoolExpr upperBoundEq = ctx.mkAnd(sub.getIntRange(), sup.getIntRange(), ctx.mkEq(sub.getIntRangeUpper(), sup.getIntRangeUpper()));
+        BoolExpr upperBoundEq =
+                ctx.mkAnd(
+                        sub.getIntRange(),
+                        sup.getIntRange(),
+                        ctx.mkEq(sub.getIntRangeUpper(), sup.getIntRangeUpper()));
         if (!upperBoundEq.isTrue()) {
-        	addSoftConstraint(upperBoundEq, 1);
+            addSoftConstraint(upperBoundEq, 1);
         }
     }
-    
-	@Override
-	protected void encodeSoftComparisonConstraint(ComparisonConstraint cc) {
-		switch(cc.getOperation()) {
+
+    @Override
+    protected void encodeSoftComparisonConstraint(ComparisonConstraint cc) {
+        switch (cc.getOperation()) {
             case EQUAL_TO:
-            	Constraint cst = InferenceMain.getInstance()
-                        .getConstraintManager()
-                        .createEqualityConstraint(cc.getResult(), cc.getRight());
-            	Expr simplified = cst.serialize(formatTranslator).simplify();
+                Constraint cst =
+                        InferenceMain.getInstance()
+                                .getConstraintManager()
+                                .createEqualityConstraint(cc.getResult(), cc.getRight());
+                Expr simplified = cst.serialize(formatTranslator).simplify();
                 if (!simplified.isTrue()) {
                     addSoftConstraint(simplified, 15);
                 }
             default:
-            	break;
-		}
-	}
+                break;
+        }
+    }
 
     @Override
     protected void encodeSoftComparableConstraint(ComparableConstraint constraint) {

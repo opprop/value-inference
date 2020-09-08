@@ -16,12 +16,10 @@ import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
-import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
 import com.sun.source.tree.VariableTree;
-
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -151,7 +149,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
             AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
             if (lhsAM == null || rhsAM == null) {
-            	super.visitBinary(binaryTree, p);
+                super.visitBinary(binaryTree, p);
             }
             Slot lhs = slotManager.getSlot(lhsAM);
             Slot rhs = slotManager.getSlot(rhsAM);
@@ -403,9 +401,10 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         ArithmeticVariableSlot avsResplus =
                                 slotManager.getArithmeticVariableSlot(
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
-                        // TODO: slot is null because location is missing. Find out why location is missing.
+                        // TODO: slot is null because location is missing. Find out why location is
+                        // missing.
                         if (avsResplus == null) {
-                        	break;
+                            break;
                         }
                         constraintManager.addEqualityConstraint(avsResplus, res);
                         break;
@@ -450,7 +449,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
                         // TODO: slot is null because location is missing.
                         if (avsResplus == null) {
-                        	break;
+                            break;
                         }
                         ConstantSlot cs =
                                 slotManager.createConstantSlot(
@@ -472,7 +471,7 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                                         VariableAnnotator.treeToLocation(atypeFactory, tree));
                         // TODO: slot is null because location is missing.
                         if (avsResplus == null) {
-                        	break;
+                            break;
                         }
                         constraintManager.addEqualityConstraint(avsResplus, var);
                         if (var instanceof RefinementVariableSlot) {
@@ -510,13 +509,13 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             AnnotationMirror castAM = castATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
             AnnotationMirror exprAM = exprATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
             if (castAM == null || exprAM == null) {
-            	return super.visitTypeCast(tree, p);
+                return super.visitTypeCast(tree, p);
             }
             Slot cast = slotManager.getSlot(castAM);
             Slot expr = slotManager.getSlot(exprAM);
 
             if (cast != null && expr != null) {
-            	constraintManager.addSubtypeConstraint(expr, cast);
+                constraintManager.addSubtypeConstraint(expr, cast);
             }
         }
 
