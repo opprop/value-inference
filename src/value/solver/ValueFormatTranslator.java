@@ -308,21 +308,21 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
 
     @Override
     public BoolExpr encodeSlotPreferenceConstraint(Slot slot) {
-        if (slot instanceof ConstantSlot) {
-            ConstantSlot cs = (ConstantSlot) slot;
-            AnnotationMirror anno = cs.getValue();
-            // encode poly as constant trues
-            if (AnnotationUtils.areSameByClass(anno, PolyVal.class)) {
-                return ctx.mkTrue();
-            }
-        }
+//        if (slot instanceof ConstantSlot) {
+//            ConstantSlot cs = (ConstantSlot) slot;
+//            AnnotationMirror anno = cs.getValue();
+//            // encode poly as constant trues
+//            if (AnnotationUtils.areSameByClass(anno, PolyVal.class)) {
+//                return ctx.mkTrue();
+//            }
+//        }
 
         Z3InferenceValue value = slot.serialize(this);
         if (slot instanceof VariableSlot) {
             VariableSlot vslot = (VariableSlot) slot;
             TypeMirror type = vslot.getUnderlyingType();
             if (type == null) {
-                return ctx.mkAnd(ctx.mkNot(value.getUnknownVal()), ctx.mkNot(value.getBottomVal()));
+                return value.getBottomVal();
             }
             //            if (type.toString().equals("java.lang.String")) {
             //                return value.getStringVal();
@@ -363,12 +363,11 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             }
         }
 
-        // Most likely numeric computation and comparisons
-        if (slot instanceof ArithmeticVariableSlot || slot instanceof ComparisonVariableSlot) {
+        // Most likely a numeric computation
+        if (slot instanceof ArithmeticVariableSlot) {
             return value.getIntRange();
         }
-
-        return ctx.mkOr(value.getUnknownVal(), value.getBottomVal());
+        return ctx.mkTrue();
     }
 
     @Override
