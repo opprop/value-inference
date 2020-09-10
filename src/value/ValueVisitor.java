@@ -18,6 +18,8 @@ import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
 import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
@@ -157,14 +159,9 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             Slot rhs = slotManager.getSlot(rhsAM);
             
             Tree leftTree = binaryTree.getLeftOperand();
-            Tree rightTree = binaryTree.getLeftOperand();
             if (leftTree instanceof AssignmentTree ) {
         		AssignmentTree t = (AssignmentTree) leftTree;
         		leftTree = t.getVariable();
-            }
-            if (rightTree instanceof AssignmentTree ) {
-        		AssignmentTree t = (AssignmentTree) rightTree;
-        		rightTree = t.getVariable();
             }
 
             Kind kind = binaryTree.getKind();
@@ -182,22 +179,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                                 slotManager.getComparisonVariableSlot(
                                         VariableAnnotator.treeToLocation(
                                                 atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compElseRes);
-                    }
-                    if (rightTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.EQUAL_TO, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compElseRes);
@@ -220,22 +201,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.EQUAL_TO, lhs, rhs, compElseRes);
                     }
-                    if (rightTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.EQUAL_TO, lhs, rhs, compElseRes);
-                    }
                     break;
                 case GREATER_THAN: // >
                     if (leftTree instanceof IdentifierTree) {
@@ -253,22 +218,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compElseRes);
-                    }
-                    if (rightTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
                     break;
                 case GREATER_THAN_EQUAL: // >=
@@ -288,22 +237,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.LESS_THAN, lhs, rhs, compElseRes);
                     }
-                    if (rightTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN, lhs, rhs, compElseRes);
-                    }
                     break;
                 case LESS_THAN: // <
                     if (leftTree instanceof IdentifierTree) {
@@ -322,22 +255,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compElseRes);
                     }
-                    if (rightTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compElseRes);
-                    }
                     break;
                 case LESS_THAN_EQUAL: // <=
                     if (leftTree instanceof IdentifierTree) {
@@ -355,22 +272,6 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                                         false);
                         constraintManager.addComparisonConstraint(
                                 ComparisonOperationKind.GREATER_THAN, lhs, rhs, compElseRes);
-                    }
-                    if (rightTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(
-                                                atypeFactory, rightTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN, lhs, rhs, compElseRes);
                     }
                     break;
                 default:
