@@ -174,7 +174,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                 //                        ctx.mkLe(value.getIntRangeLower(),
                 // value.getIntRangeUpper()));
             }
-            if (type.getKind() == TypeKind.BYTE) {
+            if (type.getKind() == TypeKind.BYTE || type.toString().equals("java.lang.Byte")) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
@@ -203,7 +203,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                         value.getIntRangeUpper(),
                                                         ctx.mkInt(Byte.MAX_VALUE * 2 + 1)))));
             }
-            if (type.getKind() == TypeKind.SHORT) {
+            if (type.getKind() == TypeKind.SHORT || type.toString().equals("java.lang.Short")) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
@@ -235,7 +235,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                                         value.getIntRangeUpper(),
                                                         ctx.mkInt(Short.MAX_VALUE * 2 + 1)))));
             }
-            if (type.getKind() == TypeKind.CHAR) {
+            if (type.getKind() == TypeKind.CHAR || type.toString().equals("java.lang.Character")) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
@@ -246,7 +246,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Character.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Character.MAX_VALUE)));
             }
-            if (type.getKind() == TypeKind.INT) {
+            if (type.getKind() == TypeKind.INT || type.toString().equals("java.lang.Integer")) {
                 range =
                         ctx.mkAnd(
                                 value.getIntRange(),
@@ -257,7 +257,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
                                 ctx.mkGe(value.getIntRangeLower(), ctx.mkInt(Integer.MIN_VALUE)),
                                 ctx.mkLe(value.getIntRangeUpper(), ctx.mkInt(Integer.MAX_VALUE)));
             }
-            if (type.getKind() == TypeKind.LONG) {
+            if (type.getKind() == TypeKind.LONG || type.toString().equals("java.lang.Long")) {
                 range =
                         ctx.mkAnd(
                                 ctx.mkOr(value.getIntRange(), value.getUnknownVal()),
@@ -354,11 +354,7 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
             }
         }
 
-        // Most likely a numeric computation
-        if (slot instanceof ArithmeticVariableSlot) {
-            return value.getIntRange();
-        }
-        return ctx.mkTrue();
+        return ctx.mkNot(value.getIntRange());
     }
 
     @Override

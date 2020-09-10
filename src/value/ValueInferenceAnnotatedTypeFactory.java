@@ -368,6 +368,10 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 if (location == AnnotationLocation.MISSING_LOCATION) {
                     return;
                 }
+                if (atm.getUnderlyingType().getKind() == TypeKind.DOUBLE ||
+                		atm.getUnderlyingType().getKind() == TypeKind.FLOAT) {
+                	return;
+                }
                 ConstraintManager constraintManager =
                         InferenceMain.getInstance().getConstraintManager();
                 AnnotatedTypeMirror lhsATM =
@@ -632,9 +636,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         result = slotManager.createConstantSlot(UNKNOWNVAL);
                         break;
                     default:
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
-                }
+                    	result = slotManager.createLubVariableSlot(lhs, rhs);                
+                    	break;
+                	}
 
                 // insert varAnnot of the slot into the ATM
                 AnnotationMirror resultAM = slotManager.getAnnotation(result);
@@ -895,7 +899,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
      * Returns {@code null} if the annotation is null or if the annotation is not an {@code
      * IntRange}, {@code IntRangeFromPositive}, {@code IntVal}, or {@code ArrayLenRange}.
      */
-    public static Range getRange(AnnotationMirror rangeAnno) {
+    public Range getRange(AnnotationMirror rangeAnno) {
         if (rangeAnno == null) {
             return null;
         }

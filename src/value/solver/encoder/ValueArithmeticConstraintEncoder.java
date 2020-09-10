@@ -82,18 +82,63 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
             }
         }
 
-        ArithExpr upperArith;
-        ArithExpr lowerArith;
-
         switch (operation) {
             case PLUS:
-                upperArith = ctx.mkAdd(left.getIntRangeUpper(), right.getIntRangeUpper());
-                lowerArith = ctx.mkAdd(left.getIntRangeLower(), right.getIntRangeLower());
-                break;
+            	ArithExpr plus_up = ctx.mkAdd(left.getIntRangeUpper(), right.getIntRangeUpper());
+            	ArithExpr plus_lo = ctx.mkAdd(left.getIntRangeLower(), right.getIntRangeLower());
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkOr(
+                                                ctx.mkAnd(
+                                                        ctx.mkEq(res.getIntRangeUpper(), plus_up),
+                                                        ctx.mkEq(res.getIntRangeLower(), plus_lo),
+                                                        ctx.mkLe(plus_up, maxRange),
+                                                        ctx.mkGe(plus_lo, minRange)),
+                                                ctx.mkAnd(
+                                                        ctx.mkEq(res.getIntRangeLower(), minRange),
+                                                        ctx.mkEq(res.getIntRangeUpper(), maxRange),
+                                                        ctx.mkOr(
+                                                                ctx.mkGt(plus_up, maxRange),
+                                                                ctx.mkLt(plus_lo, minRange))))),
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                                ));
             case MINUS:
-                upperArith = ctx.mkSub(left.getIntRangeUpper(), right.getIntRangeUpper());
-                lowerArith = ctx.mkSub(left.getIntRangeLower(), right.getIntRangeLower());
-                break;
+            	ArithExpr minus_lo = ctx.mkSub(left.getIntRangeLower(), right.getIntRangeUpper());
+            	ArithExpr minus_up = ctx.mkSub(left.getIntRangeUpper(), right.getIntRangeLower());
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkOr(
+                                                ctx.mkAnd(
+                                                        ctx.mkEq(res.getIntRangeUpper(), minus_up),
+                                                        ctx.mkEq(res.getIntRangeLower(), minus_lo),
+                                                        ctx.mkLe(minus_up, maxRange),
+                                                        ctx.mkGe(minus_lo, minRange)),
+                                                ctx.mkAnd(
+                                                        ctx.mkEq(res.getIntRangeLower(), minRange),
+                                                        ctx.mkEq(res.getIntRangeUpper(), maxRange),
+                                                        ctx.mkOr(
+                                                                ctx.mkGt(minus_up, maxRange),
+                                                                ctx.mkLt(minus_lo, minRange))))),
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                                ));
             case MULTIPLY:
                 ArithExpr mul1 = ctx.mkMul(left.getIntRangeUpper(), right.getIntRangeUpper());
                 ArithExpr mul2 = ctx.mkMul(left.getIntRangeLower(), right.getIntRangeLower());
@@ -195,9 +240,118 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 ctx.mkLt(mul4, minRange))))),
                                 ctx.mkNot(res.getIntRange())));
             case DIVIDE:
-                upperArith = ctx.mkDiv(left.getIntRangeUpper(), right.getIntRangeUpper());
-                lowerArith = ctx.mkDiv(left.getIntRangeLower(), right.getIntRangeLower());
-                break;
+                ArithExpr div_upup = ctx.mkDiv(left.getIntRangeUpper(), right.getIntRangeUpper());
+                ArithExpr div_uplo = ctx.mkDiv(left.getIntRangeUpper(), right.getIntRangeLower());
+                ArithExpr div_lolo = ctx.mkDiv(left.getIntRangeLower(), right.getIntRangeLower());
+                ArithExpr div_loup = ctx.mkDiv(left.getIntRangeLower(), right.getIntRangeUpper());
+                ArithExpr div_neglo = ctx.mkMul(left.getIntRangeLower(), ctx.mkInt(-1));
+                ArithExpr div_negup = ctx.mkMul(left.getIntRangeUpper(), ctx.mkInt(-1));
+
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkOr(
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkAnd(
+                                        		// pos / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        						ctx.mkGt(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_uplo),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_loup))),
+                                        		// pos / neg
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        						ctx.mkLt(right.getIntRangeUpper(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_lolo),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_upup))),
+                                        		// neg / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkGt(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_upup),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_lolo))),
+                                        		// neg / neg
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(right.getIntRangeUpper(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_loup),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_uplo))),
+                                        		// pos / unknown
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        						ctx.mkGt(right.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeLower(), div_negup),
+                                        						ctx.mkEq(res.getIntRangeUpper(), left.getIntRangeUpper()))),
+                                        		// neg / unknown
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkGt(right.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeLower(), left.getIntRangeLower()),
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_neglo))),
+                                        		// unknown / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        						ctx.mkGt(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeLower(), div_lolo),
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_uplo))),
+                                        		// unknown / neg
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        						ctx.mkLt(right.getIntRangeUpper(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeLower(), div_upup),
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_loup))),
+                                        		// unknown / unknown
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        						ctx.mkGt(right.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkImplies(
+                                                						ctx.mkLt(left.getIntRangeLower(), div_negup),
+                                        								ctx.mkEq(res.getIntRangeLower(), left.getIntRangeLower())),
+                                        						ctx.mkImplies(
+                                                						ctx.mkGt(left.getIntRangeLower(), div_negup),
+                                        								ctx.mkEq(res.getIntRangeLower(), div_negup)),
+                                        						ctx.mkImplies(
+                                                						ctx.mkLt(div_neglo, left.getIntRangeLower()),
+                                        								ctx.mkEq(res.getIntRangeUpper(), left.getIntRangeLower())),
+                                        						ctx.mkImplies(
+                                                						ctx.mkGt(div_neglo, left.getIntRangeLower()),
+                                        								ctx.mkEq(res.getIntRangeUpper(), div_neglo)))),
+                                        		// any / 0
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(right.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkEq(right.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), maxRange),
+                                        						ctx.mkEq(res.getIntRangeLower(), minRange))))),
+                                ctx.mkNot(res.getIntRange())));
             case REMAINDER:
                 return ctx.mkAnd(
                         encoding,
@@ -206,75 +360,66 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                         left.getIntRange(),
                                         right.getIntRange(),
                                         res.getIntRange(),
-                                        ctx.mkOr(
+                                        ctx.mkImplies(
+                                                ctx.mkGe(
+                                                        right.getIntRangeLower(),
+                                                        ctx.mkInt(0)),
                                                 ctx.mkAnd(
-                                                        ctx.mkImplies(
-                                                                ctx.mkGe(
-                                                                        right.getIntRangeLower(),
-                                                                        ctx.mkInt(0)),
-                                                                ctx.mkAnd(
-                                                                        ctx.mkEq(
-                                                                                res
-                                                                                        .getIntRangeLower(),
-                                                                                ctx.mkInt(0)),
-                                                                        ctx.mkEq(
-                                                                                res
-                                                                                        .getIntRangeUpper(),
-                                                                                right
-                                                                                        .getIntRangeUpper()))),
-                                                        ctx.mkImplies(
-                                                                ctx.mkLe(
-                                                                        right.getIntRangeUpper(),
-                                                                        ctx.mkInt(0)),
-                                                                ctx.mkAnd(
-                                                                        ctx.mkEq(
-                                                                                res
-                                                                                        .getIntRangeUpper(),
-                                                                                ctx.mkInt(0)),
-                                                                        ctx.mkEq(
-                                                                                res
-                                                                                        .getIntRangeLower(),
-                                                                                right
-                                                                                        .getIntRangeLower()))),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkLe(
-                                                                                right
-                                                                                        .getIntRangeLower(),
-                                                                                ctx.mkInt(0)),
-                                                                        ctx.mkGe(
-                                                                                right
-                                                                                        .getIntRangeUpper(),
-                                                                                ctx.mkInt(0))),
-                                                                ctx.mkAnd(
-                                                                        ctx.mkEq(
-                                                                                res
-                                                                                        .getIntRangeLower(),
-                                                                                right
-                                                                                        .getIntRangeLower()),
-                                                                        ctx.mkEq(
-                                                                                res
-                                                                                        .getIntRangeUpper(),
-                                                                                right
-                                                                                        .getIntRangeUpper())))),
-                                                ctx.mkNot(res.getIntRange())))));
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                ctx.mkInt(0)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                right.getIntRangeUpper()))),
+                                        ctx.mkImplies(
+                                                ctx.mkLe(
+                                                        right.getIntRangeUpper(),
+                                                        ctx.mkInt(0)),
+                                                ctx.mkAnd(
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                ctx.mkInt(0)),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                right.getIntRangeLower()))),
+                                        ctx.mkImplies(
+                                                ctx.mkAnd(
+                                                        ctx.mkLe(
+                                                                right.getIntRangeLower(),
+                                                                ctx.mkInt(0)),
+                                                        ctx.mkGe(
+                                                                right.getIntRangeUpper(),
+                                                                ctx.mkInt(0))),
+                                                ctx.mkAnd(
+                                                        ctx.mkEq(
+                                                                res.getIntRangeLower(),
+                                                                right.getIntRangeLower()),
+                                                        ctx.mkEq(
+                                                                res.getIntRangeUpper(),
+                                                                right.getIntRangeUpper())))),
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                                ));
             case LEFT_SHIFT:
                 // The value of n << s is n left-shifted s bit positions. Equivalent to
                 // multiplication by 2 to the power s.
 
-                mul1 =
+            	ArithExpr mul_upup =
                         ctx.mkMul(
                                 left.getIntRangeUpper(),
                                 ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
-                mul2 =
+            	ArithExpr mul_lolo =
                         ctx.mkMul(
                                 left.getIntRangeLower(),
                                 ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
-                mul3 =
+            	ArithExpr mul_uplo =
                         ctx.mkMul(
                                 left.getIntRangeUpper(),
                                 ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
-                mul4 =
+            	ArithExpr mul_loup =
                         ctx.mkMul(
                                 left.getIntRangeLower(),
                                 ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
@@ -297,212 +442,137 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                         res.getIntRange(),
                                         ctx.mkGe(right.getIntRangeLower(), ctx.mkInt(0)),
                                         ctx.mkLe(right.getIntRangeUpper(), ctx.mkInt(31)),
-                                        ctx.mkOr(
-                                                ctx.mkAnd(
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkGe(mul1, mul2),
-                                                                        ctx.mkGe(mul1, mul3),
-                                                                        ctx.mkGe(mul1, mul4)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeUpper(),
-                                                                        mul1)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkGe(mul2, mul1),
-                                                                        ctx.mkGe(mul2, mul3),
-                                                                        ctx.mkGe(mul2, mul4)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeUpper(),
-                                                                        mul2)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkGe(mul3, mul1),
-                                                                        ctx.mkGe(mul3, mul2),
-                                                                        ctx.mkGe(mul3, mul4)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeUpper(),
-                                                                        mul3)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkGe(mul4, mul1),
-                                                                        ctx.mkGe(mul4, mul2),
-                                                                        ctx.mkGe(mul4, mul3)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeUpper(),
-                                                                        mul4)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkLe(mul1, mul2),
-                                                                        ctx.mkLe(mul1, mul3),
-                                                                        ctx.mkLe(mul1, mul4)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeLower(),
-                                                                        mul1)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkLe(mul2, mul1),
-                                                                        ctx.mkLe(mul2, mul3),
-                                                                        ctx.mkLe(mul2, mul4)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeLower(),
-                                                                        mul2)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkLe(mul3, mul1),
-                                                                        ctx.mkLe(mul3, mul2),
-                                                                        ctx.mkLe(mul3, mul4)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeLower(),
-                                                                        mul3)),
-                                                        ctx.mkImplies(
-                                                                ctx.mkAnd(
-                                                                        ctx.mkLe(mul4, mul1),
-                                                                        ctx.mkLe(mul4, mul2),
-                                                                        ctx.mkLe(mul4, mul3)),
-                                                                ctx.mkEq(
-                                                                        res.getIntRangeLower(),
-                                                                        mul4)),
-                                                        ctx.mkLt(mul1, maxRange),
-                                                        ctx.mkLt(mul2, maxRange),
-                                                        ctx.mkLt(mul3, maxRange),
-                                                        ctx.mkLt(mul4, maxRange),
-                                                        ctx.mkGt(mul1, minRange),
-                                                        ctx.mkGt(mul2, minRange),
-                                                        ctx.mkGt(mul3, minRange),
-                                                        ctx.mkGt(mul4, minRange)),
-                                                ctx.mkAnd(
-                                                        ctx.mkEq(res.getIntRangeLower(), minRange),
-                                                        ctx.mkEq(res.getIntRangeUpper(), maxRange),
-                                                        ctx.mkOr(
-                                                                ctx.mkGt(mul1, maxRange),
-                                                                ctx.mkGt(mul2, maxRange),
-                                                                ctx.mkGt(mul3, maxRange),
-                                                                ctx.mkGt(mul4, maxRange),
-                                                                ctx.mkLt(mul1, minRange),
-                                                                ctx.mkLt(mul2, minRange),
-                                                                ctx.mkLt(mul3, minRange),
-                                                                ctx.mkLt(mul4, minRange))))),
-                                ctx.mkNot(res.getIntRange())));
+                                        ctx.mkAnd(
+                                                ctx.mkImplies(
+                                        				ctx.mkGt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                                        ctx.mkEq(res.getIntRangeUpper(), mul_upup)),
+                                                ctx.mkImplies(
+                                        				ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                                        ctx.mkEq(res.getIntRangeLower(), mul_loup)),
+                                                ctx.mkImplies(
+                                        				ctx.mkGt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                                        ctx.mkEq(res.getIntRangeLower(), mul_lolo)),
+                                                ctx.mkImplies(
+                                        				ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                                        ctx.mkEq(res.getIntRangeUpper(), mul_uplo)))),
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                        ));
             case RIGHT_SHIFT:
-                // The value of n >> s is n right-shifted s bit positions with sign-extension.
-                // Resulting value is ⌊ n / 2s ⌋.
-                upperArith =
-                        ctx.mkDiv(
-                                left.getIntRangeUpper(),
-                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
-                lowerArith =
-                        ctx.mkDiv(
-                                left.getIntRangeLower(),
-                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
-                break;
-            case UNSIGNED_RIGHT_SHIFT:
-                /* The value of n >>> s is n right-shifted s bit positions with zero-extension:
-                If n >= 0, then the result is n >> s.
-                If n < 0, then the result is (n >> s) + (2L << ~s). where ~s == (-s)-1. */
-                ArithExpr posUpperArith =
-                        ctx.mkDiv(
-                                left.getIntRangeUpper(),
-                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
-                ArithExpr posLowerArith =
-                        ctx.mkDiv(
-                                left.getIntRangeLower(),
-                                ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
-                ArithExpr negUpperArith =
-                        ctx.mkAdd(
-                                ctx.mkDiv(
-                                        left.getIntRangeUpper(),
-                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper())),
-                                ctx.mkMul(
-                                        ctx.mkInt(2),
-                                        ctx.mkPower(
-                                                ctx.mkInt(2),
-                                                ctx.mkSub(
-                                                        ctx.mkMul(
-                                                                ctx.mkInt(-1),
-                                                                right.getIntRangeUpper()),
-                                                        ctx.mkInt(1)))));
-                ArithExpr negLowerArith =
-                        ctx.mkAdd(
-                                ctx.mkDiv(
-                                        left.getIntRangeLower(),
-                                        ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower())),
-                                ctx.mkMul(
-                                        ctx.mkInt(2),
-                                        ctx.mkPower(
-                                                ctx.mkInt(2),
-                                                ctx.mkSub(
-                                                        ctx.mkMul(
-                                                                ctx.mkInt(-1),
-                                                                right.getIntRangeLower()),
-                                                        ctx.mkInt(1)))));
+            	div_upup = ctx.mkDiv(
+            			left.getIntRangeUpper(), 
+            			ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
+                div_uplo = ctx.mkDiv(left.getIntRangeUpper(), 
+                		ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
+                div_lolo = ctx.mkDiv(left.getIntRangeLower(), 
+                		ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
+                div_loup = ctx.mkDiv(left.getIntRangeLower(), 
+                		ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
+
                 return ctx.mkAnd(
                         encoding,
                         ctx.mkOr(
-                                ctx.mkAnd(
+                        		ctx.mkAnd(
                                         left.getIntRange(),
                                         right.getIntRange(),
                                         res.getIntRange(),
                                         ctx.mkOr(
-                                                // 0 <= left.lower <= left.upper <= max
-                                                ctx.mkAnd(
-                                                        ctx.mkGe(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeUpper(),
-                                                                posUpperArith),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeLower(),
-                                                                posLowerArith)),
-                                                // min <= left.lower <= left.upper < 0
-                                                ctx.mkAnd(
-                                                        ctx.mkLt(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeUpper(),
-                                                                negUpperArith),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeLower(),
-                                                                negLowerArith),
-                                                        ctx.mkGe(negLowerArith, minRange),
-                                                        ctx.mkLe(negUpperArith, maxRange)),
-                                                ctx.mkAnd(
-                                                        ctx.mkLt(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkEq(res.getIntRangeLower(), minRange),
-                                                        ctx.mkEq(res.getIntRangeUpper(), maxRange),
-                                                        ctx.mkOr(
-                                                                ctx.mkGt(negUpperArith, maxRange),
-                                                                ctx.mkLt(negLowerArith, minRange))),
-                                                //  min <= left.lower < 0 <= left.upper <= max
-                                                ctx.mkAnd(
-                                                        ctx.mkGe(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkLt(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeUpper(),
-                                                                posLowerArith),
-                                                        ctx.mkEq(
-                                                                res.getIntRangeLower(),
-                                                                negLowerArith),
-                                                        ctx.mkGe(negLowerArith, minRange)),
-                                                ctx.mkAnd(
-                                                        ctx.mkGe(
-                                                                left.getIntRangeUpper(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkLt(
-                                                                left.getIntRangeLower(),
-                                                                ctx.mkInt(0)),
-                                                        ctx.mkEq(res.getIntRangeLower(), minRange),
-                                                        ctx.mkEq(res.getIntRangeUpper(), maxRange),
-                                                        ctx.mkLt(negLowerArith, minRange)))),
-                                ctx.mkNot(res.getIntRange())));
+                                                ctx.mkLe(right.getIntRangeLower(), ctx.mkInt(0)),
+                                                ctx.mkGe(right.getIntRangeUpper(), ctx.mkInt(31))),
+                                        ctx.mkEq(res.getIntRangeLower(), minRange),
+                                        ctx.mkEq(res.getIntRangeUpper(), maxRange)),
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkGe(right.getIntRangeLower(), ctx.mkInt(0)),
+                                        ctx.mkLe(right.getIntRangeUpper(), ctx.mkInt(31)),
+                                        ctx.mkAnd(
+                                        		// pos / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkGt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_uplo),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_loup))),
+                                        		// neg / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_upup),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_lolo))),
+                                        		// unknown / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeLower(), div_lolo),
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_uplo))))),
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                        ));
+            case UNSIGNED_RIGHT_SHIFT:
+            	div_upup = ctx.mkDiv(
+            			left.getIntRangeUpper(), 
+            			ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
+                div_uplo = ctx.mkDiv(left.getIntRangeUpper(), 
+                		ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
+                div_lolo = ctx.mkDiv(left.getIntRangeLower(), 
+                		ctx.mkPower(ctx.mkInt(2), right.getIntRangeLower()));
+                div_loup = ctx.mkDiv(left.getIntRangeLower(), 
+                		ctx.mkPower(ctx.mkInt(2), right.getIntRangeUpper()));
+
+                return ctx.mkAnd(
+                        encoding,
+                        ctx.mkOr(
+                        		ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkOr(
+                                                ctx.mkLe(right.getIntRangeLower(), ctx.mkInt(0)),
+                                                ctx.mkGe(right.getIntRangeUpper(), ctx.mkInt(31))),
+                                        ctx.mkEq(res.getIntRangeLower(), minRange),
+                                        ctx.mkEq(res.getIntRangeUpper(), maxRange)),
+                                ctx.mkAnd(
+                                        left.getIntRange(),
+                                        right.getIntRange(),
+                                        res.getIntRange(),
+                                        ctx.mkGe(right.getIntRangeLower(), ctx.mkInt(0)),
+                                        ctx.mkLe(right.getIntRangeUpper(), ctx.mkInt(31)),
+                                        ctx.mkAnd(
+                                        		// pos / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkGt(left.getIntRangeLower(), ctx.mkInt(0)),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_uplo),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_loup))),
+                                        		// neg / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkLt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_upup),
+                                        						ctx.mkEq(res.getIntRangeLower(), div_lolo))),
+                                        		// unknown / pos
+                                        		ctx.mkImplies(
+                                        				ctx.mkAnd(
+                                        						ctx.mkGt(left.getIntRangeUpper(), ctx.mkInt(0)),
+                                        						ctx.mkLt(left.getIntRangeLower(), ctx.mkInt(0))),
+                                        				ctx.mkAnd(
+                                        						ctx.mkEq(res.getIntRangeLower(), div_lolo),
+                                        						ctx.mkEq(res.getIntRangeUpper(), div_uplo))))),
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                        ));
             case XOR:
                 return ctx.mkAnd(
                         encoding,
@@ -513,7 +583,12 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                         res.getIntRange(),
                                         ctx.mkEq(res.getIntRangeLower(), minRange),
                                         ctx.mkEq(res.getIntRangeUpper(), maxRange)),
-                                ctx.mkNot(res.getIntRange())));
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                                ));
             case AND:
                 return ctx.mkAnd(
                         encoding,
@@ -589,7 +664,12 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                                                 ctx.mkInt(0)))),
                                         ctx.mkEq(res.getIntRangeLower(), minRange),
                                         ctx.mkEq(res.getIntRangeUpper(), maxRange)),
-                                ctx.mkNot(res.getIntRange())));
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                                ));
             case OR:
                 return ctx.mkAnd(
                         encoding,
@@ -600,7 +680,12 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                         res.getIntRange(),
                                         ctx.mkEq(res.getIntRangeLower(), minRange),
                                         ctx.mkEq(res.getIntRangeUpper(), maxRange)),
-                                ctx.mkNot(res.getIntRange())));
+                                ctx.mkAnd(
+                                		ctx.mkOr(
+                                				ctx.mkNot(left.getIntRange()),
+                                				ctx.mkNot(right.getIntRange())),
+                                		ctx.mkNot(res.getIntRange()))
+                                ));
             default:
                 throw new BugInCF(
                         "Attempting to encode an unsupported arithmetic operation: "
@@ -612,27 +697,6 @@ public class ValueArithmeticConstraintEncoder extends ValueAbstractConstraintEnc
                                 + " result: "
                                 + result);
         }
-
-        return ctx.mkAnd(
-                encoding,
-                ctx.mkOr(
-                        ctx.mkAnd(
-                                left.getIntRange(),
-                                right.getIntRange(),
-                                res.getIntRange(),
-                                ctx.mkOr(
-                                        ctx.mkAnd(
-                                                ctx.mkEq(res.getIntRangeUpper(), upperArith),
-                                                ctx.mkEq(res.getIntRangeLower(), lowerArith),
-                                                ctx.mkLe(upperArith, maxRange),
-                                                ctx.mkGe(lowerArith, minRange)),
-                                        ctx.mkAnd(
-                                                ctx.mkEq(res.getIntRangeLower(), minRange),
-                                                ctx.mkEq(res.getIntRangeUpper(), maxRange),
-                                                ctx.mkOr(
-                                                        ctx.mkGt(upperArith, maxRange),
-                                                        ctx.mkLt(lowerArith, minRange))))),
-                        ctx.mkNot(res.getIntRange())));
     }
 
     @Override
