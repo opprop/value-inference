@@ -112,7 +112,7 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                         ctx.mkOr(
                         		ctx.mkAnd(
                                         ctx.mkOr(
-                                                ctx.mkNot(l.getBottomVal()),
+                                                l.getBottomVal(),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
@@ -225,8 +225,8 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                 encoding =
                         ctx.mkOr(
                         		ctx.mkAnd(
-                                        ctx.mkOr(
-                                                ctx.mkNot(l.getBottomVal()),
+                        				ctx.mkOr(
+                                                l.getBottomVal(),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
@@ -276,8 +276,8 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                 encoding =
                         ctx.mkOr(
                                 ctx.mkAnd(
-                                        ctx.mkOr(
-                                                ctx.mkNot(l.getBottomVal()),
+                                		ctx.mkOr(
+                                                l.getBottomVal(),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
@@ -324,8 +324,8 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                 encoding =
                         ctx.mkOr(
                                 ctx.mkAnd(
-                                        ctx.mkOr(
-                                                ctx.mkNot(l.getBottomVal()),
+                                		ctx.mkOr(
+                                                l.getBottomVal(),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
@@ -375,8 +375,8 @@ public class ValueComparisonConstraintEncoder extends ValueAbstractConstraintEnc
                 encoding =
                         ctx.mkOr(
                                 ctx.mkAnd(
-                                        ctx.mkOr(
-                                                ctx.mkNot(l.getBottomVal()),
+                                		ctx.mkOr(
+                                                l.getBottomVal(),
                                                 ctx.mkNot(r.getIntRange())),
                                         valueZ3SmtEncoderUtils.equality(ctx, res, l)),
                                 ctx.mkAnd(
