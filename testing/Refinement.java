@@ -1,5 +1,3 @@
-package inference;
-
 import value.qual.*;
 
 public class Refinement {

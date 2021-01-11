@@ -41,7 +41,8 @@ public class Test {
     }
 
     public byte casting(@IntRange(from = 0, to = 255)int value) {
-    	return (byte)(value);
+    	  // :: warning: (cast.unsafe)
+        return (byte)(value);
     }
 
     void refineParam(int x, int y) {
