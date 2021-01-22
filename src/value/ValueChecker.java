@@ -7,8 +7,17 @@ import checkers.inference.SlotManager;
 import checkers.inference.dataflow.InferenceAnalysis;
 import checkers.inference.model.ConstraintManager;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.framework.flow.CFAnalysis;
+import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
+import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.qual.StubFiles;
+import org.checkerframework.framework.type.GenericAnnotatedTypeFactory;
+import org.checkerframework.javacutil.Pair;
+
+import java.util.List;
+
+import javax.lang.model.element.VariableElement;
 
 @StubFiles({
     "input.astub",
@@ -48,14 +57,12 @@ public class ValueChecker extends BaseInferrableChecker {
             BaseAnnotatedTypeFactory realTypeFactory,
             SlotManager slotManager,
             ConstraintManager constraintManager) {
-        ValueInferenceAnnotatedTypeFactory securityInferenceATF =
-                new ValueInferenceAnnotatedTypeFactory(
-                        inferenceChecker,
-                        realChecker.withCombineConstraints(),
-                        realTypeFactory,
-                        realChecker,
-                        slotManager,
-                        constraintManager);
-        return securityInferenceATF;
+        return new ValueInferenceAnnotatedTypeFactory(
+                inferenceChecker,
+                realChecker.withCombineConstraints(),
+                realTypeFactory,
+                realChecker,
+                slotManager,
+                constraintManager);
     }
 }

@@ -40,7 +40,7 @@ export JAVA_LIBRARY_PATH=$CFI_LIB
 
 # Inference
 if [ -n "$1" ] && [ $1 = "true" ]; then
-    $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
+    $CFI/scripts/inference-dev -m ROUNDTRIP_TYPECHECK --checker "$CHECKER" \
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
         --hacks="$IS_HACK" -afud ./annotated "${@:2}"
 else
@@ -48,7 +48,7 @@ else
     # --logLevel "SEVERE" \
     # see java.util.logging.Level
     $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
-        --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
+        --solver "$SOLVER" --solverArgs="$SOLVERARGS" --debug=5005\
         --logLevel "INFO" \
         --hacks="$IS_HACK" -afud ./annotated "$@"
 

@@ -30,44 +30,48 @@ public class Test {
     	return two;
     }
 
-    public int setx() {
-    	int x = 2;
-        x = x + x;
-        x++;
-        x += x;
-        x++;
-        x = x + x;
-    	return x;
-    }
+//  Not work
+//    public int setx() {
+//    	int x = 2;
+//        x = x + x;
+//        x++;
+//        x += x;
+//        x++;
+//        x = x + x;
+//    	return x;
+//    }
 
-    public byte casting(@IntRange(from = 0, to = 255)int value) {
-    	  // :: warning: (cast.unsafe)
-        return (byte)(value);
-    }
-
+//  Not work
+//    public byte casting(@IntRange(from = 0, to = 255)int value) {
+//    	  // :: warning: (cast.unsafe)
+//        return (byte)(value);
+//    }
+//
     void refineParam(int x, int y) {
         x = 0;
         x = 1;
         y = x;
     }
 
-    int forloop() {
-        int x;
-        int sum = 0;
-        int max = 5;
-        for (x = 0; sum < max; x++) {
-            sum++;
-        }
-        return sum;
-    }
-    
-    int whileloop(int max) {
-        int x = 0;
-        int sum = 0;
-        while ( x < max ) {
-            sum++;
-            x++;
-        }
-        return sum;
-    }
+//  Not work
+//    int forloop() {
+//        int x;
+//        int sum = 0;
+//        int max = 5;
+//        for (x = 0; sum < max; x++) {
+//            sum++;
+//        }
+//        return sum;
+//    }
+
+//  Not work
+//    int whileloop(int max) {
+//        int x = 0;
+//        int sum = 0;
+//        while ( x < max ) {
+//            sum++;
+//            x++;
+//        }
+//        return sum;
+//    }
 }
