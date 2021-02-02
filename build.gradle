@@ -139,35 +139,39 @@ tasks.clean {
 }
 
 /* Configuration for formatting */
-/* Copy from https://github.com/randoop/randoop/blob/master/build.gradle */
+/* Copy from https://github.com/plume-lib/run-google-java-format */
 task getCodeFormatScripts {
     description "Obtain the run-google-java-format scripts"
     doLast {
-        if (! new File("$projectDir/build/utils/.run-google-java-format").exists()) {
-            Grgit.clone(dir: "$projectDir/build/utils/.run-google-java-format", uri: 'https://github.com/plume-lib/run-google-java-format.git')
+        def rgjfDir = "$projectDir/.run-google-java-format"
+        if (! new File(rgjfDir).exists()) {
+            exec {
+                commandLine 'git', 'clone', '--depth', '1', "https://github.com/plume-lib/run-google-java-format.git", rgjfDir
+            }
         } else {
-            def rgjfGit = Grgit.open(dir: "$projectDir/build/utils/.run-google-java-format")
-            rgjfGit.pull()
+            // Ignore exit value so this does not halt the build when not connected to the Internet.
+            exec {
+                workingDir rgjfDir
+                ignoreExitValue true
+                commandLine 'git', 'pull', '-q'
+            }
         }
     }
 }
 
 task pythonIsInstalled(type: Exec) {
-    description "Check that the python executable is installed."
-    executable = "python"
+    description "Check that the python3 executable is installed."
+    executable = "python3"
     args "--version"
 }
 
 task checkFormat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], group: 'Formatting') {
     description "Check whether the Java source code is properly formatted"
-    def javaFiles = fileTree("$projectDir").matching{
-        include "**/*.java" exclude "testinput/**" exclude "testdata/**" exclude "build/**"
-    } as List
+    def javaFiles = fileTree("$projectDir").matching{ include "**/*.java" } as List
     def pythonArgs = javaFiles.clone()
-    pythonArgs.add(0, "$projectDir/build/utils/.run-google-java-format/check-google-java-format.py")
-    pythonArgs.add(1, "--aosp") // 4 space indentation
+    pythonArgs.add(0, "$projectDir/.run-google-java-format/check-google-java-format.py")
 
-    commandLine "python"
+    commandLine "python3"
     args pythonArgs
     ignoreExitValue true
 
@@ -187,7 +191,7 @@ task reformat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], 
     pythonArgs.add(0, "$projectDir/build/utils/.run-google-java-format/run-google-java-format.py")
     pythonArgs.add(1, "--aosp") // 4 space indentation
 
-    commandLine "python"
+    commandLine "python3"
     args pythonArgs
 }
 
