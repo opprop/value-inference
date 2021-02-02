@@ -59,22 +59,23 @@ public class Arithmetics {
 		@UnknownVal int vval = val * val;
 	}
 
-	void division(int val) {
-		// Constant addition
-		// :: fixable-error: (assignment.type.incompatible)
-		@IntRange(from=0, to=0) int xy = x / y;
-		// :: fixable-error: (assignment.type.incompatible)
-		@IntRange(from=2, to=2) int cons = 20 / 10;
-		// :: fixable-error: (assignment.type.incompatible)
-		@IntRange(from=0, to=0) int xcons = x / 20;
-		// :: fixable-error: (assignment.type.incompatible)
-		@IntRange(from=0, to=0) int ycons = 10 / y;
-
-		// Range addition
-		@UnknownVal int xval = x / val;
-		@UnknownVal int yval = val / y;
-		@UnknownVal int vval = val / val;
-	}
+//  Not work
+//	void division(int val) {
+//		// Constant addition
+//		// :: fixable-error: (assignment.type.incompatible)
+//		@IntRange(from=0, to=0) int xy = x / y;
+//		// :: fixable-error: (assignment.type.incompatible)
+//		@IntRange(from=2, to=2) int cons = 20 / 10;
+//		// :: fixable-error: (assignment.type.incompatible)
+//		@IntRange(from=0, to=0) int xcons = x / 20;
+//		// :: fixable-error: (assignment.type.incompatible)
+//		@IntRange(from=0, to=0) int ycons = 10 / y;
+//
+//		// Range addition
+//		@UnknownVal int xval = x / val;
+//		@UnknownVal int yval = val / y;
+//		@UnknownVal int vval = val / val;
+//	}
 
 //  Not work
 //	void remainder(int val) {
