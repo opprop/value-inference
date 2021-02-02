@@ -24,6 +24,10 @@ import org.checkerframework.common.value.qual.ArrayLenRange;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
+import org.checkerframework.framework.flow.CFAbstractAnalysis;
+import org.checkerframework.framework.flow.CFStore;
+import org.checkerframework.framework.flow.CFTransfer;
+import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
@@ -109,6 +113,12 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         BottomVal.class,
                         UnknownVal.class,
                         PolyVal.class));
+    }
+
+    @Override
+    public CFTransfer createFlowTransferFunction(
+        CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
+        return new ValueTransfer(analysis);
     }
 
     @Override
@@ -876,5 +886,16 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
         return anno;
+    }
+
+    /**
+     * Returns true if {@code anno} is an {@link IntRange} or {@link UnknownVal}.
+     *
+     * @param anno annotation mirror
+     * @return true if {@code anno} is an {@link IntRange} or {@link UnknownVal}
+     */
+    public boolean isIntRange(AnnotationMirror anno) {
+        return AnnotationUtils.areSameByClass(anno, IntRange.class)
+                || AnnotationUtils.areSameByClass(anno, UnknownVal.class);
     }
 }
