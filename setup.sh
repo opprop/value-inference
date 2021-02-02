@@ -8,12 +8,22 @@ export JSR308=$(cd $(dirname "$0")/.. && pwd)
 
 # export SHELLOPTS
 
-#default value is opprop. REPO_SITE may be set to other value for travis test purpose.
+# default value is txiang61. REPO_SITE may be set to other value for travis test purpose.
 export REPO_SITE="${REPO_SITE:-txiang61}"
 
 echo "------ Downloading everything from REPO_SITE: $REPO_SITE ------"
 
-##### build checker-framework-inference
+# build checker-framework=
+if [ -d $JSR308/checker-framework ] ; then
+    (cd $JSR308/checker-framework && git pull)
+else
+    BRANCH=master
+    (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework.git)
+fi
+
+(cd $JSR308/checker-framework && ./checker/bin-devel/build.sh)
+
+# build checker-framework-inference
 if [ -d $JSR308/checker-framework-inference ] ; then
     (cd $JSR308/checker-framework-inference && git pull)
 else
