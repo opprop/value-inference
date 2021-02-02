@@ -1,0 +1,23 @@
+# Workaround for https://status.dev.azure.com/_event/179641421
+trigger:
+  branches:
+    include:
+      - '*'
+pr:
+  branches:
+    include:
+      - '*'
+
+
+jobs:
+  - job: basic_tests_jdk8
+    pool:
+      vmImage: 'ubuntu-latest'
+    container: xingweitian/ubuntu-for-cfi-jdk8:latest
+    steps:
+      - checkout: self
+        fetchDepth: 25
+      - bash: |
+          ./setup.sh
+          ./gradlew test
+        displayName: ./gradlew test
