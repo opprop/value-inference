@@ -1,0 +1,4 @@
+PyGithub
+pyyaml
+subprocess32>=3.2.6
+lithium
