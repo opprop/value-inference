@@ -18,6 +18,7 @@ if [ -d $JSR308/checker-framework ] ; then
     (cd $JSR308/checker-framework && git pull)
 else
     BRANCH=master
+    echo "Downloading checker-framework from: https://github.com/$REPO_SITE/checker-framework.git"
     (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework.git)
 fi
 
@@ -28,6 +29,7 @@ if [ -d $JSR308/checker-framework-inference ] ; then
     (cd $JSR308/checker-framework-inference && git pull)
 else
     BRANCH=master
+    echo "Downloading checker-framework-inference from: https://github.com/$REPO_SITE/checker-framework-inference.git"
     (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework-inference.git)
 fi
 
