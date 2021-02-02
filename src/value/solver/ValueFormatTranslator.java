@@ -1,7 +1,5 @@
 package value.solver;
 
-import checkers.inference.model.ArithmeticVariableSlot;
-import checkers.inference.model.ComparisonVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -270,20 +268,15 @@ public class ValueFormatTranslator extends Z3SmtFormatTranslator<Z3InferenceValu
         }
         BoolExpr unknownVal =
                 ctx.mkAnd(
-                		value.getUnknownVal(),
+                        value.getUnknownVal(),
                         ctx.mkEq(value.getIntRangeLower(), ctx.mkInt(Long.MIN_VALUE)),
                         ctx.mkEq(value.getIntRangeUpper(), ctx.mkInt(Long.MAX_VALUE)));
         return ctx.mkAnd(
                 // one hot
                 ctx.mkAnd(
-                        ctx.mkXor(
-                                ctx.mkXor(unknownVal, value.getBottomVal()),
-                                value.getIntRange()),
+                        ctx.mkXor(ctx.mkXor(unknownVal, value.getBottomVal()), value.getIntRange()),
                         ctx.mkNot(
-                                ctx.mkAnd(
-                                		unknownVal,
-                                        value.getBottomVal(),
-                                        value.getIntRange()))),
+                                ctx.mkAnd(unknownVal, value.getBottomVal(), value.getIntRange()))),
                 // min <= from <= to <= max
                 range,
                 ctx.mkLe(value.getIntRangeLower(), value.getIntRangeUpper()));

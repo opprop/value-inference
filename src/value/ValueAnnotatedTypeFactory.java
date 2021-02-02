@@ -24,8 +24,6 @@ import org.checkerframework.common.value.qual.ArrayLenRange;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
-import org.checkerframework.dataflow.analysis.TransferInput;
-import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFTransfer;
@@ -119,7 +117,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public CFTransfer createFlowTransferFunction(
-        CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
+            CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
         return new ValueTransfer(analysis);
     }
 

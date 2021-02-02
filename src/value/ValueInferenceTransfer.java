@@ -12,9 +12,9 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.qual.VarAnnot;
-
 import com.sun.source.tree.Tree;
-
+import java.util.Set;
+import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.dataflow.analysis.ConditionalTransferResult;
 import org.checkerframework.dataflow.analysis.FlowExpressions;
 import org.checkerframework.dataflow.analysis.FlowExpressions.Receiver;
@@ -36,10 +36,6 @@ import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 
-import java.util.Set;
-
-import javax.lang.model.element.AnnotationMirror;
-
 public class ValueInferenceTransfer extends InferenceTransfer {
 
     private ValueInferenceAnnotatedTypeFactory typeFactory;
@@ -57,15 +53,14 @@ public class ValueInferenceTransfer extends InferenceTransfer {
         // Only create refinement comparison slot for variables
         Node var = node;
         if (node instanceof AssignmentNode) {
-        	AssignmentNode a = (AssignmentNode) node;
-        	var = a.getTarget();
-        } 
+            AssignmentNode a = (AssignmentNode) node;
+            var = a.getTarget();
+        }
         if (!(var instanceof LocalVariableNode) && !(var instanceof FieldAccessNode)) {
             return;
         }
         Tree tree = var.getTree();
-        ConstraintManager constraintManager =
-                InferenceMain.getInstance().getConstraintManager();
+        ConstraintManager constraintManager = InferenceMain.getInstance().getConstraintManager();
         AnnotatedTypeMirror atm = typeFactory.getAnnotatedType(tree);
         Slot slotToRefine = getInferenceAnalysis().getSlotManager().getVariableSlot(atm);
         // TODO: Understand why there are null slots
