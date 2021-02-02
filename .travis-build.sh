@@ -15,6 +15,8 @@ export REPO_SITE=$SLUGOWNER
 # Build dependencies
 . ./setup.sh
 
-echo "Starting security-demo tests"
+echo "Starting value-inference tests"
 
-. ./test-cast.sh travis
+# Currently we only run basic tests in value-inference.
+# TODO run with corpus
+./gradlew test

@@ -1,13 +1,10 @@
 language: java
-
-script: ./.travis-build.sh
-
 sudo: false
-
-addons:
-  apt:
-    packages:
-      - ant-optional
-
+dist: trusty
 jdk:
   - oraclejdk8
+
+install:
+  - pip install --user  -r ./.travis-requirements.txt
+
+script: ./.travis-build.sh

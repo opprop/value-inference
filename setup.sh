@@ -9,9 +9,9 @@ export JSR308=$(cd $(dirname "$0")/.. && pwd)
 # export SHELLOPTS
 
 #default value is opprop. REPO_SITE may be set to other value for travis test purpose.
-export REPO_SITE="${REPO_SITE:-opprop}"
+export REPO_SITE="${REPO_SITE:-txiang61}"
 
-echo "------ Downloading everthing from REPO_SITE: $REPO_SITE ------"
+echo "------ Downloading everything from REPO_SITE: $REPO_SITE ------"
 
 ##### build checker-framework-inference
 if [ -d $JSR308/checker-framework-inference ] ; then
@@ -34,6 +34,6 @@ else
 fi
 
 
-echo "Building cast checker without testing"
+echo "Building value-inference without testing"
 
 (cd $JSR308/value-inference && ./gradlew build -x test --console=plain)
