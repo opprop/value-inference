@@ -20,4 +20,4 @@ jobs:
       - bash: |
           ./setup.sh
           ./gradlew build
-        displayName: ./gradlew test
+        displayName: ./setup.sh && ./gradlew build
