@@ -889,13 +889,13 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     /**
-     * Returns true if {@code anno} is an {@link IntRange}.
+     * Returns true if {@code anno} is an {@link IntRange} or {@link UnknownVal}.
      *
      * @param anno annotation mirror
-     * @return true if {@code anno} is an {@link IntRange}
+     * @return true if {@code anno} is an {@link IntRange} or {@link UnknownVal}
      */
     public boolean isIntRange(AnnotationMirror anno) {
-        String name = AnnotationUtils.annotationName(anno);
-        return name.equals("value.qual.IntRange");
+        return AnnotationUtils.areSameByClass(anno, IntRange.class)
+                || AnnotationUtils.areSameByClass(anno, UnknownVal.class);
     }
 }
