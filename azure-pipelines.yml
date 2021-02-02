@@ -19,5 +19,5 @@ jobs:
         fetchDepth: 25
       - bash: |
           ./setup.sh
-          ./gradlew test
+          ./gradlew build
         displayName: ./gradlew test
