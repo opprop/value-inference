@@ -1,5 +1,6 @@
 package value;
 
+import checkers.inference.InferenceMain;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
@@ -84,7 +85,7 @@ public class ValueTransfer extends CFTransfer {
     }
 
     /** Binary operations that are analyzed by the value checker. */
-    enum NumericalBinaryOps {
+    private enum NumericalBinaryOps {
         ADDITION,
         SUBTRACTION,
         DIVISION,
@@ -95,7 +96,7 @@ public class ValueTransfer extends CFTransfer {
         UNSIGNED_SHIFT_RIGHT,
         BITWISE_AND,
         BITWISE_OR,
-        BITWISE_XOR;
+        BITWISE_XOR
     }
 
     /**
@@ -192,10 +193,11 @@ public class ValueTransfer extends CFTransfer {
      */
     private Range getIntRangeFromAnnotation(Node node, AnnotationMirror val) {
         Range range;
-        if (val == null
-            || AnnotationUtils.areSameByName(val, typeFactory.UNKNOWNVAL)) {
+        if (!InferenceMain.isHackMode() && val == null) {
+            throw new BugInCF("Get IntRange from annotation with null annotation mirror argument.");
+        } else if (AnnotationUtils.areSameByName(val, typeFactory.UNKNOWNVAL)) {
             range = Range.EVERYTHING;
-        } else if (typeFactory.isIntRange(val)) {
+        } else if (AnnotationUtils.areSameByName(val, typeFactory.INTRANGE)) {
             range = ValueAnnotatedTypeFactory.getRange(val);
         } else if (AnnotationUtils.areSameByName(val, typeFactory.BOTTOMVAL)) {
             return Range.NOTHING;
@@ -203,18 +205,6 @@ public class ValueTransfer extends CFTransfer {
             range = Range.EVERYTHING;
         }
         return NumberUtils.castRange(node.getType(), range);
-    }
-
-    /**
-     * Returns true if {@code node} an integral type and is {@code anno} is {@code @UnknownVal}.
-     *
-     * @param node a node
-     * @param anno annotation mirror
-     * @return true if node is annotated with {@code @UnknownVal} and it is an integral type.
-     */
-    private boolean isIntegralUnknownVal(Node node, AnnotationMirror anno) {
-        return AnnotationUtils.areSameByName(anno, typeFactory.UNKNOWNVAL)
-            && TypesUtils.isIntegral(node.getType());
     }
 
     private AnnotationMirror getValueAnnotation(Node subNode, TransferInput<CFValue, CFStore> p) {

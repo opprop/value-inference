@@ -67,6 +67,10 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected final AnnotationMirror BOTTOMVAL =
             AnnotationBuilder.fromClass(elements, BottomVal.class);
 
+    /** The int range type for this hierarchy. */
+    protected final AnnotationMirror INTRANGE =
+            AnnotationBuilder.fromClass(elements, IntRange.class);
+
     /** The polymorphic type for this hierarchy. */
     protected final AnnotationMirror POLYVAL = AnnotationBuilder.fromClass(elements, PolyVal.class);
 
@@ -783,9 +787,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /**
      * Returns a {@link StringVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
-     * sorted and duplicates are removed before the annotation is created. If values is larger than
-     * the max number of values allowed (10 by default), then an {@link ArrayLen} or an {@link
-     * ArrayLenRange} annotation is returned.
+     * sorted and duplicates are removed before the annotation is created.
      *
      * @param values list of strings; duplicates are allowed and the values may be in any order
      * @return a {@link StringVal} annotation using the values
@@ -886,16 +888,5 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
         return anno;
-    }
-
-    /**
-     * Returns true if {@code anno} is an {@link IntRange} or {@link UnknownVal}.
-     *
-     * @param anno annotation mirror
-     * @return true if {@code anno} is an {@link IntRange} or {@link UnknownVal}
-     */
-    public boolean isIntRange(AnnotationMirror anno) {
-        return AnnotationUtils.areSameByClass(anno, IntRange.class)
-                || AnnotationUtils.areSameByClass(anno, UnknownVal.class);
     }
 }
