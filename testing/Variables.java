@@ -1,4 +1,4 @@
-import value.qual.*;
+import value.qual.IntRange;
 
 public class Variables {
 

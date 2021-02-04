@@ -1,4 +1,4 @@
-import value.qual.*;
+import value.qual.IntRange;
 
 public class Test {
     int zero = 0;

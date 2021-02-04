@@ -46,7 +46,7 @@ dependencies {
     // z3 solver dependency
     compile fileTree(dir: "${cfiPath}/lib", include: "com.microsoft.z3.jar")
     // CFI test lib dependency
-    compile fileTree(dir: "${cfiPath}/dist", include: "inference-framework-test-lib.jar")
+    testCompile fileTree(dir: "${cfiPath}/dist", include: "inference-framework-test-lib.jar")
     // CF test lib dependency
     testCompile fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
     testCompile 'junit:junit:4.12'
