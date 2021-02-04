@@ -202,7 +202,7 @@ public class ValueTransfer extends CFTransfer {
         } else if (AnnotationUtils.areSameByName(val, typeFactory.BOTTOMVAL)) {
             return Range.NOTHING;
         } else {
-            range = Range.EVERYTHING;
+            throw new BugInCF("Unexpected annotation mirror type: " + val);
         }
         return NumberUtils.castRange(node.getType(), range);
     }
