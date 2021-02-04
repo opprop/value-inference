@@ -16,7 +16,6 @@ ext {
     jsr308 = System.getenv('JSR308') ?: file(new File("..")).absolutePath
     cfPath = "${jsr308}/checker-framework"
     cfiPath = "${jsr308}/checker-framework-inference"
-    jsr308langtoolsPath = "${jsr308}/jsr308-langtools"
     afu = "${jsr308}/annotation-tools/annotation-file-utilities"
     valuePath = "${jsr308}/value-inference"
 }
