@@ -1,7 +1,6 @@
 import value.qual.IntRange;
 
 public class Test {
-    int zero = 0;
     String one = "one";
     boolean no = false;
     int two = 2;
