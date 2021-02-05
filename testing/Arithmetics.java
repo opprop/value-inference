@@ -60,7 +60,7 @@ public class Arithmetics {
 		@UnknownVal int vval = val * val;
 	}
 
-//  Not work
+//  Does not work
 //	void division(int val) {
 //		// Constant division
 //		// :: fixable-error: (assignment.type.incompatible)
@@ -78,7 +78,7 @@ public class Arithmetics {
 //		@UnknownVal int vval = val / val;
 //	}
 
-//  Not work
+//  Does not work
 //	void remainder(int val) {
 //		// Constant remainder
 //		// :: fixable-error: (assignment.type.incompatible)

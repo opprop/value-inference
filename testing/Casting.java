@@ -13,7 +13,7 @@ public class Casting {
 		@IntRange(from=-2147483648, to=2147483647) int ival= (int) val;
 	}
 
-// Not work
+// Does not work
 //	void widdeningCast(@IntRange(from=-128, to=127) byte val) {
 //		@IntRange(from=-128, to=127) short sval= val;
 //		// :: warning: (cast.unsafe)

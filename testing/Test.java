@@ -30,7 +30,7 @@ public class Test {
     	return two;
     }
 
-//  Not work
+//  Does not work
 //    public int setx() {
 //    	int x = 2;
 //        x = x + x;
@@ -41,7 +41,7 @@ public class Test {
 //    	return x;
 //    }
 
-//  Not work
+//  Does not work
 //    public byte casting(@IntRange(from = 0, to = 255)int value) {
 //    	  // :: warning: (cast.unsafe)
 //        return (byte)(value);
@@ -53,7 +53,7 @@ public class Test {
         y = x;
     }
 
-//  Not work
+//  Does not work
 //    int forloop() {
 //        int x;
 //        int sum = 0;
@@ -64,7 +64,7 @@ public class Test {
 //        return sum;
 //    }
 
-//  Not work
+//  Does not work
 //    int whileloop(int max) {
 //        int x = 0;
 //        int sum = 0;
