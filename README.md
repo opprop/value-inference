@@ -6,12 +6,9 @@ Constant Value Inference is a type inference for the [Constant Value Checker](ht
 
 ## Dependencies
 
-This project is developed based on [Checker Framework](http://types.cs.washington.edu/checker-framework/). To use this checker, below dependencies are required:
+This project is developed based on [Checker Framework Inference](https://github.com/opprop/checker-framework-inference).
 
-- txiang61/checker-framework
-- txiang61/checke-framework-inference
-
-I have a `setup.sh` to build these dependencies and also the Value Inference.
+A `setup.sh` is provided to build these dependencies and also the Value Inference.
 
 ## Build
 
