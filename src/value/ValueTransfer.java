@@ -1,6 +1,5 @@
 package value;
 
-import checkers.inference.InferenceMain;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
@@ -21,6 +20,9 @@ import org.checkerframework.javacutil.TypesUtils;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.TypeKind;
 
+/**
+ * Transfer function for value inference. Please also check {@link ValueInferenceTransfer}.
+ */
 public class ValueTransfer extends CFTransfer {
 
     private final ValueAnnotatedTypeFactory typeFactory;
@@ -193,7 +195,7 @@ public class ValueTransfer extends CFTransfer {
      */
     private Range getIntRangeFromAnnotation(Node node, AnnotationMirror val) {
         Range range;
-        if (!InferenceMain.isHackMode() && val == null) {
+        if (val == null) {
             throw new BugInCF("Get IntRange from annotation with null annotation mirror argument.");
         } else if (AnnotationUtils.areSameByName(val, typeFactory.UNKNOWNVAL)) {
             range = Range.EVERYTHING;
