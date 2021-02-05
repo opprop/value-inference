@@ -24,6 +24,10 @@ import org.checkerframework.common.value.qual.ArrayLenRange;
 import org.checkerframework.common.value.qual.IntVal;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
+import org.checkerframework.framework.flow.CFAbstractAnalysis;
+import org.checkerframework.framework.flow.CFStore;
+import org.checkerframework.framework.flow.CFTransfer;
+import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedArrayType;
@@ -62,6 +66,10 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /** The bottom type for this hierarchy. */
     protected final AnnotationMirror BOTTOMVAL =
             AnnotationBuilder.fromClass(elements, BottomVal.class);
+
+    /** The int range type for this hierarchy. */
+    protected final AnnotationMirror INTRANGE =
+            AnnotationBuilder.fromClass(elements, IntRange.class);
 
     /** The polymorphic type for this hierarchy. */
     protected final AnnotationMirror POLYVAL = AnnotationBuilder.fromClass(elements, PolyVal.class);
@@ -109,6 +117,12 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         BottomVal.class,
                         UnknownVal.class,
                         PolyVal.class));
+    }
+
+    @Override
+    public CFTransfer createFlowTransferFunction(
+        CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
+        return new ValueTransfer(analysis);
     }
 
     @Override
@@ -773,9 +787,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /**
      * Returns a {@link StringVal} annotation using the values. If {@code values} is null, then
      * UnknownVal is returned; if {@code values} is empty, then bottom is returned. The values are
-     * sorted and duplicates are removed before the annotation is created. If values is larger than
-     * the max number of values allowed (10 by default), then an {@link ArrayLen} or an {@link
-     * ArrayLenRange} annotation is returned.
+     * sorted and duplicates are removed before the annotation is created.
      *
      * @param values list of strings; duplicates are allowed and the values may be in any order
      * @return a {@link StringVal} annotation using the values
