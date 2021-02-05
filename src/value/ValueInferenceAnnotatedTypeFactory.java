@@ -368,9 +368,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 if (location == AnnotationLocation.MISSING_LOCATION) {
                     return;
                 }
-                if (atm.getUnderlyingType().getKind() == TypeKind.DOUBLE ||
-                		atm.getUnderlyingType().getKind() == TypeKind.FLOAT) {
-                	return;
+                if (atm.getUnderlyingType().getKind() == TypeKind.DOUBLE
+                        || atm.getUnderlyingType().getKind() == TypeKind.FLOAT) {
+                    return;
                 }
                 ConstraintManager constraintManager =
                         InferenceMain.getInstance().getConstraintManager();
@@ -636,9 +636,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         result = slotManager.createConstantSlot(UNKNOWNVAL);
                         break;
                     default:
-                    	result = slotManager.createLubVariableSlot(lhs, rhs);                
-                    	break;
-                	}
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        break;
+                }
 
                 // insert varAnnot of the slot into the ATM
                 AnnotationMirror resultAM = slotManager.getAnnotation(result);
