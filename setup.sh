@@ -33,7 +33,7 @@ else
 fi
 
 # This also builds annotation-tools
-(cd $CHECKERFRAMEWORK && checker/bin-devel/build.sh downloadjdk)
+(cd $JSR308/checker-framework && checker/bin-devel/build.sh downloadjdk)
 
 (cd $JSR308/checker-framework-inference && ./gradlew assemble dist && ./gradlew testLibJar)
 
