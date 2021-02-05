@@ -1,25 +1,14 @@
 # Constant Value Inference (Interval Inference)
 
-[![build-status](https://travis-ci.org/txiang61/cast_checker.svg?branch=master)](https://travis-ci.org/txiang61/cast_checker)
-
 A type system that enforces [CERT-FIO08-J rule](https://www.securecoding.cert.org/confluence/display/java/FIO08-J.+Distinguish+between+characters+or+bytes+read+from+a+stream+and+-1) based on [Checker Framework](http://types.cs.washington.edu/checker-framework/)
 
 Constant Value Inference is a type inference for the [Constant Value Checker](http://checkerframework.org/manual/#constant-value-checker/). It supports a subtype of the annotations in the Checker. The annotations are @UnknownVal, @BottomVal, @BoolVal, @IntRange(from, to), and @StringVal. The main annotation is @IntRange. @IntRange takes two arguments — a lower bound and an upper bound. Its meaning is that at run time, the expression evaluates to a value between the bounds (inclusive). For example, an expression of type @IntRange(from=0, to=255) evaluates to 0, 1, 2, …, 254, or 255.
 
 ## Dependencies
 
-This project is developed based on [Checker Framework](http://types.cs.washington.edu/checker-framework/). To use this checker, below dependencies are required:
+This project is developed based on [Checker Framework Inference](https://github.com/opprop/checker-framework-inference).
 
-- txiang61/checker-framework
-- txiang61/checke-framework-inference
-- jsr308-langtools
-- annotation-tools
-
-I have a `setup.sh` to build these dependencies and also the Value Inference. This `setup.sh` needs following tools to be ready in your machine before running it:
-
-- [ant](http://ant.apache.org/manual/install.html)
-- [mercurial](https://www.mercurial-scm.org/wiki/Download)
-- [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+A `setup.sh` is provided to build these dependencies and also the Value Inference.
 
 ## Build
 
