@@ -1,6 +1,4 @@
-package inference;
-
-import value.qual.*;
+import value.qual.IntRange;
 
 public class Refinement {
 	
@@ -9,7 +7,7 @@ public class Refinement {
         x = 1;
         y = x;
     }
-	
+
 	@IntRange(from=0, to=1) int refineReturn(int x) {
         x = 0;
         x = 1;

@@ -16,7 +16,6 @@ ext {
     jsr308 = System.getenv('JSR308') ?: file(new File("..")).absolutePath
     cfPath = "${jsr308}/checker-framework"
     cfiPath = "${jsr308}/checker-framework-inference"
-    jsr308langtoolsPath = "${jsr308}/jsr308-langtools"
     afu = "${jsr308}/annotation-tools/annotation-file-utilities"
     valuePath = "${jsr308}/value-inference"
 }
@@ -45,7 +44,8 @@ dependencies {
     compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
     // z3 solver dependency
     compile fileTree(dir: "${cfiPath}/lib", include: "com.microsoft.z3.jar")
-    
+    // CFI test lib dependency
+    testCompile fileTree(dir: "${cfiPath}/dist", include: "inference-framework-test-lib.jar")
     // CF test lib dependency
     testCompile fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
     testCompile 'junit:junit:4.12'
@@ -65,8 +65,7 @@ sourceSets {
 
     test {
         java {
-            // TODO: we shouldn't need source level dependency on CFITest
-            srcDirs = ["tests", "${cfiPath}/tests/checkers/inference/test"]
+            srcDirs = ["tests"]
         }
     }
 }
