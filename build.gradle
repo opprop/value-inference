@@ -188,19 +188,8 @@ task reformat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], 
         include "src/**/*.java" exclude "testinput/**" exclude "testdata/**" exclude "build/**"
     } as List
     def pythonArgs = javaFiles.clone()
-    pythonArgs.add(0, "$projectDir/build/utils/.run-google-java-format/run-google-java-format.py")
-    pythonArgs.add(1, "--aosp") // 4 space indentation
+    pythonArgs.add(0, "$projectDir/.run-google-java-format/run-google-java-format.py")
 
     commandLine "python3"
     args pythonArgs
 }
-
-task installGitHooks(type: Copy) {
-    group=null
-    description "Installs git hooks for pre-commit"
-    from 'scripts/'
-    into '.git/hooks'
-}
-
-/* Always run this task */
-gradle.startParameter.taskNames = [":installGitHooks"] + gradle.startParameter.taskNames

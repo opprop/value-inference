@@ -1,5 +1,7 @@
 package value;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.type.TypeKind;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
@@ -17,57 +19,57 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TypesUtils;
 
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.type.TypeKind;
-
-/**
- * Transfer function for value inference. Please also check {@link ValueInferenceTransfer}.
- */
+/** Transfer function for value inference. Please also check {@link ValueInferenceTransfer}. */
 public class ValueTransfer extends CFTransfer {
 
     private final ValueAnnotatedTypeFactory typeFactory;
 
-    public ValueTransfer(
-        CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
+    public ValueTransfer(CFAbstractAnalysis<CFValue, CFStore, CFTransfer> analysis) {
         super(analysis);
         typeFactory = (ValueAnnotatedTypeFactory) analysis.getTypeFactory();
     }
 
     @Override
-    public TransferResult<CFValue, CFStore> visitNumericalAddition(NumericalAdditionNode n,
-        TransferInput<CFValue, CFStore> cfValueCFStoreTransferInput) {
-        TransferResult<CFValue, CFStore> transferResult = super
-            .visitNumericalAddition(n, cfValueCFStoreTransferInput);
-        AnnotationMirror resultAnno = calculateNumericalBinaryOp(n.getLeftOperand(),
-            n.getRightOperand(),
-            NumericalBinaryOps.ADDITION, cfValueCFStoreTransferInput);
+    public TransferResult<CFValue, CFStore> visitNumericalAddition(
+            NumericalAdditionNode n, TransferInput<CFValue, CFStore> cfValueCFStoreTransferInput) {
+        TransferResult<CFValue, CFStore> transferResult =
+                super.visitNumericalAddition(n, cfValueCFStoreTransferInput);
+        AnnotationMirror resultAnno =
+                calculateNumericalBinaryOp(
+                        n.getLeftOperand(),
+                        n.getRightOperand(),
+                        NumericalBinaryOps.ADDITION,
+                        cfValueCFStoreTransferInput);
         return createNewResult(transferResult, resultAnno);
     }
 
     @Override
     public TransferResult<CFValue, CFStore> visitNumericalSubtraction(
-        NumericalSubtractionNode n, TransferInput<CFValue, CFStore> cfValueCFStoreTransferInput) {
-        TransferResult<CFValue, CFStore> transferResult = super
-            .visitNumericalSubtraction(n, cfValueCFStoreTransferInput);
+            NumericalSubtractionNode n,
+            TransferInput<CFValue, CFStore> cfValueCFStoreTransferInput) {
+        TransferResult<CFValue, CFStore> transferResult =
+                super.visitNumericalSubtraction(n, cfValueCFStoreTransferInput);
         AnnotationMirror resultAnno =
-            calculateNumericalBinaryOp(
-                n.getLeftOperand(), n.getRightOperand(), NumericalBinaryOps.SUBTRACTION,
-                cfValueCFStoreTransferInput);
+                calculateNumericalBinaryOp(
+                        n.getLeftOperand(),
+                        n.getRightOperand(),
+                        NumericalBinaryOps.SUBTRACTION,
+                        cfValueCFStoreTransferInput);
         return createNewResult(transferResult, resultAnno);
     }
 
     @Override
     public TransferResult<CFValue, CFStore> visitNumericalMultiplication(
-        NumericalMultiplicationNode n,
-        TransferInput<CFValue, CFStore> cfValueCFStoreTransferInput) {
-        TransferResult<CFValue, CFStore> transferResult = super
-            .visitNumericalMultiplication(n, cfValueCFStoreTransferInput);
+            NumericalMultiplicationNode n,
+            TransferInput<CFValue, CFStore> cfValueCFStoreTransferInput) {
+        TransferResult<CFValue, CFStore> transferResult =
+                super.visitNumericalMultiplication(n, cfValueCFStoreTransferInput);
         AnnotationMirror resultAnno =
-            calculateNumericalBinaryOp(
-                n.getLeftOperand(),
-                n.getRightOperand(),
-                NumericalBinaryOps.MULTIPLICATION,
-                cfValueCFStoreTransferInput);
+                calculateNumericalBinaryOp(
+                        n.getLeftOperand(),
+                        n.getRightOperand(),
+                        NumericalBinaryOps.MULTIPLICATION,
+                        cfValueCFStoreTransferInput);
         return createNewResult(transferResult, resultAnno);
     }
 
@@ -79,10 +81,10 @@ public class ValueTransfer extends CFTransfer {
      * @return the new transfer result
      */
     private TransferResult<CFValue, CFStore> createNewResult(
-        TransferResult<CFValue, CFStore> result, AnnotationMirror resultAnno) {
+            TransferResult<CFValue, CFStore> result, AnnotationMirror resultAnno) {
         CFValue newResultValue =
-            analysis.createSingleAnnotationValue(
-                resultAnno, result.getResultValue().getUnderlyingType());
+                analysis.createSingleAnnotationValue(
+                        resultAnno, result.getResultValue().getUnderlyingType());
         return new RegularTransferResult<>(newResultValue, result.getRegularStore());
     }
 
@@ -111,22 +113,22 @@ public class ValueTransfer extends CFTransfer {
      * @return the result annotation mirror
      */
     private AnnotationMirror calculateNumericalBinaryOp(
-        Node leftNode,
-        Node rightNode,
-        NumericalBinaryOps op,
-        TransferInput<CFValue, CFStore> p) {
+            Node leftNode,
+            Node rightNode,
+            NumericalBinaryOps op,
+            TransferInput<CFValue, CFStore> p) {
         Range resultRange = calculateRangeBinaryOp(leftNode, rightNode, op, p);
         return typeFactory.createIntRangeAnnotation(resultRange);
     }
 
     /** Calculate the result range after a binary operation between two numerical type nodes. */
     private Range calculateRangeBinaryOp(
-        Node leftNode,
-        Node rightNode,
-        NumericalBinaryOps op,
-        TransferInput<CFValue, CFStore> p) {
+            Node leftNode,
+            Node rightNode,
+            NumericalBinaryOps op,
+            TransferInput<CFValue, CFStore> p) {
         if (TypesUtils.isIntegral(leftNode.getType())
-            && TypesUtils.isIntegral(rightNode.getType())) {
+                && TypesUtils.isIntegral(rightNode.getType())) {
             Range leftRange = getIntRange(leftNode, p);
             Range rightRange = getIntRange(rightNode, p);
             Range resultRange;
@@ -170,9 +172,9 @@ public class ValueTransfer extends CFTransfer {
             // Any integral type with less than 32 bits would be promoted to 32-bit int type during
             // operations.
             return leftNode.getType().getKind() == TypeKind.LONG
-                || rightNode.getType().getKind() == TypeKind.LONG
-                ? resultRange
-                : resultRange.intRange();
+                            || rightNode.getType().getKind() == TypeKind.LONG
+                    ? resultRange
+                    : resultRange.intRange();
         } else {
             return Range.EVERYTHING;
         }
@@ -221,7 +223,8 @@ public class ValueTransfer extends CFTransfer {
      * @return the Value Checker annotation within cfValue
      */
     private AnnotationMirror getValueAnnotation(CFValue cfValue) {
-        return typeFactory.getQualifierHierarchy().findAnnotationInHierarchy(
-            cfValue.getAnnotations(), typeFactory.UNKNOWNVAL);
+        return typeFactory
+                .getQualifierHierarchy()
+                .findAnnotationInHierarchy(cfValue.getAnnotations(), typeFactory.UNKNOWNVAL);
     }
 }
