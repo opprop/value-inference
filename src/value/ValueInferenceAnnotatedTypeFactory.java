@@ -171,7 +171,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Slot varSlotForPolyReturn = variableAnnotator.getOrCreatePolyVar(newClassTree);
 
                 // 2) the call site return type: "@m" in "new @m Clazz(...)"
-                Slot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
+                Slot callSiteReturnVarSlot = slotManager.getSlot(atm);
 
                 // Create a subtype constraint: callSiteReturnVarSlot <: varSlotForPolyReturn
                 // since after annotation insertion, the varSlotForPolyReturn is conceptually a
@@ -210,7 +210,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // see if given annotation mirror is the VarAnnot versions of @PolyVal
         private boolean isPolyAnnotation(AnnotationMirror annot) {
             Slot slot = slotManager.getSlot(annot);
-            if (slot.isConstant()) {
+            if (slot instanceof ConstantSlot) {
                 AnnotationMirror constant = ((ConstantSlot) slot).getValue();
                 return InferenceQualifierHierarchy.isPolymorphic(constant);
             }
@@ -382,8 +382,8 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
                 AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
                 // grab slots for the component (only for lub slot)
-                Slot lhs = slotManager.getVariableSlot(lhsATM);
-                Slot rhs = slotManager.getVariableSlot(rhsATM);
+                Slot lhs = slotManager.getSlot(lhsATM);
+                Slot rhs = slotManager.getSlot(rhsATM);
 
                 Slot result;
                 Kind kind = binaryTree.getKind();
@@ -648,7 +648,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
                 resultSet.add(resultAM);
                 final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair =
-                        Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                        Pair.of(slotManager.getSlot(atm), resultSet);
                 treeToVarAnnoPair.put(binaryTree, varATMPair);
             }
         }
