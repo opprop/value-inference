@@ -302,13 +302,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
-    @Override
-    protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
-        Set<AnnotationMirror> top = new HashSet<>();
-        top.add(UNKNOWNVAL);
-        return top;
-    }
-
     /**
      * The domain of the Constant Value Checker: the types for which it estimates possible values.
      */
