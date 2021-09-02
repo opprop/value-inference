@@ -32,8 +32,8 @@ public class ValueChecker extends BaseInferrableChecker {
     }
 
     @Override
-    public ValueAnnotatedTypeFactory createRealTypeFactory() {
-        return new ValueAnnotatedTypeFactory(this);
+    public ValueAnnotatedTypeFactory createRealTypeFactory(boolean infer) {
+        return new ValueAnnotatedTypeFactory(this, infer);
     }
 
     @Override

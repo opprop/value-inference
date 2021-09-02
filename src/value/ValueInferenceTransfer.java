@@ -16,8 +16,7 @@ import com.sun.source.tree.Tree;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.dataflow.analysis.ConditionalTransferResult;
-import org.checkerframework.dataflow.analysis.FlowExpressions;
-import org.checkerframework.dataflow.analysis.FlowExpressions.Receiver;
+import org.checkerframework.dataflow.expression.JavaExpression;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
 import org.checkerframework.dataflow.analysis.TransferResult;
@@ -31,6 +30,7 @@ import org.checkerframework.dataflow.cfg.node.LessThanOrEqualNode;
 import org.checkerframework.dataflow.cfg.node.LocalVariableNode;
 import org.checkerframework.dataflow.cfg.node.Node;
 import org.checkerframework.dataflow.cfg.node.NotEqualNode;
+import org.checkerframework.dataflow.expression.JavaExpression;
 import org.checkerframework.framework.flow.CFStore;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -94,8 +94,8 @@ public class ValueInferenceTransfer extends InferenceTransfer {
         AnnotationMirror elseAm = getInferenceAnalysis().getSlotManager().getAnnotation(elseSlot);
 
         // If node is assignment, iterate over lhs; otherwise, just node.
-        Receiver rec;
-        rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), var);
+        JavaExpression rec;
+        rec = JavaExpression.fromNode(var);
         thenStore.clearValue(rec);
         thenStore.insertValue(rec, thenAm);
         elseStore.clearValue(rec);
@@ -198,7 +198,7 @@ public class ValueInferenceTransfer extends InferenceTransfer {
             LocalVariableNode n, TransferInput<CFValue, CFStore> in) {
         TransferResult<CFValue, CFStore> result = super.visitLocalVariable(n, in);
         CFStore store = result.getRegularStore();
-        Receiver rec = FlowExpressions.internalReprOf(getInferenceAnalysis().getTypeFactory(), n);
+        JavaExpression rec = JavaExpression.fromNode(n);
 
         CFValue value = store.getValue(rec);
         if (value == null) {

@@ -36,7 +36,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.common.value.ValueCheckerUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -45,6 +44,7 @@ import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotatedTypes;
+import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -212,7 +212,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             Slot slot = slotManager.getSlot(annot);
             if (slot instanceof ConstantSlot) {
                 AnnotationMirror constant = ((ConstantSlot) slot).getValue();
-                return InferenceQualifierHierarchy.isPolymorphic(constant);
+                return getQualifierHierarchy().isPolymorphicQualifier(constant);
             }
             return false;
         }
@@ -274,14 +274,23 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
+    public QualifierHierarchy createQualifierHierarchy() {
+        return MultiGraphQualifierHierarchy
+                .createMultiGraphQualifierHierarchy(this);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public QualifierHierarchy createQualifierHierarchyWithMultiGraphFactory(
+            MultiGraphFactory factory) {
         return new ValueInferenceQualifierHierarchy(factory);
     }
 
     private final class ValueInferenceQualifierHierarchy extends InferenceQualifierHierarchy {
-        public ValueInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
-            super(multiGraphFactory);
+        public ValueInferenceQualifierHierarchy(MultiGraphQualifierHierarchy.MultiGraphFactory multiGraphFactory) {
+            super(getSupportedTypeQualifiers(), elements);
         }
 
         @Override
@@ -352,8 +361,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // create varslot for the result of the binary tree computation
             // note: constraints for binary ops are added in Visitor
             if (this.treeToVarAnnoPair.containsKey(binaryTree)) {
-                atm.replaceAnnotations(
-                        (Iterable) ((Pair) this.treeToVarAnnoPair.get(binaryTree)).second);
+                atm.replaceAnnotations(treeToVarAnnoPair.get(binaryTree).second);
             } else {
                 // TODO: find out why there are missing location
                 AnnotationLocation location =
@@ -408,7 +416,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case MINUS:
                         if (lhsAM == null || rhsAM == null) {
@@ -429,7 +437,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case MULTIPLY:
                         if (lhsAM == null || rhsAM == null) {
@@ -450,7 +458,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case DIVIDE:
                         if (lhsAM == null || rhsAM == null) {
@@ -471,7 +479,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case REMAINDER:
                         if (lhsAM == null || rhsAM == null) {
@@ -492,7 +500,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case LEFT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
@@ -513,7 +521,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
@@ -534,7 +542,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case UNSIGNED_RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
@@ -555,7 +563,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case AND:
                         if (lhsAM == null || rhsAM == null) {
@@ -576,7 +584,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case OR:
                         if (lhsAM == null || rhsAM == null) {
@@ -597,7 +605,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case XOR:
                         if (lhsAM == null || rhsAM == null) {
@@ -618,7 +626,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                     slotManager.createConstantSlot(createIntRangeAnnotation(range));
                             break;
                         }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                     case GREATER_THAN:
                     case GREATER_THAN_EQUAL:
@@ -629,13 +637,13 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         result = slotManager.createConstantSlot(UNKNOWNVAL);
                         break;
                     default:
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                 }
 
                 // insert varAnnot of the slot into the ATM
                 AnnotationMirror resultAM = slotManager.getAnnotation(result);
-                atm.clearAnnotations();
+                atm.clearPrimaryAnnotations();
                 atm.replaceAnnotation(resultAM);
 
                 Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
@@ -678,7 +686,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 stringVals.add((String) o);
             }
             return createStringAnnotation(stringVals);
-        } else if (ValueCheckerUtils.getClassFromType(resultType) == char[].class) {
+        } else if (TypesUtils.getClassFromType(resultType) == char[].class) {
             List<String> stringVals = new ArrayList<>(values.size());
             for (Object o : values) {
                 if (o instanceof char[]) {

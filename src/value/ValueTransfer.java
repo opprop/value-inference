@@ -17,6 +17,7 @@ import org.checkerframework.framework.flow.CFTransfer;
 import org.checkerframework.framework.flow.CFValue;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
+import org.checkerframework.javacutil.TypeKindUtils;
 import org.checkerframework.javacutil.TypesUtils;
 
 /** Transfer function for value inference. Please also check {@link ValueInferenceTransfer}. */
@@ -127,8 +128,8 @@ public class ValueTransfer extends CFTransfer {
             Node rightNode,
             NumericalBinaryOps op,
             TransferInput<CFValue, CFStore> p) {
-        if (TypesUtils.isIntegral(leftNode.getType())
-                && TypesUtils.isIntegral(rightNode.getType())) {
+        if (TypeKindUtils.isIntegral(leftNode.getType().getKind())
+                && TypeKindUtils.isIntegral(rightNode.getType().getKind())) {
             Range leftRange = getIntRange(leftNode, p);
             Range rightRange = getIntRange(rightNode, p);
             Range resultRange;
