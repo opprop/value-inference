@@ -274,43 +274,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public QualifierHierarchy createQualifierHierarchy() {
-        return MultiGraphQualifierHierarchy
-                .createMultiGraphQualifierHierarchy(this);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public QualifierHierarchy createQualifierHierarchyWithMultiGraphFactory(
-            MultiGraphFactory factory) {
-        return new ValueInferenceQualifierHierarchy(factory);
-    }
-
-    private final class ValueInferenceQualifierHierarchy extends InferenceQualifierHierarchy {
-        public ValueInferenceQualifierHierarchy(MultiGraphQualifierHierarchy.MultiGraphFactory multiGraphFactory) {
-            super(getSupportedTypeQualifiers(), elements);
-        }
-
-        @Override
-        public Set<? extends AnnotationMirror> leastUpperBounds(
-                Collection<? extends AnnotationMirror> annos1,
-                Collection<? extends AnnotationMirror> annos2) {
-            // TODO: remove hack
-            Set<AnnotationMirror> result = AnnotationUtils.createAnnotationSet();
-            for (AnnotationMirror a1 : annos1) {
-                for (AnnotationMirror a2 : annos2) {
-                    AnnotationMirror lub = leastUpperBound(a1, a2);
-                    if (lub != null) {
-                        result.add(lub);
-                    }
-                }
-            }
-            return result;
-        }
-    }
-
     /**
      * The domain of the Constant Value Checker: the types for which it estimates possible values.
      */
