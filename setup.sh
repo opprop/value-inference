@@ -12,7 +12,7 @@ else
 fi
 
 # Default value is opprop. REPO_SITE may be set to other value for travis test purpose.
-export REPO_SITE="${REPO_SITE:-txiang61}"
+export REPO_SITE="${REPO_SITE:-opprop}"
 
 echo "------ Downloading everything from REPO_SITE: $REPO_SITE ------"
 
@@ -20,16 +20,14 @@ echo "------ Downloading everything from REPO_SITE: $REPO_SITE ------"
 if [ -d $JSR308/checker-framework ] ; then
     (cd $JSR308/checker-framework && git pull)
 else
-    BRANCH=master
-    (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework.git)
+    /tmp/plume-scripts/git-clone-related $REPO_SITE checker-framework $JSR308/checker-framework
 fi
 
 # Build checker-framework-inference
 if [ -d $JSR308/checker-framework-inference ] ; then
     (cd $JSR308/checker-framework-inference && git pull)
 else
-    BRANCH=master
-    (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework-inference.git)
+    /tmp/plume-scripts/git-clone-related $REPO_SITE checker-framework-inference $JSR308/checker-framework-inference
 fi
 
 # This also builds annotation-tools
@@ -42,8 +40,7 @@ echo "Fetching DLJC"
 if [ -d $JSR308/do-like-javac ] ; then
     (cd $JSR308/do-like-javac && git pull)
 else
-    BRANCH=master
-    (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/do-like-javac.git)
+    /tmp/plume-scripts/git-clone-related $REPO_SITE do-like-javac $JSR308/do-like-javac
 fi
 
 echo "Building value-inference without testing"
