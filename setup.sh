@@ -11,6 +11,12 @@ else
   export JAVA_HOME=${JAVA_HOME:-$(dirname $(dirname $(readlink -f $(which javac))))}
 fi
 
+if [ -d "/tmp/plume-scripts" ] ; then
+  git -C /tmp/plume-scripts pull -q
+else
+  git -C /tmp clone --depth 1 -q https://github.com/plume-lib/plume-scripts.git
+fi
+
 # Default value is opprop. REPO_SITE may be set to other value for travis test purpose.
 export REPO_SITE="${REPO_SITE:-opprop}"
 
