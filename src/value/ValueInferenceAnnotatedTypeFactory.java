@@ -606,7 +606,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
                 // insert varAnnot of the slot into the ATM
                 AnnotationMirror resultAM = slotManager.getAnnotation(result);
-                atm.clearPrimaryAnnotations();
+                atm.clearAnnotations();
                 atm.replaceAnnotation(resultAM);
 
                 Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
