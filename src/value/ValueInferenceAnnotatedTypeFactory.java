@@ -362,7 +362,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                             break;
                         }
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -383,7 +383,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case MINUS:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -404,7 +404,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case MULTIPLY:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -425,7 +425,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case DIVIDE:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -446,7 +446,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case REMAINDER:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -467,7 +467,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case LEFT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -488,7 +488,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -509,7 +509,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case UNSIGNED_RIGHT_SHIFT:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -530,7 +530,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case AND:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -551,7 +551,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case OR:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
@@ -572,7 +572,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                     case XOR:
                         if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
+                            result = slotManager.createArithmeticVariableSlot(location, lhsATM, rhsATM);
                             ArithmeticOperationKind opKindplus =
                                     ArithmeticOperationKind.fromTreeKind(kind);
                             constraintManager.addArithmeticConstraint(
