@@ -41,7 +41,7 @@ dependencies {
     testImplementation fileTree(dir: "${cfiPath}/dist", include: "inference-framework-test-lib.jar")
     // CF test lib dependency
     testImplementation fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 sourceSets {
