@@ -14,6 +14,7 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.Slot;
+import checkers.inference.qual.VarAnnot;
 import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.CompoundAssignmentTree;
@@ -30,6 +31,13 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TreeUtils;
 import value.qual.IntRange;
 import value.qual.UnknownVal;
+
+import static checkers.inference.model.ComparisonConstraint.ComparisonOperationKind.EQUAL_TO;
+import static checkers.inference.model.ComparisonConstraint.ComparisonOperationKind.GREATER_THAN;
+import static checkers.inference.model.ComparisonConstraint.ComparisonOperationKind.GREATER_THAN_EQUAL;
+import static checkers.inference.model.ComparisonConstraint.ComparisonOperationKind.LESS_THAN;
+import static checkers.inference.model.ComparisonConstraint.ComparisonOperationKind.LESS_THAN_EQUAL;
+import static checkers.inference.model.ComparisonConstraint.ComparisonOperationKind.NOT_EQUAL_TO;
 
 public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTypeFactory> {
 
@@ -163,106 +171,62 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
             }
 
             Kind kind = binaryTree.getKind();
+            ComparisonVariableSlot compThenRes, compElseRes;
+
+            if (!(leftTree instanceof IdentifierTree)) {
+                return super.visitBinary(binaryTree, p);
+            }
+
             switch (kind) {
-                case EQUAL_TO: // ==
-                    if (leftTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.EQUAL_TO, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compElseRes);
-                    }
+                case EQUAL_TO:
+                case NOT_EQUAL_TO:
+                case GREATER_THAN:
+                case GREATER_THAN_EQUAL:
+                case LESS_THAN:
+                case LESS_THAN_EQUAL:
+                    compThenRes = slotManager.createComparisonVariableSlot(
+                            VariableAnnotator.treeToLocation(atypeFactory, leftTree),
+                            null,
+                            true);
+                    compElseRes = slotManager.createComparisonVariableSlot(
+                            VariableAnnotator.treeToLocation(atypeFactory, leftTree),
+                            null,
+                            false);
+
                     break;
+                default:
+                    return super.visitBinary(binaryTree, p);
+            }
+
+            // initialize the comparison relation as for "==" comparison
+            ComparisonOperationKind thenRelation = EQUAL_TO;
+            ComparisonOperationKind elseRelation = NOT_EQUAL_TO;
+            switch (kind) {
                 case NOT_EQUAL_TO: // !=
-                    if (leftTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.NOT_EQUAL_TO, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.EQUAL_TO, lhs, rhs, compElseRes);
-                    }
+                    thenRelation = NOT_EQUAL_TO;
+                    elseRelation = EQUAL_TO;
                     break;
                 case GREATER_THAN: // >
-                    if (leftTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compElseRes);
-                    }
+                    thenRelation = GREATER_THAN;
+                    elseRelation = LESS_THAN_EQUAL;
                     break;
                 case GREATER_THAN_EQUAL: // >=
-                    if (leftTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN, lhs, rhs, compElseRes);
-                    }
+                    thenRelation = GREATER_THAN_EQUAL;
+                    elseRelation = LESS_THAN;
                     break;
                 case LESS_THAN: // <
-                    if (leftTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN_EQUAL, lhs, rhs, compElseRes);
-                    }
+                    thenRelation = LESS_THAN;
+                    elseRelation = GREATER_THAN_EQUAL;
                     break;
                 case LESS_THAN_EQUAL: // <=
-                    if (leftTree instanceof IdentifierTree) {
-                        ComparisonVariableSlot compThenRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        true);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.LESS_THAN_EQUAL, lhs, rhs, compThenRes);
-                        ComparisonVariableSlot compElseRes =
-                                slotManager.getComparisonVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, leftTree),
-                                        false);
-                        constraintManager.addComparisonConstraint(
-                                ComparisonOperationKind.GREATER_THAN, lhs, rhs, compElseRes);
-                    }
+                    thenRelation = LESS_THAN_EQUAL;
+                    elseRelation = GREATER_THAN;
                     break;
                 default:
                     break;
             }
+            constraintManager.addComparisonConstraint(thenRelation, lhs, rhs, compThenRes);
+            constraintManager.addComparisonConstraint(elseRelation, lhs, rhs, compElseRes);
         }
 
         return super.visitBinary(binaryTree, p);
@@ -278,11 +242,14 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
 
             InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
 
+            // The ATM of the compound assignment expression
             AnnotatedTypeMirror resATM = atypeFactory.getAnnotatedType(tree);
+            // The ATM of the right operand of the compound assignment expression
             AnnotatedTypeMirror exprATM = iatf.getAnnotatedType(tree.getExpression());
-            AnnotatedTypeMirror varATM = iatf.getAnnotatedTypeLhs(tree.getVariable());
-            AnnotationMirror exprAMVal = exprATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
-            AnnotationMirror varAMVal = varATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
+            // The ATM of the left operand of the compound assignment expression
+//            AnnotatedTypeMirror varATM = iatf.getAnnotatedTypeLhs(tree.getVariable());
+            AnnotatedTypeMirror varATM = iatf.getAnnotatedType(tree.getVariable());
+
             Slot lhs = slotManager.getSlot(exprATM);
             Slot rhs = slotManager.getSlot(varATM);
             Slot res = slotManager.getSlot(resATM);
@@ -297,22 +264,20 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case MULTIPLY_ASSIGNMENT:
                 case DIVIDE_ASSIGNMENT:
                 case REMAINDER_ASSIGNMENT:
-                    if (exprAMVal == null || varAMVal == null) {
-                        ArithmeticVariableSlot avsResplus =
-                                slotManager.getArithmeticVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, tree));
-                        // TODO: slot is null because location is missing. Find out why location is
-                        // missing.
-                        if (avsResplus == null) {
-                            break;
-                        }
-                        constraintManager.addEqualityConstraint(avsResplus, res);
+                    ArithmeticVariableSlot avsResplus =
+                            slotManager.createArithmeticVariableSlot(
+                                    VariableAnnotator.treeToLocation(atypeFactory, tree),
+                                    varATM.getUnderlyingType(),
+                                    exprATM.getUnderlyingType());
+                    ArithmeticOperationKind opKindplus = ArithmeticOperationKind.fromTreeKind(kind);
+                    constraintManager.addArithmeticConstraint(opKindplus, lhs, rhs, avsResplus);
+                    // TODO: slot is null because location is missing. Find out why location is
+                    // missing.
+                    if (avsResplus == null) {
                         break;
                     }
-                    if (AnnotationUtils.areSameByClass(exprAMVal, IntRange.class)
-                            && AnnotationUtils.areSameByClass(varAMVal, IntRange.class)) {
-                        break;
-                    } // Create LUB constraint by default
+                    constraintManager.addEqualityConstraint(avsResplus, res);
+                    break;
                 default:
                     Slot lubSlot = slotManager.getSlot(atypeFactory.getAnnotatedType(tree));
                     // Create LUB constraint by default
@@ -345,8 +310,8 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case UNARY_MINUS:
                     if (exprAMVal == null) {
                         ArithmeticVariableSlot avsResplus =
-                                slotManager.getArithmeticVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, tree));
+                                slotManager.createArithmeticVariableSlot(
+                                        VariableAnnotator.treeToLocation(atypeFactory, tree), null, null);
                         // TODO: slot is null because location is missing.
                         if (avsResplus == null) {
                             break;
@@ -367,8 +332,8 @@ public class ValueVisitor extends InferenceVisitor<ValueChecker, BaseAnnotatedTy
                 case POSTFIX_DECREMENT:
                     if (exprAMVal == null) {
                         ArithmeticVariableSlot avsResplus =
-                                slotManager.getArithmeticVariableSlot(
-                                        VariableAnnotator.treeToLocation(atypeFactory, tree));
+                                slotManager.createArithmeticVariableSlot(
+                                        VariableAnnotator.treeToLocation(atypeFactory, tree), null, null);
                         // TODO: slot is null because location is missing.
                         if (avsResplus == null) {
                             break;
