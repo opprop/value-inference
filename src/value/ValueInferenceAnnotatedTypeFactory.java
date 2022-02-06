@@ -36,7 +36,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.common.value.ValueCheckerUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -45,6 +44,7 @@ import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotatedTypes;
+import org.checkerframework.framework.util.MultiGraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -171,7 +171,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Slot varSlotForPolyReturn = variableAnnotator.getOrCreatePolyVar(newClassTree);
 
                 // 2) the call site return type: "@m" in "new @m Clazz(...)"
-                Slot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
+                Slot callSiteReturnVarSlot = slotManager.getSlot(atm);
 
                 // Create a subtype constraint: callSiteReturnVarSlot <: varSlotForPolyReturn
                 // since after annotation insertion, the varSlotForPolyReturn is conceptually a
@@ -210,9 +210,9 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // see if given annotation mirror is the VarAnnot versions of @PolyVal
         private boolean isPolyAnnotation(AnnotationMirror annot) {
             Slot slot = slotManager.getSlot(annot);
-            if (slot.isConstant()) {
+            if (slot instanceof ConstantSlot) {
                 AnnotationMirror constant = ((ConstantSlot) slot).getValue();
-                return InferenceQualifierHierarchy.isPolymorphic(constant);
+                return getQualifierHierarchy().isPolymorphicQualifier(constant);
             }
             return false;
         }
@@ -274,41 +274,6 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
-    @Override
-    public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
-        return new ValueInferenceQualifierHierarchy(factory);
-    }
-
-    private final class ValueInferenceQualifierHierarchy extends InferenceQualifierHierarchy {
-        public ValueInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
-            super(multiGraphFactory);
-        }
-
-        @Override
-        public Set<? extends AnnotationMirror> leastUpperBounds(
-                Collection<? extends AnnotationMirror> annos1,
-                Collection<? extends AnnotationMirror> annos2) {
-            // TODO: remove hack
-            Set<AnnotationMirror> result = AnnotationUtils.createAnnotationSet();
-            for (AnnotationMirror a1 : annos1) {
-                for (AnnotationMirror a2 : annos2) {
-                    AnnotationMirror lub = leastUpperBound(a1, a2);
-                    if (lub != null) {
-                        result.add(lub);
-                    }
-                }
-            }
-            return result;
-        }
-    }
-
-    @Override
-    protected Set<? extends AnnotationMirror> getDefaultTypeDeclarationBounds() {
-        Set<AnnotationMirror> top = new HashSet<>();
-        top.add(UNKNOWNVAL);
-        return top;
-    }
-
     /**
      * The domain of the Constant Value Checker: the types for which it estimates possible values.
      */
@@ -359,8 +324,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // create varslot for the result of the binary tree computation
             // note: constraints for binary ops are added in Visitor
             if (this.treeToVarAnnoPair.containsKey(binaryTree)) {
-                atm.replaceAnnotations(
-                        (Iterable) ((Pair) this.treeToVarAnnoPair.get(binaryTree)).second);
+                atm.replaceAnnotations(treeToVarAnnoPair.get(binaryTree).second);
             } else {
                 // TODO: find out why there are missing location
                 AnnotationLocation location =
@@ -379,264 +343,54 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 AnnotatedTypeMirror rhsATM =
                         this.inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
 
-                AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
-                AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(UNKNOWNVAL);
                 // grab slots for the component (only for lub slot)
-                Slot lhs = slotManager.getVariableSlot(lhsATM);
-                Slot rhs = slotManager.getVariableSlot(rhsATM);
+                Slot lhs = slotManager.getSlot(lhsATM);
+                Slot rhs = slotManager.getSlot(rhsATM);
+
+                TypeMirror lhsTM = lhsATM.getUnderlyingType();
+                TypeMirror rhsTM = rhsATM.getUnderlyingType();
 
                 Slot result;
                 Kind kind = binaryTree.getKind();
                 switch (kind) {
                     case PLUS:
                         if (TreeUtils.isStringConcatenation(binaryTree)) {
-                            result = slotManager.createConstantSlot(UNKNOWNVAL);
-                            //                            result =
-                            //                                    slotManager.createConstantSlot(
-                            //
-                            // AnnotationBuilder.fromClass(elements, StringVal.class));
+                            result = slotManager.getSlot(UNKNOWNVAL);
+                            // result = slotManager.createConstantSlot(
+                            //              AnnotationBuilder.fromClass(elements, StringVal.class));
                             break;
                         }
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).plus(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createArithmeticVariableSlot(location, lhsTM, rhsTM);
+                        ArithmeticOperationKind opKindplus = ArithmeticOperationKind.fromTreeKind(kind);
+                        constraintManager.addArithmeticConstraint(
+                                opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
                         break;
                     case MINUS:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).minus(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case MULTIPLY:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).times(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case DIVIDE:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).divide(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case REMAINDER:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).remainder(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case LEFT_SHIFT:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).shiftLeft(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case RIGHT_SHIFT:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).signedShiftRight(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case UNSIGNED_RIGHT_SHIFT:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).unsignedShiftRight(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case AND:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).bitwiseAnd(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case OR:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).bitwiseOr(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
-                        break;
                     case XOR:
-                        if (lhsAM == null || rhsAM == null) {
-                            result = slotManager.createArithmeticVariableSlot(location);
-                            ArithmeticOperationKind opKindplus =
-                                    ArithmeticOperationKind.fromTreeKind(kind);
-                            constraintManager.addArithmeticConstraint(
-                                    opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
-                            break;
-                        }
-                        if (AnnotationUtils.areSameByClass(lhsAM, IntRange.class)
-                                && AnnotationUtils.areSameByClass(rhsAM, IntRange.class)) {
-                            Range range = getRange(lhsAM).bitwiseXor(getRange(rhsAM));
-                            if (range.isLongEverything() && atm.getKind() == TypeKind.INT) {
-                                range = Range.INT_EVERYTHING;
-                            }
-                            result =
-                                    slotManager.createConstantSlot(createIntRangeAnnotation(range));
-                            break;
-                        }
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createArithmeticVariableSlot(location, lhsTM, rhsTM);
+                        opKindplus = ArithmeticOperationKind.fromTreeKind(kind);
+                        constraintManager.addArithmeticConstraint(
+                                opKindplus, lhs, rhs, (ArithmeticVariableSlot) result);
                         break;
+
                     case GREATER_THAN:
                     case GREATER_THAN_EQUAL:
                     case LESS_THAN:
                     case LESS_THAN_EQUAL:
                     case EQUAL_TO:
                     case NOT_EQUAL_TO:
-                        result = slotManager.createConstantSlot(UNKNOWNVAL);
+                        result = slotManager.getSlot(UNKNOWNVAL);
                         break;
                     default:
-                        result = slotManager.createLubVariableSlot(lhs, rhs);
+                        result = slotManager.createLubMergeVariableSlot(lhs, rhs);
                         break;
                 }
 
@@ -648,7 +402,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
                 resultSet.add(resultAM);
                 final Pair<Slot, Set<? extends AnnotationMirror>> varATMPair =
-                        Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                        Pair.of(slotManager.getSlot(atm), resultSet);
                 treeToVarAnnoPair.put(binaryTree, varATMPair);
             }
         }
@@ -685,7 +439,7 @@ public class ValueInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 stringVals.add((String) o);
             }
             return createStringAnnotation(stringVals);
-        } else if (ValueCheckerUtils.getClassFromType(resultType) == char[].class) {
+        } else if (TypesUtils.getClassFromType(resultType) == char[].class) {
             List<String> stringVals = new ArrayList<>(values.size());
             for (Object o : values) {
                 if (o instanceof char[]) {

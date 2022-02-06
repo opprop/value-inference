@@ -1,5 +1,6 @@
 package value;
 
+import checkers.inference.BaseInferenceRealTypeFactory;
 import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.NewArrayTree;
 import com.sun.source.tree.Tree;
@@ -14,13 +15,23 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
-import org.checkerframework.common.value.ValueCheckerUtils;
+import org.checkerframework.common.value.qual.ArrayLen;
+import org.checkerframework.common.value.qual.ArrayLenRange;
+import org.checkerframework.common.value.qual.DoubleVal;
+import org.checkerframework.common.value.qual.IntRangeFromGTENegativeOne;
+import org.checkerframework.common.value.qual.IntRangeFromNonNegative;
+import org.checkerframework.common.value.qual.IntRangeFromPositive;
 import org.checkerframework.common.value.qual.IntVal;
+import org.checkerframework.common.value.qual.MatchesRegex;
+import org.checkerframework.common.value.qual.MinLen;
+import org.checkerframework.common.value.qual.MinLenFieldInvariant;
+import org.checkerframework.common.value.qual.PolyValue;
 import org.checkerframework.common.value.util.NumberUtils;
 import org.checkerframework.common.value.util.Range;
 import org.checkerframework.framework.flow.CFAbstractAnalysis;
@@ -45,6 +56,7 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 import value.qual.BoolVal;
 import value.qual.BottomVal;
@@ -53,7 +65,9 @@ import value.qual.PolyVal;
 import value.qual.StringVal;
 import value.qual.UnknownVal;
 
-public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
+import org.plumelib.util.CollectionsPlume;
+
+public class ValueAnnotatedTypeFactory extends BaseInferenceRealTypeFactory {
 
     /** The maximum number of values allowed in an annotation's array. */
     protected static final int MAX_VALUES = 10;
@@ -73,8 +87,31 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     /** The polymorphic type for this hierarchy. */
     protected final AnnotationMirror POLYVAL = AnnotationBuilder.fromClass(elements, PolyVal.class);
 
-    public ValueAnnotatedTypeFactory(BaseTypeChecker checker) {
-        super(checker);
+    /** Fully-qualified class name of {@link org.checkerframework.common.value.qual.BottomVal}. */
+    public static final String BOTTOMVAL_NAME = "org.checkerframework.common.value.qual.BottomVal";
+    /** Fully-qualified class name of {@link org.checkerframework.common.value.qual.BoolVal}. */
+    public static final String BOOLVAL_NAME = "org.checkerframework.common.value.qual.BoolVal";
+    /** Fully-qualified class name of {@link IntVal}. */
+    public static final String INTVAL_NAME = "org.checkerframework.common.value.qual.IntVal";
+    /** Fully-qualified class name of {@link org.checkerframework.common.value.qual.StringVal}. */
+    public static final String STRINGVAL_NAME = "org.checkerframework.common.value.qual.StringVal";
+    /** Fully-qualified class name of {@link org.checkerframework.common.value.qual.IntRange}. */
+    public static final String INTRANGE_NAME = "org.checkerframework.common.value.qual.IntRange";
+
+
+    /** The value() element/field of a @BoolVal annotation. */
+    protected final ExecutableElement boolValValueElement =
+            TreeUtils.getMethod(org.checkerframework.common.value.qual.BoolVal.class, "value", 0, processingEnv);
+    /** The value() element/field of a @IntVal annotation. */
+    protected final ExecutableElement intValValueElement =
+            TreeUtils.getMethod(IntVal.class, "value", 0, processingEnv);
+    /** The value() element/field of a @StringVal annotation. */
+    public final ExecutableElement stringValValueElement =
+            TreeUtils.getMethod(org.checkerframework.common.value.qual.StringVal.class, "value", 0, processingEnv);
+
+
+    public ValueAnnotatedTypeFactory(BaseTypeChecker checker, boolean isInfer) {
+        super(checker, isInfer);
         postInit();
     }
 
@@ -132,8 +169,17 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return super.canonicalAnnotation(anno);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
+    public QualifierHierarchy createQualifierHierarchy() {
+        return MultiGraphQualifierHierarchy
+                .createMultiGraphQualifierHierarchy(this);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public QualifierHierarchy createQualifierHierarchyWithMultiGraphFactory(
+            MultiGraphFactory factory) {
         return new ValueQualifierHierarchy(factory);
     }
 
@@ -177,7 +223,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
             if (AnnotationUtils.areSameByName(a1, a2)) {
                 // If both are the same type, determine the type and merge
-                if (AnnotationUtils.areSameByClass(a1, IntRange.class)) {
+                if (areSameByClass(a1, IntRange.class)) {
                     // special handling for IntRange
                     long from1 = AnnotationUtils.getElementValue(a1, "from", Long.class, true);
                     long to1 = AnnotationUtils.getElementValue(a1, "to", Long.class, true);
@@ -223,7 +269,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return true;
             } else if (AnnotationUtils.areSameByName(superAnno, subAnno)) {
                 // Same type, so might be subtype
-                if (AnnotationUtils.areSameByClass(subAnno, IntRange.class)) {
+                if (areSameByClass(subAnno, IntRange.class)) {
                     // Special case for range-based annotations
                     Range sub = getRange(subAnno);
                     Range sup = getRange(superAnno);
@@ -239,7 +285,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         public AnnotationMirror widenedUpperBound(
                 AnnotationMirror newQualifier, AnnotationMirror previousQualifier) {
             AnnotationMirror lub = leastUpperBound(newQualifier, previousQualifier);
-            if (AnnotationUtils.areSameByClass(lub, IntRange.class)) {
+            if (areSameByClass(lub, IntRange.class)) {
                 Range lubRange = getRange(lub);
                 Range newRange = getRange(newQualifier);
                 Range oldRange = getRange(previousQualifier);
@@ -626,7 +672,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     newAnno = oldAnno;
                 } else if (AnnotationUtils.areSameByClass(oldAnno, IntRange.class)
                         && (range = getRange(oldAnno)).isWiderThan(MAX_VALUES)) {
-                    Class<?> newClass = ValueCheckerUtils.getClassFromType(newType);
+                    Class<?> newClass = TypesUtils.getClassFromType(newType);
                     if (newClass == String.class) {
                         newAnno = UNKNOWNVAL;
                     } else if (newClass == Boolean.class || newClass == boolean.class) {
@@ -636,7 +682,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                         newAnno = createIntRangeAnnotation(NumberUtils.castRange(newType, range));
                     }
                 } else {
-                    List<?> values = ValueCheckerUtils.getValuesCastedToType(oldAnno, newType);
+                    List<?> values = ValueUtils.getValuesCastedToType(oldAnno, newType, ValueAnnotatedTypeFactory.this);
                     newAnno = createResultingAnnotation(atm.getUnderlyingType(), values);
                 }
                 atm.addMissingAnnotations(Collections.singleton(newAnno));
@@ -680,7 +726,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 stringVals.add((String) o);
             }
             return createStringAnnotation(stringVals);
-        } else if (ValueCheckerUtils.getClassFromType(resultType) == char[].class) {
+        } else if (TypesUtils.getClassFromType(resultType) == char[].class) {
             List<String> stringVals = new ArrayList<>(values.size());
             for (Object o : values) {
                 if (o instanceof char[]) {
@@ -857,7 +903,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         } else if (range.isWiderThan(MAX_VALUES)) {
             return createIntRangeAnnotation(range.from, range.to);
         } else {
-            List<Long> newValues = ValueCheckerUtils.getValuesFromRange(range, Long.class);
+            List<Long> newValues = ValueUtils.getValuesFromRange(range, Long.class);
             return createIntValAnnotation(newValues);
         }
     }
@@ -879,7 +925,7 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
      * anno}.
      */
     private AnnotationMirror convertToUnknown(AnnotationMirror anno) {
-        if (AnnotationUtils.areSameByClass(anno, IntRange.class)) {
+        if (areSameByClass(anno, IntRange.class)) {
             long from = AnnotationUtils.getElementValue(anno, "from", Long.class, true);
             long to = AnnotationUtils.getElementValue(anno, "to", Long.class, true);
             if (from == Long.MIN_VALUE && to == Long.MAX_VALUE) {
@@ -887,5 +933,47 @@ public class ValueAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
         return anno;
+    }
+
+    /**
+     * Returns the set of possible values as a sorted list with no duplicate values. Returns the
+     * empty list if no values are possible (for dead code). Returns null if any value is possible
+     * -- that is, if no estimate can be made -- and this includes when there is no constant-value
+     * annotation so the argument is null.
+     *
+     * <p>The method returns a list of {@code Long} but is named {@code getIntValues} because it
+     * supports the {@code @IntVal} annotation.
+     *
+     * @param intAnno an {@code @IntVal} annotation, or null
+     * @return the possible values, deduplicated and sorted
+     */
+    public List<Long> getIntValues(AnnotationMirror intAnno) {
+        if (intAnno == null) {
+            return null;
+        }
+        List<Long> list =
+                AnnotationUtils.getElementValueArray(intAnno, intValValueElement, Long.class);
+        list = CollectionsPlume.withoutDuplicates(list);
+        return list;
+    }
+
+    /**
+     * Returns the set of possible values as a sorted list with no duplicate values. Returns the
+     * empty list if no values are possible (for dead code). Returns null if any value is possible
+     * -- that is, if no estimate can be made -- and this includes when there is no constant-value
+     * annotation so the argument is null.
+     *
+     * @param stringAnno a {@code @StringVal} annotation, or null
+     * @return the possible values, deduplicated and sorted
+     */
+    public List<String> getStringValues(AnnotationMirror stringAnno) {
+        if (stringAnno == null) {
+            return null;
+        }
+        List<String> list =
+                AnnotationUtils.getElementValueArray(
+                        stringAnno, stringValValueElement, String.class);
+        list = CollectionsPlume.withoutDuplicates(list);
+        return list;
     }
 }
